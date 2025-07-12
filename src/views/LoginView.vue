@@ -112,8 +112,14 @@ const login = async () => {
       password: password.value
     })
     const userData = response.data.user;
+    const token = response.data.token;
+    
+    console.log('Login response:', { userData, hasToken: !!token });
+    
     if (response.data.success) {
-      authStore.login(userData);
+      // ส่ง token ไปด้วย
+      authStore.login({ ...userData, token });
+      
       if (loginMode.value === 'partner' || userData.role === 'partner') {
         localStorage.setItem('partner', JSON.stringify(userData));
         localStorage.removeItem('user');

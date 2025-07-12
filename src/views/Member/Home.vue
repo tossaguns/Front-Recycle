@@ -95,8 +95,8 @@
 </template>
 
 <script>
-import Bar from '../components/Bar.vue'
-import Footer from '../components/Footer.vue'
+import Bar from '../../components/Bar.vue'
+import Footer from '../../components/Footer.vue'
 export default {
     name: "Home",
     components: { Bar },

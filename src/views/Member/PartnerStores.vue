@@ -11,12 +11,32 @@
         <!-- ค้นหาร้าน -->
         <div class="flex flex-col items-center mb-6 sm:mb-8 md:mb-10">
           <div class="flex flex-col gap-3 sm:gap-4 w-full max-w-xs sm:max-w-md md:max-w-xl">
-            <span class="text-sm sm:text-base">เลือกจังหวัดที่ต้องการค้นหาร้าน</span>
-            <select v-model="selectedProvince"
+            <span class="text-sm sm:text-base">เลือกพื้นที่ที่ต้องการค้นหาร้าน</span>
+            
+            <!-- จังหวัด -->
+            <select v-model="selectedProvince" @change="onProvinceChange"
               class="rounded-full border border-[#b6e388] px-4 sm:px-5 py-2 sm:py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white w-full">
               <option value="">เลือกจังหวัด</option>
               <option v-for="province in provinces" :key="province" :value="province">{{ province }}</option>
             </select>
+            
+            <!-- อำเภอ -->
+            <select v-model="selectedDistrict" @change="onDistrictChange"
+              :disabled="!selectedProvince"
+              class="rounded-full border border-[#b6e388] px-4 sm:px-5 py-2 sm:py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white w-full disabled:opacity-50 disabled:cursor-not-allowed">
+              <option value="">เลือกอำเภอ</option>
+              <option v-for="district in districts" :key="district" :value="district">{{ district }}</option>
+            </select>
+            
+            <!-- ตำบล -->
+            <select v-model="selectedSubdistrict"
+              :disabled="!selectedDistrict"
+              class="rounded-full border border-[#b6e388] px-4 sm:px-5 py-2 sm:py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white w-full disabled:opacity-50 disabled:cursor-not-allowed">
+              <option value="">เลือกตำบล</option>
+              <option v-for="subdistrict in subdistricts" :key="subdistrict" :value="subdistrict">{{ subdistrict }}</option>
+            </select>
+            
+            <!-- ค้นหาชื่อร้าน -->
             <form @submit.prevent class="flex flex-1 gap-1 sm:gap-2">
               <div class="relative w-full">
                 <svg class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400"
@@ -33,6 +53,12 @@
                 ค้นหา
               </button>
             </form>
+            
+            <!-- ปุ่มล้างการค้นหา -->
+            <button @click="clearFilters"
+              class="bg-gray-500 hover:bg-gray-600 text-white rounded-full px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-semibold shadow transition">
+              ล้างการค้นหา
+            </button>
           </div>
         </div>
 
@@ -48,14 +74,28 @@
           </button>
         </div> -->
 
+        <!-- แสดงจำนวนร้านที่พบ -->
+        <div class="text-center mb-6">
+          <p class="text-lg text-gray-600">
+            พบร้านค้า <span class="font-bold text-[#184c36]">{{ filteredStores.length }}</span> ร้าน
+            <span v-if="selectedProvince || selectedDistrict || selectedSubdistrict || search">
+              จากทั้งหมด <span class="font-bold text-[#184c36]">{{ stores.length }}</span> ร้าน
+            </span>
+          </p>
+        </div>
+
         <!-- ร้านค้า -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-8">
+        <div v-if="pagedStores.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-8">
           <div v-for="(store, idx) in pagedStores" :key="store._id || idx"
             class="flex flex-col items-center">
             <img :src="store.img || defaultImg" alt="store"
               class="rounded-xl w-full aspect-square object-cover mb-4" />
             <div class="text-lg font-semibold text-black mb-1">{{ store.name || 'ชื่อร้าน' }}</div>
-            <div class="text-gray-600 text-sm mb-2">{{ store.province || 'แสดงชื่อจังหวัด' }}</div>
+            <div class="text-gray-600 text-sm mb-2 text-center">
+              <div>{{ store.province || 'แสดงชื่อจังหวัด' }}</div>
+              <div v-if="store.district" class="text-xs">{{ store.district }}</div>
+              <div v-if="store.subdistrict" class="text-xs">{{ store.subdistrict }}</div>
+            </div>
             <!-- <button
               class="bg-[#184c36] hover:bg-[#b6e388] text-white rounded-full px-3 py-1 text-sm shadow transition flex items-center gap-1 mb-2"
               @click="selectPartner(store)"
@@ -73,8 +113,21 @@
             </router-link>
           </div>
         </div>
+        
+        <!-- แสดงข้อความเมื่อไม่พบร้านค้า -->
+        <div v-else class="text-center py-12">
+          <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">ไม่พบร้านค้า</h3>
+          <p class="text-gray-600 mb-4">ลองเปลี่ยนเงื่อนไขการค้นหาหรือเลือกพื้นที่อื่น</p>
+          <button @click="clearFilters" 
+            class="bg-[#b6e388] hover:bg-[#184c36] text-[#184c36] hover:text-white rounded-full px-6 py-2 font-semibold transition">
+            ล้างการค้นหา
+          </button>
+        </div>
         <!-- Pagination -->
-        <div class="flex justify-end">
+        <div v-if="pagedStores.length > 0 && pageCount > 1" class="flex justify-end">
           <nav class="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
             <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1"
               class="px-3 py-1 rounded-l-md border border-[#e6e6e6] bg-white text-[#184c36] font-semibold hover:bg-[#b6e388] disabled:opacity-50 disabled:cursor-not-allowed">&lt;</button>
@@ -102,7 +155,11 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 const stores = ref([]);
 const provinces = ref([]);
+const districts = ref([]);
+const subdistricts = ref([]);
 const selectedProvince = ref('');
+const selectedDistrict = ref('');
+const selectedSubdistrict = ref('');
 const search = ref('');
 const showAll = ref(false);
 const defaultImg = '/src/assets/NoPicture.webp';
@@ -125,12 +182,27 @@ const displayedStores = computed(() => {
 
 const filteredStores = computed(() => {
   let filtered = stores.value;
+  
+  // กรองตามจังหวัด
   if (selectedProvince.value) {
     filtered = filtered.filter(s => s.province === selectedProvince.value);
   }
-  if (search.value) {
-    filtered = filtered.filter(s => s.name && s.name.includes(search.value));
+  
+  // กรองตามอำเภอ
+  if (selectedDistrict.value) {
+    filtered = filtered.filter(s => s.district === selectedDistrict.value);
   }
+  
+  // กรองตามตำบล
+  if (selectedSubdistrict.value) {
+    filtered = filtered.filter(s => s.subdistrict === selectedSubdistrict.value);
+  }
+  
+  // กรองตามชื่อร้าน
+  if (search.value) {
+    filtered = filtered.filter(s => s.name && s.name.toLowerCase().includes(search.value.toLowerCase()));
+  }
+  
   return filtered;
 })
 const pageCount = computed(() => Math.ceil(filteredStores.value.length / pageSize))
@@ -186,6 +258,52 @@ function goToPage(page) {
   }
 }
 
+// ฟังก์ชันเมื่อเลือกจังหวัด
+const onProvinceChange = () => {
+  selectedDistrict.value = '';
+  selectedSubdistrict.value = '';
+  districts.value = [];
+  subdistricts.value = [];
+  
+  if (selectedProvince.value) {
+    // ดึงข้อมูลอำเภอจากร้านในจังหวัดที่เลือก
+    const storesInProvince = stores.value.filter(s => s.province === selectedProvince.value);
+    const districtSet = new Set(storesInProvince.map(s => s.district).filter(Boolean));
+    districts.value = Array.from(districtSet).sort();
+  }
+  
+  currentPage.value = 1; // รีเซ็ตหน้า
+};
+
+// ฟังก์ชันเมื่อเลือกอำเภอ
+const onDistrictChange = () => {
+  selectedSubdistrict.value = '';
+  subdistricts.value = [];
+  
+  if (selectedDistrict.value) {
+    // ดึงข้อมูลตำบลจากร้านในอำเภอที่เลือก
+    const storesInDistrict = stores.value.filter(s => 
+      s.province === selectedProvince.value && 
+      s.district === selectedDistrict.value
+    );
+    const subdistrictSet = new Set(storesInDistrict.map(s => s.subdistrict).filter(Boolean));
+    subdistricts.value = Array.from(subdistrictSet).sort();
+  }
+  
+  currentPage.value = 1; // รีเซ็ตหน้า
+};
+
+// ฟังก์ชันล้างการค้นหา
+const clearFilters = () => {
+  selectedProvince.value = '';
+  selectedDistrict.value = '';
+  selectedSubdistrict.value = '';
+  search.value = '';
+  districts.value = [];
+  subdistricts.value = [];
+  currentPage.value = 1;
+};
+
 function selectPartner(store) {
   localStorage.setItem('partner', JSON.stringify(store));
   router.push('/recycleorder');
@@ -205,11 +323,13 @@ onMounted(async () => {
       ...s,
       name: s.companyName,
       province: s.companyProvince,
+      district: s.companyDistrict,
+      subdistrict: s.companySubdistrict,
       img: s.shopImages || defaultImg
     }));
     // สร้าง list จังหวัดจากข้อมูลร้าน
     const provinceSet = new Set(stores.value.map(s => s.province).filter(Boolean));
-    provinces.value = Array.from(provinceSet);
+    provinces.value = Array.from(provinceSet).sort();
     // รอ DOM render เสร็จแล้วค่อย updateScrollState
     setTimeout(() => {
       if (scrollRef.value) {

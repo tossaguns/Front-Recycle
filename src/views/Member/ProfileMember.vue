@@ -23,15 +23,6 @@
           </label>
         </div>
 
-        <div
-          class="flex items-center gap-1 sm:gap-2 bg-[#e6f7e6] text-[#184c36] rounded-full px-3 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold shadow mb-4 sm:mb-6">
-          <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h8M12 8v8" />
-          </svg>
-          50 โควต้า
-        </div>
-
         <div class="bg-white rounded-2xl shadow-xl border-l-4 border-[#b6e388] w-full px-3 sm:px-5 py-4 sm:py-6">
           <div class="p-3 sm:p-4 md:p-6 lg:p-8">
             <div class="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6 pb-2 border-b border-[#e6f7e6]">

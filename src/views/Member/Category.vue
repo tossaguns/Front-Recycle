@@ -42,8 +42,8 @@
 </template>
 
 <script setup>
-import Bar from '../components/Bar.vue'
-import Footer from '../components/Footer.vue'
+import Bar from '../../components/Bar.vue'
+import Footer from '../../components/Footer.vue'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
