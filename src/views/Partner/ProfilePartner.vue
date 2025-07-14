@@ -59,30 +59,35 @@
                         </div>
 
                         <div class="mt-6 sm:col-span-2 xl:col-span-3">
-                            <h3 class="text-lg font-semibold text-[#184c36] mb-4">ที่อยู่ร้าน/พาร์ทเนอร์</h3>
-                            <div v-if="partnerAddresses.length === 0" class="text-center py-8 text-gray-500">
-                                <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor"
+                            <h3 class="text-xl font-bold text-[#184c36] mb-4">ที่อยู่</h3>
+
+                            <!-- ไม่มีที่อยู่ -->
+                            <div v-if="partnerAddresses.length === 0" class="text-center py-10 text-gray-500">
+                                <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
-                                <p>ยังไม่มีที่อยู่</p>
+                                <p class="text-sm">ยังไม่มีที่อยู่ที่บันทึกไว้</p>
                             </div>
+
+                            <!-- มีที่อยู่ -->
                             <div v-else class="space-y-4">
                                 <div v-for="address in partnerAddresses" :key="address._id"
-                                    class="border border-[#e6f7e6] rounded-lg p-4 bg-[#f7faf0]">
-                                    <div class="flex items-start justify-between">
-                                        <div class="flex-1">
-                                            <div class="flex items-center gap-2 mb-2">
-                                                <h4 class="font-semibold text-[#184c36]">{{ address.address_name }}</h4>
+                                    class="border border-[#e0f2e9] rounded-2xl p-4 bg-[#f9fdf5] shadow-sm">
+                                    <div class="flex justify-between items-start gap-4">
+                                        <div class="flex-1 space-y-1">
+                                            <div class="flex items-center gap-2">
+                                                <h4 class="font-semibold text-[#184c36] text-base">{{
+                                                    address.address_name }}</h4>
                                                 <span v-if="address.is_default"
-                                                    class="bg-[#b6e388] text-[#184c36] text-xs px-2 py-1 rounded-full">
+                                                    class="bg-[#b6e388] text-[#184c36] text-xs font-semibold px-2 py-0.5 rounded-full">
                                                     ที่อยู่ร้าน
                                                 </span>
                                             </div>
-                                            <p class="text-sm text-gray-700 mb-1">{{ address.address }}</p>
+                                            <p class="text-sm text-gray-700">{{ address.address }}</p>
                                             <p class="text-sm text-gray-600">
                                                 {{ address.subdistrict }} {{ address.district }} {{ address.province }}
                                                 {{ address.postal_code }}
@@ -90,6 +95,20 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+
+                            <!-- ที่อยู่ส่วนตัว (ถ้ามี) -->
+                            <div v-if="form.personalAddress || form.personalSubdistrict || form.personalDistrict || form.personalProvince || form.personalPostalCode"
+                                class="mt-6 border border-[#e0f2e9] rounded-2xl p-4 bg-[#f9fdf5] shadow-sm">
+                                <h4 class="font-semibold text-[#184c36] text-base mb-2">ที่อยู่ผู้ติดต่อ</h4>
+                                <p class="text-sm text-gray-700 leading-relaxed">
+                                    {{ form.personalAddress }}<br>
+                                    <template v-if="form.personalSubdistrict">ต.{{ form.personalSubdistrict }}
+                                    </template>
+                                    <template v-if="form.personalDistrict">อ.{{ form.personalDistrict }} </template>
+                                    <template v-if="form.personalProvince">จ.{{ form.personalProvince }} </template>
+                                    <template v-if="form.personalPostalCode">{{ form.personalPostalCode }}</template>
+                                </p>
                             </div>
                         </div>
 
@@ -110,6 +129,11 @@ const form = reactive({
     fullName: '',
     personalEmail: '',
     personalPhone: '',
+    personalAddress: '',
+    personalSubdistrict: '',
+    personalDistrict: '',
+    personalProvince: '',
+    personalPostalCode: '',
 });
 const partnerAddresses = ref([]);
 const partner = JSON.parse(localStorage.getItem('partner') || '{}');
@@ -128,12 +152,17 @@ async function loadPartnerProfile() {
         form.personalEmail = partnerData.personalEmail || '';
         form.personalPhone = partnerData.personalPhone || '';
         profileImg.value = partnerData.companyLogo || '/src/assets/logo3.png';
+        form.personalAddress = partnerData.personalAddress || '';
+        form.personalSubdistrict = partnerData.personalSubdistrict || '';
+        form.personalDistrict = partnerData.personalDistrict || '';
+        form.personalProvince = partnerData.personalProvince || '';
+        form.personalPostalCode = partnerData.personalPostalCode || '';
 
         // ✅ เอาเฉพาะที่อยู่บริษัท
         partnerAddresses.value = [
             {
                 _id: 'company',
-                address_name: 'ที่อยู่บริษัท',
+                address_name: partnerData.companyName || 'ที่อยู่ร้าน',
                 address: partnerData.companyAddress,
                 subdistrict: partnerData.companySubdistrict,
                 district: partnerData.companyDistrict,

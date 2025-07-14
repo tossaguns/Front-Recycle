@@ -3,8 +3,8 @@
         <div class="w-full flex items-center justify-between px-6 py-3 gap-4">
             <!-- Logo -->
             <div class="flex items-center cursor-pointer" @click="$router.push('/')">
-                <div class="bg-[#d6f5a6] rounded-xl w-10 h-10 flex items-center justify-center">
-                    <img src="/vite.svg" alt="logo" class="w-6 h-6" />
+                <div class="rounded-xl w-11 h-10 flex items-center justify-center">
+                    <img src="../assets/logorecycle.png" alt="logo" class="h-10" />
                 </div>
             </div>
 

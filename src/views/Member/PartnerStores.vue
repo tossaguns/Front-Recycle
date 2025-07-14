@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-white flex flex-col">
     <Bar />
 
-    <div class="bg-[#f7faf0] h-screen">
+    <div class="bg-[#f7faf0] min-h-screen">
       <main class="flex-1 max-w-7xl mx-auto w-full px-8 py-8 relative flex flex-col justify-center ">
         <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-[#222] text-center my-6 sm:my-8 md:my-10">
           ร้านรับ - ซื้อสินค้ารีไซเคิล

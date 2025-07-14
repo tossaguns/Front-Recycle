@@ -73,10 +73,14 @@ const pageCount = computed(() => Math.ceil(filteredItems.value.length / pageSize
 const search = ref('')
 
 const categoryName = computed(() => route.query.category || '')
+const subCategoryId = computed(() => route.query.subCategoryId || '')
+const subCategoryName = computed(() => route.query.subCategoryName || '')
 
 const filteredItems = computed(() => {
   let items = allItems.value
-  if (categoryName.value) {
+  if (subCategoryId.value) {
+    items = items.filter(item => item.subCategoryId === subCategoryId.value || (item.subCategoryId && item.subCategoryId._id === subCategoryId.value))
+  } else if (categoryName.value) {
     items = items.filter(item => item.category_id && (item.category_id.name === categoryName.value))
   }
   if (search.value) {

@@ -19,6 +19,7 @@ import ProductCategory from "../views/Member/ProductCategory.vue";
 import ProfileMember from "../views/Member/ProfileMember.vue";
 import PartnerStores from '../views/Member/PartnerStores.vue'
 import PartnerDetailView from '../views/Member/PartnerDetailView.vue'
+import SubCategory from "../views/Member/SubCategory.vue";
 
 // Component
 import Bar from "../components/Bar.vue";
@@ -67,6 +68,7 @@ const routes = [
   { path: "/profilemember", name: "productCategory", component: ProfileMember },
   { path: '/partnerstores', component: PartnerStores },
   { path: '/partnerdetail/:id', component: PartnerDetailView },
+  { path: "/subcategory", component: SubCategory },
 
   // Component
   { path: "/bar", component: Bar },
@@ -96,11 +98,6 @@ router.beforeEach((to, from, next) => {
       console.log("Auth store initialization failed");
     }
   }
-  
-  console.log("Route guard - to:", to.path);
-  console.log("Route guard - user role:", authStore.user.role);
-  console.log("Route guard - isAuthenticated:", authStore.isAuthenticated);
-  console.log("Route guard - user data:", authStore.user);
   
   // ตรวจสอบว่าต้องการ authentication หรือไม่
   if (to.meta.requiresAuth) {

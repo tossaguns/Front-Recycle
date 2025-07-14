@@ -7,8 +7,7 @@
       <div class="relative flex items-center">
         <button @click="scrollLeft" :disabled="isAtStart"
           class="absolute left-0 z-10 bg-white border border-[#e6e6e6] rounded-full w-10 h-10 md:w-14 md:h-14 flex items-center justify-center shadow hover:bg-[#b6e388] disabled:opacity-50 disabled:cursor-not-allowed transition -translate-x-1/2">
-          <svg class="w-6 h-6 text-[#184c36]" fill="none" stroke="currentColor" stroke-width="2"
-            viewBox="0 0 24 24">
+          <svg class="w-6 h-6 text-[#184c36]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
@@ -30,8 +29,7 @@
         </div>
         <button @click="scrollRight" :disabled="isAtEnd"
           class="absolute right-0 z-10 bg-white border border-[#e6e6e6] rounded-full w-10 h-10 md:w-14 md:h-14 flex items-center justify-center shadow hover:bg-[#b6e388] disabled:opacity-50 disabled:cursor-not-allowed transition translate-x-1/2">
-          <svg class="w-6 h-6 text-[#184c36]" fill="none" stroke="currentColor" stroke-width="2"
-            viewBox="0 0 24 24">
+          <svg class="w-6 h-6 text-[#184c36]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
           </svg>
         </button>
@@ -44,7 +42,7 @@
 <script setup>
 import Bar from '../../components/Bar.vue'
 import Footer from '../../components/Footer.vue'
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 
@@ -94,23 +92,30 @@ function handleResize() {
 }
 
 function goToCategory(cat) {
-  router.push({ name: 'productcategory', query: { category: cat.name } })
+  localStorage.setItem('category', JSON.stringify({
+    _id: cat._id,
+    name: cat.name
+  }));
+  router.push({ path: '/subcategory' })
 }
 
 onMounted(async () => {
   try {
-    const res = await axios.get('http://localhost:8888/recycle/categories')
-    if (res.data && res.data.categories) {
-      categories.value = res.data.categories.map(cat => ({
+    const res = await axios.get(`${import.meta.env.VITE_API_URL}/categories`)
+    if (Array.isArray(res.data)) {
+      categories.value = res.data.map(cat => ({
+        _id: cat._id,
         name: cat.name,
-        img: '/src/assets/NoPicture.webp' // หรือจะ map รูปจริงถ้ามี field ใน backend
+        img: cat.image || '/src/assets/NoPicture.webp'
       }))
     }
   } catch (e) {
     categories.value = []
   }
+  await nextTick()
   updateCardsPerScroll()
   updateScrollButtons()
+
   if (scrollRef.value) {
     scrollRef.value.addEventListener('scroll', updateScrollButtons)
   }

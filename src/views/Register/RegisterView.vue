@@ -28,7 +28,7 @@
       <div class="bg-white bg-opacity-90 backdrop-blur-md rounded-2xl shadow-xl p-8 animate-fadeIn">
         <div class="flex justify-center">
           <div class="w-20 h-20 rounded-full overflow-hidden pulse-animation">
-            <img src="../../assets/logo.png" alt="Logo" class="w-full h-full object-cover" />
+            <img src="../../assets/logorecycle.png" alt="Logo" class="w-full h-full object-cover" />
           </div>
         </div>
         <div class="mt-6">

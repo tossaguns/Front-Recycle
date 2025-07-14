@@ -3,8 +3,8 @@
         <div class="w-full flex items-center justify-between px-6 py-3 gap-4">
             <!-- Logo -->
             <div class="flex items-center cursor-pointer" @click="$router.push('/dashboardpartner')">
-                <div class="bg-[#d6f5a6] rounded-xl w-10 h-10 flex items-center justify-center">
-                    <img src="/vite.svg" alt="logo" class="w-6 h-6" />
+                <div class="rounded-xl w-12 h-10 flex items-center justify-center">
+                    <img src="../assets/logorecycle.png" alt="logo" class="h-10" />
                 </div>
                 <span class="ml-2 text-lg font-bold text-[#184c36]">Admin Panel</span>
             </div>
@@ -78,7 +78,7 @@
 
         <!-- เมนู (Desktop) -->
         <nav class="w-full pl-0 sm:pl-20 py-3 justify-center sm:justify-start hidden sm:flex">
-            <ul class="flex gap-6 text-sm text-[#222] font-medium">
+            <ul class="flex gap-2 md:gap-6 text-xs lg:text-sm text-[#222] font-medium">
                 <li :class="['menu-underline', $route.path === '/dashboardpartner' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
                     @click="navigateTo('/dashboardpartner')">หน้าหลัก</li>
                 <li :class="['menu-underline', $route.path === '/admin/sales' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"

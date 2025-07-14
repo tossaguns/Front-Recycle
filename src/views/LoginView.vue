@@ -31,7 +31,7 @@
         <div class="bg-white bg-opacity-95 rounded-2xl shadow-xl p-8 animate-fadeIn">
         <div class="flex justify-center">
           <div class="w-20 h-20 rounded-full overflow-hidden pulse-animation">
-            <img src="../assets/logo.png" alt="Logo" class="w-full h-full object-cover">
+            <img src="../assets/logorecycle.png" alt="Logo" class="w-full h-full object-cover">
           </div>
         </div>
 
@@ -88,6 +88,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import axios from 'axios'
+import Swal from 'sweetalert2'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -102,7 +103,11 @@ const circles = ref([]);
 
 const login = async () => {
   if (!username.value || !password.value) {
-    alert('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน')
+    await Swal.fire({
+      icon: 'error',
+      title: 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน',
+      confirmButtonText: 'ตกลง'
+    });
     return
   }
   try {
@@ -117,9 +122,14 @@ const login = async () => {
     console.log('Login response:', { userData, hasToken: !!token });
     
     if (response.data.success) {
+      await Swal.fire({
+        icon: 'success',
+        title: 'เข้าสู่ระบบสำเร็จ',
+        showConfirmButton: false,
+        timer: 1200
+      });
       // ส่ง token ไปด้วย
       authStore.login({ ...userData, token });
-      
       if (loginMode.value === 'partner' || userData.role === 'partner') {
         localStorage.setItem('partner', JSON.stringify(userData));
         localStorage.removeItem('user');
@@ -133,9 +143,19 @@ const login = async () => {
     }
   } catch (error) {
     if (error.response) {
-      alert('เข้าสู่ระบบไม่สำเร็จ: ' + (error.response.data.error || error.response.statusText))
+      await Swal.fire({
+        icon: 'error',
+        title: 'เข้าสู่ระบบไม่สำเร็จ',
+        text: error.response.data.error || error.response.statusText,
+        confirmButtonText: 'ตกลง'
+      });
     } else {
-      alert('เกิดข้อผิดพลาด: ' + error.message)
+      await Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาด',
+        text: error.message,
+        confirmButtonText: 'ตกลง'
+      });
     }
   }
 }

@@ -1,10 +1,17 @@
 <template>
-    <div class="partner-register min-h-screen bg-gradient-to-br from-[#e6f7e6] via-white to-[#b6e388] flex items-center justify-center py-8">
+    <div
+        class="partner-register min-h-screen bg-gradient-to-br from-[#e6f7e6] via-white to-[#b6e388] flex items-center justify-center py-8">
+        <button @click="goBack" class="absolute top-4 left-4 z-20 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg shadow hover:bg-gray-300 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+            ย้อนกลับ
+        </button>
         <div class="container mx-auto px-4 py-6 sm:py-8 lg:py-12 max-w-4xl w-full">
             <!-- Header Section -->
             <div class="text-center mb-8 lg:mb-12">
                 <div class="flex justify-center">
-                    <img src="../../assets/logo.png" alt="logo" class="w-20 h-20">
+                    <div class="w-20 h-20 rounded-full overflow-hidden pulse-animation">
+                        <img src="../../assets/logorecycle.png" alt="Logo" class="w-full h-full object-cover" />
+                    </div>
                 </div>
                 <h1
                     class="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-[#184c36] via-[#b6e388] to-[#184c36] bg-clip-text text-transparent mb-2">
@@ -1350,6 +1357,10 @@ const resetForm = () => {
     tempFiles.logo = null;
     tempFiles.documents = [];
     tempFiles.signature = null;
+};
+
+const goBack = () => {
+    router.back();
 };
 </script>
 
