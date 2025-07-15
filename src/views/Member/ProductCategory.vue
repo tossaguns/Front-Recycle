@@ -3,12 +3,17 @@
     <Bar />
     <main class="flex-1 max-w-[1450px] mx-auto w-full px-8 py-10 relative flex flex-col justify-center">
       <h1 class="text-2xl md:text-3xl font-bold mb-4 text-[#222]">สินค้ารีไซเคิล</h1>
-      <!-- หมวดหมู่ -->
+
+      <!-- ชื่อหมวด -->
       <div class="mb-6 flex flex-wrap items-center gap-2">
-        <span v-if="categoryName"
-          class="bg-[#b6e388] text-[#184c36] rounded-full px-5 py-2 text-base font-semibold shadow">{{ categoryName
-          }}</span>
+        <span v-if="subCategoryName"
+          class="bg-[#b6e388] text-[#184c36] rounded-full px-5 py-2 text-base font-semibold shadow cursor-pointer hover:underline"
+          @click="goToSubCategory"
+        >
+          {{ subCategoryName }}
+        </span>
       </div>
+
       <!-- ค้นหา -->
       <form class="flex items-center gap-2 mb-8 max-w-md" @submit.prevent>
         <input v-model="search" type="text" placeholder="ค้นหาชื่อสินค้าที่รีไซเคิล..."
@@ -16,10 +21,15 @@
         <button type="submit"
           class="bg-[#b6e388] hover:bg-[#d6f5a6] text-[#184c36] rounded-full px-6 py-2 text-base font-semibold shadow transition">ค้นหา</button>
       </form>
+
       <!-- สินค้า -->
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
-        <template v-if="items.length">
-          <div v-for="(item, idx) in items" :key="item._id || idx"
+        <template v-if="loading">
+          <div class="col-span-full text-center text-gray-400 py-8">กำลังโหลดสินค้า...</div>
+        </template>
+
+        <template v-else-if="pagedProducts.length">
+          <div v-for="(item, index) in pagedProducts" :key="item._id || index"
             class="bg-white rounded-xl border border-[#e6f7e6] shadow p-2 flex flex-col">
             <img :src="item.img" :alt="item.name" class="rounded-lg w-full aspect-square object-cover mb-2" />
             <div class="flex p-2">
@@ -36,10 +46,12 @@
             </div>
           </div>
         </template>
-        <div v-else class="col-span-full text-center text-gray-400 py-8">
-          ไม่พบสินค้าในหมวดหมู่นี้
-        </div>
+
+        <template v-else>
+          <div class="col-span-full text-center text-gray-400 py-8">ไม่พบสินค้าในหมวดหมู่นี้</div>
+        </template>
       </div>
+
       <!-- Pagination -->
       <div class="flex justify-end">
         <nav class="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
@@ -60,60 +72,76 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Bar from '../../components/Bar.vue'
 import Footer from '../../components/Footer.vue'
 
-const route = useRoute()
-const allItems = ref([])
+const router = useRouter()
+
+// เก็บค่า subCategory จาก localStorage
+const subCategory = ref(JSON.parse(localStorage.getItem('subcategory') || '{}'))
+const subCategoryId = ref(subCategory.value._id || '')
+const subCategoryName = ref(subCategory.value.name || '')
+
+// ตัวแปรหลัก
+const allProducts = ref([])
+const search = ref('')
 const currentPage = ref(1)
 const pageSize = 12
-const pageCount = computed(() => Math.ceil(filteredItems.value.length / pageSize))
-const search = ref('')
+const loading = ref(true)
 
-const categoryName = computed(() => route.query.category || '')
-const subCategoryId = computed(() => route.query.subCategoryId || '')
-const subCategoryName = computed(() => route.query.subCategoryName || '')
-
-const filteredItems = computed(() => {
-  let items = allItems.value
-  if (subCategoryId.value) {
-    items = items.filter(item => item.subCategoryId === subCategoryId.value || (item.subCategoryId && item.subCategoryId._id === subCategoryId.value))
-  } else if (categoryName.value) {
-    items = items.filter(item => item.category_id && (item.category_id.name === categoryName.value))
-  }
+// ฟิลเตอร์ชื่อสินค้า
+const filteredProducts = computed(() => {
+  let items = allProducts.value
   if (search.value) {
-    items = items.filter(item => item.name.includes(search.value))
+    items = items.filter(p => p.name.includes(search.value))
   }
   return items
 })
 
-const items = computed(() => filteredItems.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize))
+// pagination
+const pageCount = computed(() => Math.ceil(filteredProducts.value.length / pageSize))
+const pagedProducts = computed(() =>
+  filteredProducts.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize)
+)
 
+// เปลี่ยนหน้า
 function goToPage(page) {
   if (page >= 1 && page <= pageCount.value) {
     currentPage.value = page
     setTimeout(() => {
-      const grid = document.querySelector('.grid');
+      const grid = document.querySelector('.grid')
       if (grid) {
-        grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        grid.scrollIntoView({ behavior: 'smooth', block: 'start' })
       }
-    }, 0);
+    }, 0)
   }
 }
 
+const goToSubCategory = () => {
+  router.push('/subcategory')
+}
+
+// โหลดข้อมูลสินค้า
 onMounted(async () => {
   try {
-    const res = await axios.get('http://localhost:8888/recycle/products')
-    if (res.data && res.data.products) {
-      allItems.value = res.data.products.map(p => ({
-        ...p,
-        img: '/src/assets/NoPicture.webp' // หรือ map รูปจริงถ้ามี
+    const res = await axios.get(`${import.meta.env.VITE_API_URL}/products/product/${subCategoryId.value}`)
+    if (Array.isArray(res.data)) {
+      allProducts.value = res.data.map(p => ({
+        _id: p._id,
+        name: p.name,
+        price_per_kg: p.price_per_kg,
+        subCategoryId: p.subCategoryId,
+        img: p.image || '/src/assets/NoPicture.webp'
       }))
     }
+    console.log("allProducts", allProducts.value)
   } catch (e) {
-    allItems.value = []
+    console.error('โหลดสินค้าล้มเหลว', e)
+    allProducts.value = []
+  } finally {
+    loading.value = false
   }
 })
 </script>

@@ -13,28 +13,40 @@
           <div class="flex flex-col gap-3 sm:gap-4 w-full max-w-xs sm:max-w-md md:max-w-xl">
             <span class="text-sm sm:text-base">เลือกพื้นที่ที่ต้องการค้นหาร้าน</span>
             
-            <!-- จังหวัด -->
-            <select v-model="selectedProvince" @change="onProvinceChange"
-              class="rounded-full border border-[#b6e388] px-4 sm:px-5 py-2 sm:py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white w-full">
-              <option value="">เลือกจังหวัด</option>
-              <option v-for="province in provinces" :key="province" :value="province">{{ province }}</option>
-            </select>
-            
-            <!-- อำเภอ -->
-            <select v-model="selectedDistrict" @change="onDistrictChange"
-              :disabled="!selectedProvince"
-              class="rounded-full border border-[#b6e388] px-4 sm:px-5 py-2 sm:py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white w-full disabled:opacity-50 disabled:cursor-not-allowed">
-              <option value="">เลือกอำเภอ</option>
-              <option v-for="district in districts" :key="district" :value="district">{{ district }}</option>
-            </select>
-            
-            <!-- ตำบล -->
-            <select v-model="selectedSubdistrict"
-              :disabled="!selectedDistrict"
-              class="rounded-full border border-[#b6e388] px-4 sm:px-5 py-2 sm:py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white w-full disabled:opacity-50 disabled:cursor-not-allowed">
-              <option value="">เลือกตำบล</option>
-              <option v-for="subdistrict in subdistricts" :key="subdistrict" :value="subdistrict">{{ subdistrict }}</option>
-            </select>
+            <!-- จังหวัด/อำเภอ/ตำบล -->
+            <div class="bg-[#f7faf0] rounded-xl p-3 mb-6">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
+                <!-- จังหวัด -->
+                <div class="flex flex-col gap-1">
+                  <label class="font-medium text-[#184c36] text-sm">จังหวัด</label>
+                  <select v-model="selectedProvince" @change="onProvinceChange"
+                    class="rounded-full border border-[#b6e388] px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white w-full">
+                    <option value="">เลือกจังหวัด</option>
+                    <option v-for="province in provinces" :key="province" :value="province">{{ province }}</option>
+                  </select>
+                </div>
+                <!-- อำเภอ -->
+                <div class="flex flex-col gap-1">
+                  <label class="font-medium text-[#184c36] text-sm">อำเภอ</label>
+                  <select v-model="selectedDistrict" @change="onDistrictChange"
+                    :disabled="!selectedProvince"
+                    class="rounded-full border border-[#b6e388] px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white w-full disabled:opacity-50 disabled:cursor-not-allowed">
+                    <option value="">เลือกอำเภอ</option>
+                    <option v-for="district in districts" :key="district" :value="district">{{ district }}</option>
+                  </select>
+                </div>
+                <!-- ตำบล -->
+                <div class="flex flex-col gap-1">
+                  <label class="font-medium text-[#184c36] text-sm">ตำบล</label>
+                  <select v-model="selectedSubdistrict"
+                    :disabled="!selectedDistrict"
+                    class="rounded-full border border-[#b6e388] px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white w-full disabled:opacity-50 disabled:cursor-not-allowed">
+                    <option value="">เลือกตำบล</option>
+                    <option v-for="subdistrict in subdistricts" :key="subdistrict" :value="subdistrict">{{ subdistrict }}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
             
             <!-- ค้นหาชื่อร้าน -->
             <form @submit.prevent class="flex flex-1 gap-1 sm:gap-2">
@@ -102,15 +114,15 @@
             >
               เลือกร้านนี้
             </button> -->
-            <router-link
-              :to="`/partnerdetail/${store._id || idx}`"
+            <button
               class="bg-emerald-900 hover:bg-green-500 text-white rounded-full px-3 py-1 text-sm shadow transition flex items-center gap-1"
+              @click="selectPartner(store)"
             >
               เพิ่มเติม
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
               </svg>
-            </router-link>
+            </button>
           </div>
         </div>
         
@@ -306,7 +318,7 @@ const clearFilters = () => {
 
 function selectPartner(store) {
   localStorage.setItem('partner', JSON.stringify(store));
-  router.push('/recycleorder');
+  router.push('/partnerdetail');
 }
 
 onMounted(async () => {
@@ -316,7 +328,7 @@ onMounted(async () => {
   }
 
   try {
-    const res = await axios.get('http://localhost:8888/recycle/partners');
+    const res = await axios.get(`${import.meta.env.VITE_API_URL}/partners`);
     // backend ส่งข้อมูลใน data.data (array)
     const arr = Array.isArray(res.data.data) ? res.data.data : [];
     stores.value = arr.map(s => ({

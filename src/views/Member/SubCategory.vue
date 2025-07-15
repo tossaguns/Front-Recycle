@@ -4,9 +4,12 @@
         <main class="flex-1 max-w-[1450px] mx-auto w-full px-8 py-10 relative flex flex-col justify-center">
             <h1 class="text-2xl md:text-3xl font-bold mb-4 text-[#222]">หมวดหมู่ย่อยสินค้ารีไซเคิล</h1>
             <!-- ชื่อหมวดหมู่ -->
-            <div class="mb-6">
-                <span class="bg-[#e6f9c7] text-[#7bb661] rounded-full px-6 py-2 text-xl font-bold shadow">{{
-                    categoryName }}</span>
+            <div class="mb-6 flex flex-wrap items-center gap-2">
+                <span v-if="categoryName"
+                    class="bg-[#b6e388] text-[#184c36] rounded-full px-5 py-2 text-base font-semibold shadow cursor-pointer hover:underline"
+                    @click="goToCategory">
+                    {{ categoryName }}
+                </span>
             </div>
             <!-- ช่องค้นหา -->
             <form class="flex items-center gap-2 mb-8 max-w-md" @submit.prevent>
@@ -36,8 +39,7 @@
                         <div class="text-lg font-bold text-[#184c36] mb-4">{{ sub.name }}</div>
                         <button
                             class="mt-auto bg-[#7bb661] hover:bg-[#b6e388] text-white rounded-full px-6 py-2 text-base font-semibold flex items-center gap-2 self-start transition"
-                            @click="goToProductCategory(sub)"
-                        >
+                            @click="goToProductCategory(sub)">
                             เพิ่มเติม
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
@@ -66,12 +68,11 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Bar from '../../components/Bar.vue'
 import Footer from '../../components/Footer.vue'
 
-const route = useRoute()
 const router = useRouter()
 const allSubCategories = ref([])
 const currentPage = ref(1)
@@ -102,7 +103,15 @@ function goToPage(page) {
 }
 
 function goToProductCategory(sub) {
-  router.push({ path: '/productcategory', query: { subCategoryId: sub._id, subCategoryName: sub.name } })
+    localStorage.setItem('subcategory', JSON.stringify({
+        _id: sub._id,
+        name: sub.name
+    }));
+    router.push({ path: '/productcategory' })
+}
+
+const goToCategory = () => {
+    router.push('/category')
 }
 
 onMounted(async () => {

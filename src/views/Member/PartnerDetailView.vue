@@ -16,7 +16,7 @@
                         <img :src="store?.img || '/src/assets/NoPicture.webp'"
                             class="w-10 h-10 rounded-full object-cover border-2 border-[#b6e388]" />
                         <div class="flex flex-col">
-                            <span class="font-semibold text-base">{{ store?.owner || '-' }}</span>
+                            <span class="font-semibold text-base">{{ store?.fullName || '-' }}</span>
                             <span class="text-xs text-gray-500">{{ companyFullAddress }}</span>
                         </div>
                     </div></div>
@@ -26,25 +26,40 @@
                 </div>
                 <!-- Right: Product List -->
                 <div class="flex-1 flex flex-col items-center md:items-start">
-                    <h2 class="font-bold text-lg mb-4">รายการสินค้าที่รับชื้อ</h2>
-                    <div class="w-full flex flex-col gap-4">
-                        <template v-if="store.items && store.items.length">
-                            <div v-for="item in store.items" :key="item.name" class="flex items-center justify-between gap-2">
-                                <div class="flex items-center gap-3">
-                                    <img :src="item.img" class="w-12 h-12 rounded-lg object-cover border border-[#e6e6e6]" />
-                                    <span class="font-medium">{{ item.name }}</span>
-                                    <span class="text-xs text-gray-400">โดยร้านค้า</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span
-                                        class="bg-[#f6eec7] text-[#184c36] px-3 py-1 rounded-full text-xs font-semibold">{{
-                                        item.count }} โควต้า</span>
-                                    <!-- <button
-                                        class="bg-[#f6eec7] hover:bg-[#b6e388] text-[#184c36] px-3 py-1 rounded-full text-xs font-semibold transition">ดูสินค้า</button> -->
-                                </div>
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+                        <h2 class="font-bold text-lg">รายการสินค้าที่รับชื้อ</h2>
+                        <input
+                            v-model="searchProduct"
+                            type="text"
+                            placeholder="ค้นหาสินค้า..."
+                            class="rounded-full border border-[#e6e6e6] px-4 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] w-full sm:w-64"
+                        />
+                    </div>
+                    <div
+                        class="w-full flex flex-col gap-2"
+                        :class="filteredProducts && filteredProducts.length > 4 ? 'overflow-y-auto max-h-80' : ''"
+                    >
+                        <div
+                            v-for="item in filteredProducts"
+                            :key="item._id"
+                            class="flex items-center bg-white rounded-xl shadow p-2 md:p-3 gap-3 border border-[#e6e6e6]"
+                        >
+                            <img
+                                :src="item.image || item.img || '/src/assets/NoPicture.webp'"
+                                class="w-16 h-16 rounded-lg object-cover border"
+                                :alt="item.name"
+                            />
+                            <div class="flex-1 flex flex-col justify-center">
+                                <div class="font-semibold text-base text-[#222]">{{ item.name }}</div>
+                                <div class="text-xs text-gray-400">ราคา {{ item.price_per_kg || '-' }} บาท/กก.</div>
                             </div>
-                        </template>
-                        <div v-else class="text-center text-gray-400 py-8">
+                            <div>
+                                <span class="bg-[#f6b26b] text-[#7a3e00] rounded-full px-5 py-1 text-sm font-bold shadow">
+                                    {{ item.maxAmount || 1 }} โควต้า
+                                </span>
+                            </div>
+                        </div>
+                        <div v-if="!filteredProducts || !filteredProducts.length" class="text-center text-gray-400 py-8">
                             ไม่พบสินค้าที่รับซื้อ
                         </div>
                     </div>
@@ -79,89 +94,51 @@
 
 <script setup>
 import { onMounted, ref, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import axios from 'axios';
+import { useRouter } from 'vue-router';
 import Bar from '../../components/Bar.vue';
 import Footer from '../../components/Footer.vue';
+import axios from 'axios';
 
-const route = useRoute();
 const router = useRouter();
-const storeId = String(route.params.id);
 const store = ref(null);
-const items = ref([]);
+const products = ref([]);
+const searchProduct = ref('');
+const filteredProducts = computed(() =>
+  products.value.filter(
+    p => p.name && p.name.toLowerCase().includes(searchProduct.value.toLowerCase())
+  )
+);
 
 onMounted(async () => {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const partner = JSON.parse(localStorage.getItem('partner') || '{}');
-    if ((!user || (!user._id && !user.id)) && (!partner || (!partner._id && !partner.id))) {
-        router.push('/login');
-        return;
-    }
-    // ดึงข้อมูลร้านจาก backend
-    let storeData = null;
-    try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/partners`);
-        if (res.data && Array.isArray(res.data.data)) {
-            storeData = res.data.data.find(s => String(s._id) === String(storeId));
-        }
-    } catch (e) {
-        storeData = null;
-        console.error('partner error', e);
-    }
+  const partner = JSON.parse(localStorage.getItem('partner') || '{}');
+  if (!partner || (!partner._id && !partner.id)) {
+    router.push('/partnerstores');
+    return;
+  }
+  store.value = partner;
 
-    // ดึงข้อมูลสินค้าทั้งหมด แล้ว filter เฉพาะที่ store.id ตรงกัน
-    let productList = [];
-    try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/products`);
-        if (res.data && Array.isArray(res.data.products)) {
-            productList = res.data.products
-                .filter(p => {
-                    const productStoreId = p.store_id?._id;
-                    return String(productStoreId) === String(storeId);
-                })
-                .map(p => ({
-                    name: p.name,
-                    img: p.img || '/src/assets/NoPicture.webp',
-                    count: 1,
-                }));
-        }
-    } catch (e) {
-        productList = [];
-        console.error('product error', e);
+  // ดึงสินค้าทั้งหมดแล้ว filter เฉพาะที่ shopId === partner._id
+  try {
+    const res = await axios.get(`${import.meta.env.VITE_API_URL}/products`);
+    console.log("res", res.data)
+    if (res.data && Array.isArray(res.data.products)) {
+      products.value = res.data.products.filter(
+        p => String(p.shopId) === String(partner._id)
+      );
     }
-
-    // set ข้อมูลร้านและสินค้า
-    store.value = storeData
-        ? {
-            _id: storeData._id,
-            name: storeData.companyName,
-            owner: storeData.username || '-',
-            companyAddress: storeData.companyAddress || '',
-            companySubdistrict: storeData.companySubdistrict || '',
-            companyDistrict: storeData.companyDistrict || '',
-            companyProvince: storeData.companyProvince || '',
-            companyPostalCode: storeData.companyPostalCode || '',
-            img: Array.isArray(storeData.shopImages)
-                ? storeData.shopImages[0]
-                : storeData.shopImages || '/src/assets/NoPicture.webp',
-            banner: storeData.bannerImage || '/src/assets/bannerSlider1.png',
-            items: productList,
-        }
-        : null;
-
-    items.value = productList;
+  } catch (e) {
+    products.value = [];
+  }
 });
 
 const companyFullAddress = computed(() => {
-    if (!store.value) return '-';
-    const s = store.value;
-    // ถ้าไม่มีข้อมูล return '-'
-    if (!s.companyAddress && !s.companySubdistrict && !s.companyDistrict && !s.companyProvince && !s.companyPostalCode) return '-';
-    return `${s.companyAddress || ''} ต.${s.companySubdistrict || ''} อ.${s.companyDistrict || ''} จ.${s.companyProvince || ''} ${s.companyPostalCode || ''}`.replace(/ +/g, ' ').trim();
+  if (!store.value) return '-';
+  const s = store.value;
+  return `${s.companyAddress || ''} ต.${s.companySubdistrict || ''} อ.${s.companyDistrict || ''} จ.${s.companyProvince || ''} ${s.companyPostalCode || ''}`.replace(/ +/g, ' ').trim();
 });
 
 const goBack = () => {
-    router.push('/partnerstores');
+  router.push('/partnerstores');
 };
 
 function handleBookRecycleOrder() {
@@ -174,6 +151,7 @@ function handleBookRecycleOrder() {
         // Map ข้อมูลร้านให้ครบถ้วนตามที่ RecycleOrder.vue ใช้
         const partnerData = {
             _id: store.value._id || store.value.id,
+            partnerName: store.value.fullName,
             partnerCompanyName: store.value.name || store.value.companyName,
             partnerCompanyAddress: store.value.companyAddress,
             partnerCompanySubdistrict: store.value.companySubdistrict,

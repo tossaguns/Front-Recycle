@@ -93,23 +93,50 @@
           </div>
           <div class="flex flex-col gap-4">
             <label class="font-medium text-[#184c36]">เลือกประเภทสินค้า</label>
-            <select v-model="selectedProductType" @change="handleProductTypeChange"
+            <select v-model="selectedCategory" @change="handleCategoryChange"
               class="rounded-full border border-[#b6e388] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white">
-              <option value="">เลือกประเภท</option>
-              <option v-for="type in productTypes" :key="type._id" :value="type._id">
-                {{ type.name }}
+              <option value="">เลือกประเภทสินค้า</option>
+              <option v-for="cat in partnerCategories" :key="cat._id" :value="cat._id">
+                {{ cat.name }}
+              </option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-4">
+            <label class="font-medium text-[#184c36]">เลือกประเภทย่อย</label>
+            <select v-model="selectedSubCategory" :disabled="!selectedCategory"
+              class="rounded-full border border-[#b6e388] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white">
+              <option value="">เลือกประเภทย่อย</option>
+              <option v-for="sub in filteredSubCategories" :key="sub._id" :value="sub._id">
+                {{ sub.name }}
               </option>
             </select>
           </div>
           <div class="flex flex-col gap-4">
             <label class="font-medium text-[#184c36]">เลือกสินค้า</label>
-            <select v-model="selectedProduct"
+            <select v-model="selectedProduct" :disabled="!selectedSubCategory"
               class="rounded-full border border-[#b6e388] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white">
               <option value="">เลือกสินค้า</option>
-              <option v-for="product in products" :key="product._id" :value="product._id">
-                {{ product.name }} - ฿{{ product.price_per_kg }}/กก.
+              <option v-for="prod in filteredProducts" :key="prod._id" :value="prod._id">
+                {{ prod.name }}
               </option>
             </select>
+          </div>
+
+          <!-- จำนวนกิโลกรัม: แสดงเมื่อเลือกสินค้าแล้ว -->
+          <div class="flex flex-col gap-4" v-if="selectedProductObj">
+            <label class="font-medium text-[#184c36]">จำนวน (กิโลกรัม)</label>
+            <input
+              type="number"
+              v-model.number="sellAmount"
+              :min="1"
+              :max="selectedProductObj.maxAmount"
+              class="rounded-full border border-[#b6e388] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white"
+              placeholder="จำนวนกิโลกรัม"
+              @input="handleAmountInput"
+            />
+            <div v-if="sellAmount > selectedProductObj.maxAmount" class="text-red-600 text-xs mt-1">
+              จำนวนสูงสุดที่ขายได้คือ {{ selectedProductObj.maxAmount }} กิโลกรัม
+            </div>
           </div>
           <div class="flex flex-col gap-4">
             <label class="font-medium text-[#184c36]">เลือกวันที่จอง</label>
@@ -186,120 +213,126 @@
 
 
         <!-- Summary -->
-        <div class="rounded-2xl shadow border-t-4 border-lime-400 p-6 mt-8 w-full">
-          <div class="flex flex-col gap-2">
-
+        <div class="rounded-2xl shadow border-t-4 border-lime-400 p-6 mt-8 w-full bg-white">
+          <div class="flex flex-col gap-6">
             <!-- ข้อมูล Member -->
-            <div class="flex flex-col gap-2 mb-4">
-              <div class="flex justify-between items-center">
-                <span class="text-gray-600">ชื่อลูกค้า:</span>
-                <span class="font-medium">{{ memberData.fullName }}</span>
-              </div>
-              <div class="flex justify-between items-center">
-                <span class="text-gray-600">เบอร์โทร:</span>
-                <span class="font-medium">{{ memberData.personalPhone }}</span>
+            <div>
+              <h3 class="font-semibold text-[#184c36] mb-2 text-base">ข้อมูลลูกค้า</h3>
+              <div class="flex flex-col gap-1 mb-2">
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">ชื่อลูกค้า:</span>
+                  <span class="font-medium">{{ memberData.fullName }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">เบอร์โทร:</span>
+                  <span class="font-medium">{{ memberData.personalPhone }}</span>
+                </div>
               </div>
             </div>
-
+            <hr/>
             <!-- ข้อมูล Partner -->
-            <div class="flex flex-col gap-2 mb-4">
-              <div class="flex justify-between items-center">
-                <span class="text-gray-600">ร้านค้า:</span>
-                <span class="font-medium">{{ partnerData.partnerCompanyName }}</span>
-              </div>
-              <div class="flex justify-between items-center">
-                <span class="text-gray-600">ที่อยู่:</span>
-                <span class="font-medium">{{ partnerData.partnerCompanyAddress }} ต.{{
-                  partnerData.partnerCompanySubdistrict }}
-                  อ.{{ partnerData.partnerCompanyDistrict }} จ.{{ partnerData.partnerCompanyProvince }} {{
-                    partnerData.partnerCompanyPostalCode }}</span>
+            <div>
+              <h3 class="font-semibold text-[#184c36] mb-2 text-base">ข้อมูลร้านค้า</h3>
+              <div class="flex flex-col gap-1 mb-2">
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">ร้านค้า:</span>
+                  <span class="font-medium">{{ partnerData.partnerCompanyName }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">ที่อยู่:</span>
+                  <span class="font-medium">{{ partnerData.partnerCompanyAddress }} ต.{{ partnerData.partnerCompanySubdistrict }} อ.{{ partnerData.partnerCompanyDistrict }} จ.{{ partnerData.partnerCompanyProvince }} {{ partnerData.partnerCompanyPostalCode }}</span>
+                </div>
               </div>
             </div>
-
+            <hr/>
             <!-- ข้อมูลสินค้า -->
-            <div v-if="selectedProduct" class="flex flex-col gap-2 mb-4">
-              <div class="flex justify-between items-center">
-                <span class="text-gray-600">ประเภทสินค้า:</span>
-                <span class="font-medium">{{ selectedProductTypeName }}</span>
-              </div>
-              <div class="flex justify-between items-center">
-                <span class="text-gray-600">สินค้า:</span>
-                <span class="font-medium">{{ selectedProductName }}</span>
-              </div>
-              <div class="flex justify-between items-center">
-                <span class="text-gray-600">ราคาต่อกิโลกรัม:</span>
-                <span class="font-medium">฿{{ selectedProductPrice }}/กก.</span>
-              </div>
-              <div class="flex justify-between items-center">
-                <span class="text-gray-600">จำนวน:</span>
-                <span class="font-medium">1 กิโลกรัม</span>
+            <div v-if="selectedProduct">
+              <h3 class="font-semibold text-[#184c36] mb-2 text-base">ข้อมูลสินค้า</h3>
+              <div class="flex flex-col gap-1 mb-2">
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">ประเภทสินค้า:</span>
+                  <span class="font-medium">{{ selectedCategoryObj?.name || '' }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">หมวดหมู่ย่อย:</span>
+                  <span class="font-medium">{{ selectedSubCategoryObj?.name || '' }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">สินค้า:</span>
+                  <span class="font-medium">{{ selectedProductObj?.name || '' }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">ราคาต่อกิโลกรัม:</span>
+                  <span class="font-medium">฿{{ selectedProductObj?.price_per_kg || 0 }}/กก.</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">จำนวน:</span>
+                  <span class="font-medium">{{ sellAmount }} กิโลกรัม</span>
+                </div>
               </div>
             </div>
-
+            <hr/>
             <!-- ข้อมูลการจอง -->
-            <div v-if="bookingData.date && bookingData.time" class="flex flex-col gap-2 mb-4">
-              <div class="flex justify-between items-center">
-                <span class="text-gray-600">วันที่จอง:</span>
-                <span class="font-medium">{{ new Date(bookingData.date).toLocaleDateString('th-TH') }}</span>
-              </div>
-              <div class="flex justify-between items-center">
-                <span class="text-gray-600">เวลา:</span>
-                <span class="font-medium">{{ bookingData.time }}</span>
-              </div>
-              <div class="flex justify-between items-center">
-                <span class="text-gray-600">ประเภทการจัดส่ง:</span>
-                <span class="font-medium">{{ deliveryType }}</span>
-              </div>
-              <div v-if="deliveryType === 'ให้รถเข้ารับสินค้า' && bookingData.address"
-                class="flex justify-between items-center">
-                <span class="text-gray-600">ที่อยู่รับสินค้า:</span>
-                <span class="font-medium text-sm">{{ bookingData.address }}</span>
+            <div v-if="bookingData.date && bookingData.time">
+              <h3 class="font-semibold text-[#184c36] mb-2 text-base">ข้อมูลการจอง</h3>
+              <div class="flex flex-col gap-1 mb-2">
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">วันที่จอง:</span>
+                  <span class="font-medium">{{ new Date(bookingData.date).toLocaleDateString('th-TH') }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">เวลา:</span>
+                  <span class="font-medium">{{ bookingData.time }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">ประเภทการจัดส่ง:</span>
+                  <span class="font-medium">{{ deliveryType }}</span>
+                </div>
+                <div v-if="deliveryType === 'ให้รถเข้ารับสินค้า' && bookingData.address" class="flex justify-between items-center">
+                  <span class="text-gray-600">ที่อยู่รับสินค้า:</span>
+                  <span class="font-medium text-sm">{{ bookingData.address }}</span>
+                </div>
               </div>
             </div>
-
+            <hr/>
             <!-- รูปภาพที่อัปโหลด -->
-            <div class="">
-              <span class="text-gray-600 font-medium">รูปภาพที่อัปโหลด:</span>
-              <div v-if="Object.values(uploadedImages).some(img => img)" class="flex flex-col gap-2 mb-4">
+            <div>
+              <h3 class="font-semibold text-[#184c36] mb-2 text-base">รูปภาพที่อัปโหลด</h3>
+              <div v-if="Object.values(uploadedImages).some(img => img)" class="flex flex-col gap-2 mb-2">
                 <div class="flex gap-2 flex-wrap">
                   <div v-if="uploadedImages.product" class="text-sm text-blue-600">✓ รูปสินค้า</div>
                   <div v-if="uploadedImages.front" class="text-sm text-blue-600">✓ รูปหน้าบ้าน</div>
                   <div v-if="uploadedImages.map" class="text-sm text-blue-600">✓ รูปปักหมุด</div>
                 </div>
               </div>
-              <div v-else class="flex flex-col gap-2 mb-4">
+              <div v-else class="flex flex-col gap-2 mb-2">
                 <div class="text-sm text-blue-600">ยังไม่มีรูปภาพที่อัปโหลด</div>
               </div>
             </div>
-
-            <!-- ยอดเงินที่ได้รับ -->
-            <div class="flex flex-col">
-              <span class="text-[#184c36] font-semibold">ยอดเงินที่ได้รับจากการขายรีไซเคิล</span>
-              <span class="text-lg font-bold text-[#184c36]">฿ {{ selectedProductPrice }} บาท</span>
-            </div>
-
-            <!-- ค่าจัดส่ง: แสดงเฉพาะกรณี pickup -->
-            <div v-if="deliveryType === 'ให้รถเข้ารับสินค้า'" class="flex flex-col">
-              <span class="text-gray-500 text-sm">ค่าบริการการจัดส่ง</span>
-              <span class="text-base font-semibold text-[#184c36]">฿ 15 บาท</span>
-            </div>
-
-            <!-- ค่าจัดส่ง: แสดงเฉพาะกรณี pickup -->
-            <div v-if="deliveryType === 'ให้รถเข้ารับสินค้า'" class="flex flex-col gap-2">
-              <!-- <div class="flex flex-col">
-                <span class="text-gray-500 text-sm">ยอดชำระบริการการจัดส่ง</span>
-                <span class="text-base font-semibold text-[#184c36]">฿ 15 บาท</span>
-              </div> -->
-
-              <!-- ยอดรวม -->
-              <div class="flex flex-col">
-                <span class="text-black text-md font-semibold">ยอดรวม</span>
-                <span class="text-lg font-bold text-[#184c36]">฿ {{ deliveryType === 'ให้รถเข้ารับสินค้า' ?
-                  selectedProductPrice
-                  + 15 : selectedProductPrice }} บาท</span>
+            <hr/>
+            <!-- ยอดเงิน -->
+            <div>
+              <h3 class="font-semibold text-[#184c36] mb-2 text-base">ยอดเงิน</h3>
+              <div class="flex flex-col gap-1 mb-2">
+                <div class="flex flex-col">
+                  <span class="text-[#184c36] font-semibold">ยอดเงินที่ได้รับจากการขายรีไซเคิล</span>
+                  <span class="text-lg font-bold text-[#184c36]">
+                    ฿ {{ (selectedProductObj?.price_per_kg || 0) * sellAmount }} บาท
+                  </span>
+                </div>
+                <div v-if="deliveryType === 'ให้รถเข้ารับสินค้า'" class="flex flex-col">
+                  <span class="text-gray-500 text-sm">ค่าบริการการจัดส่ง</span>
+                  <span class="text-base font-semibold text-[#184c36]">฿ 15 บาท</span>
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-black text-md font-semibold">ยอดรวม</span>
+                  <span class="text-lg font-bold text-[#184c36]">
+                    ฿ {{ ((selectedProductObj?.price_per_kg || 0) * sellAmount) + (deliveryType === 'ให้รถเข้ารับสินค้า' ? 15 : 0) }} บาท
+                  </span>
+                </div>
               </div>
             </div>
-
+            <hr/>
             <!-- หมายเหตุ -->
             <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
               <div class="flex items-start gap-2">
@@ -337,32 +370,76 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import Bar from '../../components/Bar.vue';
 import Footer from '../../components/Footer.vue';
 import Swal from 'sweetalert2'
 
-const route = useRoute();
 const router = useRouter();
 const deliveryType = ref('จัดส่งด้วยต้นเอง');
 const today = new Date().toISOString().split('T')[0];
 
-// ข้อมูล partner จาก query params
-const partnerData = ref({
-  partnerfullName: '',
-  partnerCompanyName: '',
-  partnerCompanyPhone: '',
-  partnerCompanyAddress: '',
-  partnerCompanySubdistrict: '',
-  partnerCompanyDistrict: '',
-  partnerCompanyProvince: '',
-  partnerCompanyPostalCode: '',
-  partnerCompanyProvinceId: '',
-  partnerCompanyDistrictId: '',
-  partnerCompanySubdistrictId: '',
+// ข้อมูล partner
+const partner = JSON.parse(localStorage.getItem('partner') || '{}');
+const partnerId = ref(partner.id || partner._id);
+
+// ข้อมูลทั้งหมด
+const allProducts = ref([]); // โหลดจาก backend
+const allCategories = ref([]); // โหลดจาก backend
+const allSubcategories = ref([]); // โหลดจาก backend
+
+// โหลดข้อมูลทั้งหมดครั้งเดียว
+onMounted(async () => {
+  const [productsRes, categoriesRes, subcategoriesRes] = await Promise.all([
+    axios.get(`${import.meta.env.VITE_API_URL}/products`),
+    axios.get(`${import.meta.env.VITE_API_URL}/categories`),
+    axios.get(`${import.meta.env.VITE_API_URL}/categories/subcategories/all`)
+  ]);
+  allProducts.value = productsRes.data.products || [];
+  console.log('allProducts', allProducts.value);
+  allCategories.value = categoriesRes.data.categories || categoriesRes.data || [];
+  console.log('allCategories', allCategories.value);
+  allSubcategories.value = subcategoriesRes.data.subcategories || subcategoriesRes.data || [];
+  console.log('allSubcategories', allSubcategories.value);
+  // ... (โหลด member/partner data อื่นๆ ตามเดิม)
+  loadMemberData();
+  loadPartnerData();
 });
+
+// กรองเฉพาะสินค้าของร้านนี้
+const partnerProducts = computed(() =>
+  allProducts.value.filter(p => (p.shopId?._id || p.shopId) === partnerId.value)
+);
+// กรอง categories เฉพาะที่มีใน partnerProducts
+const partnerCategoryIds = computed(() =>
+  [...new Set(partnerProducts.value.map(p => (p.category_id?._id || p.category_id)))]
+);
+const partnerCategories = computed(() =>
+  allCategories.value.filter(c => partnerCategoryIds.value.includes(c._id))
+);
+// กรอง subcategories เฉพาะที่มีใน partnerProducts
+const partnerSubCategoryIds = computed(() =>
+  [...new Set(partnerProducts.value.map(p => (p.subCategoryId?._id || p.subCategoryId)).filter(Boolean))]
+);
+const partnerSubCategories = computed(() =>
+  allSubcategories.value.filter(s => partnerSubCategoryIds.value.includes(s._id))
+);
+
+// State สำหรับ dropdown
+const selectedCategory = ref('');
+const selectedSubCategory = ref('');
+const selectedProduct = ref('');
+
+// กรอง subcategories ตาม category ที่เลือก
+const filteredSubCategories = computed(() =>
+  partnerSubCategories.value.filter(s => (s.categoryId?._id || s.categoryId) === selectedCategory.value)
+);
+// กรอง products ตาม subcategory ที่เลือก
+const filteredProducts = computed(() =>
+  partnerProducts.value.filter(p => (p.subCategoryId?._id || p.subCategoryId) === selectedSubCategory.value)
+);
 
 // ข้อมูล member
 const memberData = ref({
@@ -378,21 +455,6 @@ const memberData = ref({
   personalSubdistrictId: '',
   role: '',
 });
-
-// ข้อมูลจังหวัด อำเภอ ตำบล
-const provinces = ref([]);
-const districts = ref([]);
-const subdistricts = ref([]);
-const selectedProvince = ref('');
-const selectedDistrict = ref('');
-const selectedSubdistrict = ref('');
-
-// ข้อมูลสินค้า
-const allProducts = ref([]); // เก็บสินค้าทั้งหมดของร้าน
-const productTypes = ref([]);
-const products = ref([]); // สินค้าตามประเภทที่เลือก
-const selectedProductType = ref('');
-const selectedProduct = ref('');
 
 // ข้อมูลการจอง
 const bookingData = ref({
@@ -410,45 +472,6 @@ const uploadedImages = ref({
   product: null,
   front: null,
   map: null
-});
-
-onMounted(() => {
-  loadMemberData();
-  loadPartnerData();
-  loadProducts();
-});
-
-// // คำนวณชื่อจังหวัด อำเภอ ตำบล
-// const selectedProvinceName = computed(() => {
-//   const province = provinces.value.find(p => p.id === selectedProvince.value);
-//   return province ? province.name : '';
-// });
-
-// const selectedDistrictName = computed(() => {
-//   const district = districts.value.find(d => d.id === selectedDistrict.value);
-//   return district ? district.name : '';
-// });
-
-// const selectedSubdistrictName = computed(() => {
-//   const subdistrict = subdistricts.value.find(s => s.id === selectedSubdistrict.value);
-//   return subdistrict ? subdistrict.name : '';
-// });
-
-// คำนวณชื่อประเภทสินค้าและสินค้า
-const selectedProductTypeName = computed(() => {
-  const type = productTypes.value.find(t => t._id === selectedProductType.value);
-  return type ? type.name : '';
-});
-
-const selectedProductName = computed(() => {
-  const product = products.value.find(p => p._id === selectedProduct.value);
-  return product ? product.name : '';
-});
-
-// คำนวณราคาสินค้า
-const selectedProductPrice = computed(() => {
-  const product = products.value.find(p => p._id === selectedProduct.value);
-  return product ? product.price_per_kg : 0;
 });
 
 // --- เพิ่มสำหรับที่อยู่สมาชิก ---
@@ -479,8 +502,19 @@ const loadMemberData = async () => {
   }
 };
 
-const partner = JSON.parse(localStorage.getItem('partner') || '{}');
-const partnerId = ref(partner.id || partner._id);
+const partnerData = ref({
+  partnerfullName: '',
+  partnerCompanyName: '',
+  partnerCompanyPhone: '',
+  partnerCompanyAddress: '',
+  partnerCompanySubdistrict: '',
+  partnerCompanyDistrict: '',
+  partnerCompanyProvince: '',
+  partnerCompanyPostalCode: '',
+  partnerCompanyProvinceId: '',
+  partnerCompanyDistrictId: '',
+  partnerCompanySubdistrictId: '',
+});
 
 const loadPartnerData = async () => {
   try {
@@ -507,36 +541,6 @@ const loadPartnerData = async () => {
   }
 };
 
-// ดึงข้อมูลจังหวัด
-// const loadProvinces = async () => {
-//   try {
-//     // const response = await axios.get('http://localhost:8888/recycle/provinces');
-//     provinces.value = response.data || [];
-//   } catch (error) {
-//     console.error('Error loading provinces:', error);
-//   }
-// };
-
-// ดึงข้อมูลอำเภอ
-// const loadDistricts = async (provinceId) => {
-//   try {
-//     // const response = await axios.get(`http://localhost:8888/recycle/districts/${provinceId}`);
-//     districts.value = response.data || [];
-//   } catch (error) {
-//     console.error('Error loading districts:', error);
-//   }
-// };
-
-// ดึงข้อมูลตำบล
-// const loadSubdistricts = async (districtId) => {
-//   try {
-//     // const response = await axios.get(`${import.meta.env.VITE_API_URL}/subdistricts/${districtId}`);
-//     subdistricts.value = response.data || [];
-//   } catch (error) {
-//     console.error('Error loading subdistricts:', error);
-//   }
-// };
-
 // ดึงข้อมูลสินค้า
 const loadProducts = async () => {
   try {
@@ -556,59 +560,20 @@ const loadProducts = async () => {
         categories.push(product.category_id);
       }
     }
-
-    productTypes.value = categories;
-
-    if (selectedProductType.value) {
-      filterProductsByCategory();
-    }
   } catch (err) {
     console.error('Error loading products:', err);
     allProducts.value = [];
-    productTypes.value = [];
-    products.value = [];
   }
 };
 
-const filterProductsByCategory = () => {
-  if (!selectedProductType.value) {
-    products.value = [];
-    selectedProduct.value = '';
-    return;
+const handleProductTypeChange = async () => {
+  selectedProduct.value = '';
+  // filterProductsByCategory(); // ลบฟังก์ชันที่ไม่ได้ใช้
+  if (selectedCategory.value) { // ใช้ selectedCategory แทน selectedProductType
+    await loadSubCategories(selectedCategory.value);
+  } else {
+    // subcategories.value = []; // ลบตัวแปรที่ไม่ได้ใช้
   }
-
-  products.value = allProducts.value.filter(
-    p => p.category_id?._id === selectedProductType.value
-  );
-};
-
-// // Watch สำหรับการเปลี่ยนแปลงจังหวัด
-// const handleProvinceChange = (event) => {
-//   selectedProvince.value = event.target.value;
-//   selectedDistrict.value = '';
-//   selectedSubdistrict.value = '';
-//   districts.value = [];
-//   subdistricts.value = [];
-
-//   if (selectedProvince.value) {
-//     loadDistricts(selectedProvince.value);
-//   }
-// };
-
-// Watch สำหรับการเปลี่ยนแปลงอำเภอ
-// const handleDistrictChange = (event) => {
-//   selectedDistrict.value = event.target.value;
-//   selectedSubdistrict.value = '';
-//   subdistricts.value = [];
-
-//   if (selectedDistrict.value) {
-//     loadSubdistricts(selectedDistrict.value);
-//   }
-// };
-
-const handleProductTypeChange = () => {
-  selectedProduct.value = ''; // reset สินค้าที่เลือก
-  filterProductsByCategory();
 };
 
 // อัปโหลดรูปภาพ
@@ -758,6 +723,34 @@ const loadMemberAddresses = async () => {
 
 function formatAddress(addr) {
   return `${addr.address_name} ${addr.address} ต.${addr.subdistrict} อ.${addr.district} จ.${addr.province} ${addr.postal_code}`;
+}
+
+const selectedProductObj = computed(() => {
+  return allProducts.value.find(p => p._id === selectedProduct.value);
+});
+
+const selectedCategoryObj = computed(() => {
+  return allCategories.value.find(c => c._id === (selectedProductObj.value?.category_id?._id || selectedProductObj.value?.category_id));
+});
+
+const selectedSubCategoryObj = computed(() => {
+  return allSubcategories.value.find(s => s._id === (selectedProductObj.value?.subCategoryId?._id || selectedProductObj.value?.subCategoryId));
+});
+
+// คำนวณราคาสินค้า
+const selectedProductPrice = computed(() => {
+  const product = allProducts.value.find(p => p._id === selectedProduct.value);
+  return product ? product.price_per_kg : 0;
+});
+
+const sellAmount = ref(1);
+function handleAmountInput() {
+  if (sellAmount.value > (selectedProductObj.value?.maxAmount || 0)) {
+    sellAmount.value = selectedProductObj.value.maxAmount;
+  }
+  if (sellAmount.value < 1) {
+    sellAmount.value = 1;
+  }
 }
 </script>
 

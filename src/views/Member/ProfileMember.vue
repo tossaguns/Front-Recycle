@@ -358,11 +358,10 @@ async function saveEdit() {
     return;
   }
   try {
-    // 1. ถ้ามีรูปให้ส่งไปอัปโหลดก่อน
+    // 1. ถ้ามีไฟล์รูปใหม่ ให้ส่งไปอัปโหลดก่อน
     if (profileImageFile.value) {
       const formData = new FormData();
       formData.append('profile', profileImageFile.value);
-
       const uploadResponse = await axios.post(
         `${import.meta.env.VITE_API_URL}/members/upload-profile/${userId.value}`,
         formData,
@@ -372,18 +371,15 @@ async function saveEdit() {
           },
         }
       );
-
-      if (uploadResponse.status === 200 && uploadResponse.data.url) {
-        profileImg.value = uploadResponse.data.url;
+      if (uploadResponse.status === 200 && (uploadResponse.data.imageUrl || uploadResponse.data.url)) {
+        profileImg.value = uploadResponse.data.imageUrl || uploadResponse.data.url;
       }
     }
-
     const profileData = { ...form, profile_img: profileImg.value };
     const response = await axios.put(
       `${import.meta.env.VITE_API_URL}/members/update-profile/${userId.value}`,
       profileData
     );
-
     if (response.status === 200) {
       await Swal.fire({
         icon: 'success',
@@ -394,8 +390,6 @@ async function saveEdit() {
       Object.assign(originalForm.value, form);
       originalForm.value.profileImg = profileImg.value;
       profileImageFile.value = null;
-      
-      // โหลดที่อยู่ใหม่
       await loadMemberAddresses();
     } else {
       error.value = 'เกิดข้อผิดพลาดในการบันทึกข้อมูลส่วนตัว';
@@ -414,12 +408,13 @@ async function saveEdit() {
 function onProfileImgChange(e) {
   const file = e.target.files[0];
   if (file) {
+    profileImageFile.value = file;
+    // แสดง preview ทันที
     const reader = new FileReader();
     reader.onload = (ev) => {
       profileImg.value = ev.target.result;
     };
     reader.readAsDataURL(file);
-    profileImageFile.value = file;
   } else {
     profileImageFile.value = null;
   }

@@ -1,7 +1,12 @@
 <script setup>
-// Import Lucide icons directly for better control and bundling
-import { Facebook, Twitter, Github, Linkedin, Mail } from 'lucide-vue-next';
+import { Facebook, Linkedin } from 'lucide-vue-next';
+import { ref } from 'vue';
 
+const accordions = ref({
+  menu: false,
+  about: false,
+  contact: false,
+});
 </script>
 
 <template>
@@ -15,7 +20,68 @@ import { Facebook, Twitter, Github, Linkedin, Mail } from 'lucide-vue-next';
       </svg>
     </div>
     <div class="max-w-full mx-5 relative z-10">
-      <div class="grid grid-cols-1 md:grid-cols-5 gap-8 md:gap-2 sm:gap-2 xs:gap-1">
+      <!-- Accordion (md ลงไป) -->
+      <div class="md:hidden">
+        <!-- Logo -->
+        <div class="flex flex-col items-center mb-8">
+          <div class="bg-[#b6e388] rounded-xl w-12 h-12 flex items-center justify-center mb-4">
+            <img src="/vite.svg" alt="logo" class="w-7 h-7" />
+          </div>
+        </div>
+        <div class="border-b border-[#b6e388]">
+          <button class="w-full flex justify-between items-center py-4 font-bold focus:outline-none"
+            @click="accordions.menu = !accordions.menu">
+            <span>เมนู</span>
+            <svg class="w-5 h-5 transition-transform" :class="{'rotate-180': accordions.menu}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <transition name="fade">
+            <ul v-if="accordions.menu" class="pb-4 pl-2 text-white">
+              <li class="py-1">หน้าหลัก</li>
+              <li class="py-1">หมวดหมู่สินค้า</li>
+              <li class="py-1">ร้านค้า</li>
+              <li class="py-1">การตั้งค่าบัญชี</li>
+            </ul>
+          </transition>
+        </div>
+        <div class="border-b border-[#b6e388]">
+          <button class="w-full flex justify-between items-center py-4 font-bold focus:outline-none"
+            @click="accordions.about = !accordions.about">
+            <span>เกี่ยวกับเว็บไซต์</span>
+            <svg class="w-5 h-5 transition-transform" :class="{'rotate-180': accordions.about}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <transition name="fade">
+            <ul v-if="accordions.about" class="pb-4 pl-2 text-white">
+              <li class="py-1">จองคิว</li>
+              <li class="py-1">ข่าวสารและกิจกรรม</li>
+            </ul>
+          </transition>
+        </div>
+        <div class="border-b border-[#b6e388]">
+          <button class="w-full flex justify-between items-center py-4 font-bold focus:outline-none"
+            @click="accordions.contact = !accordions.contact">
+            <span>ติดต่อ</span>
+            <svg class="w-5 h-5 transition-transform" :class="{'rotate-180': accordions.contact}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <transition name="fade">
+            <ul v-if="accordions.contact" class="pb-4 pl-2 text-white">
+              <li class="py-1">063-1427649</li>
+              <li class="py-1">cstonlineweb@gmail.com</li>
+              <li class="flex gap-4 mt-2">
+                <a href="#" class="text-white"><Facebook class="w-7 h-7" /></a>
+                <a href="#" class="text-white"><Linkedin class="w-7 h-7" /></a>
+              </li>
+            </ul>
+          </transition>
+        </div>
+      </div>
+      <!-- Grid (md ขึ้นไป) -->
+      <div class="hidden md:grid grid-cols-4 gap-8">
         <!-- Logo -->
         <div class="flex flex-col items-center mb-8 md:mb-0">
           <div class="bg-[#b6e388] rounded-xl w-12 h-12 flex items-center justify-center mb-4">
@@ -27,7 +93,6 @@ import { Facebook, Twitter, Github, Linkedin, Mail } from 'lucide-vue-next';
           <span class="font-bold mb-2">เมนู</span>
           <ul class="space-y-1 text-sm">
             <li>หน้าหลัก</li>
-            <li>ราคา - ซื้อขาย</li>
             <li>หมวดหมู่สินค้า</li>
             <li>ร้านค้า</li>
             <li>การตั้งค่าบัญชี</li>
@@ -47,70 +112,24 @@ import { Facebook, Twitter, Github, Linkedin, Mail } from 'lucide-vue-next';
           <ul class="space-y-1 text-sm mb-4">
             <li>063-1427649</li>
             <li>cstonlineweb@gmail.com</li>
+            <li class="flex gap-4 mt-2">
+              <a href="#" class="text-white"><Facebook class="w-7 h-7" /></a>
+              <a href="#" class="text-white"><Linkedin class="w-7 h-7" /></a>
+            </li>
           </ul>
         </div>
-
-        <!-- Social -->
-        <div class="flex flex-col gap-3 sm:gap-2 xs:gap-1 w-full max-w-xs mx-auto items-start custom-center-925-768">
-          <a href="#"
-            class="flex items-center gap-3 sm:gap-2 xs:gap-1 bg-[#184c36] rounded-full px-4 py-2 sm:px-3 sm:py-1.5 xs:px-2 xs:py-1 shadow hover:bg-[#0e2d1e] transition w-fit">
-            <span class="bg-white rounded-full p-1 sm:p-0.5 xs:p-0.5">
-              <Facebook class="w-5 h-5 sm:w-4 sm:h-4 xs:w-3.5 xs:h-3.5 text-[#184c36]" />
-            </span>
-            <span class="text-white font-medium text-base sm:text-sm xs:text-xs hide-on-925-768-custom">Follow us on
-              Facebook</span>
-          </a>
-          <a href="#"
-            class="flex items-center gap-3 sm:gap-2 xs:gap-1 bg-[#184c36] rounded-full px-4 py-2 sm:px-3 sm:py-1.5 xs:px-2 xs:py-1 shadow hover:bg-[#0e2d1e] transition w-fit">
-            <span class="bg-white rounded-full p-1 sm:p-0.5 xs:p-0.5">
-              <svg class="w-5 h-5 sm:w-4 sm:h-4 xs:w-3.5 xs:h-3.5 text-[#184c36]" fill="none" stroke="currentColor"
-                stroke-width="2" viewBox="0 0 24 24">
-                <rect width="18" height="18" x="3" y="3" rx="5" />
-                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
-              </svg>
-            </span>
-            <span class="text-white font-medium text-base sm:text-sm xs:text-xs hide-on-925-768-custom">Follow us on
-              Instagram</span>
-          </a>
-          <a href="#"
-            class="flex items-center gap-3 sm:gap-2 xs:gap-1 bg-[#184c36] rounded-full px-4 py-2 sm:px-3 sm:py-1.5 xs:px-2 xs:py-1 shadow hover:bg-[#0e2d1e] transition w-fit">
-            <span class="bg-white rounded-full p-1 sm:p-0.5 xs:p-0.5">
-              <!-- Black & white Line icon SVG -->
-              <svg class="w-5 h-5 sm:w-4 sm:h-4 xs:w-3.5 xs:h-3.5" viewBox="0 0 48 48" fill="none">
-                <rect x="4" y="4" width="40" height="40" rx="12" fill="white" stroke="black" stroke-width="2" />
-                <path
-                  d="M24 14c-7.18 0-13 4.03-13 9 0 3.13 2.68 5.86 6.75 7.44l-1.06 3.88a1 1 0 0 0 1.44 1.13l4.6-2.3c.41.03.83.05 1.27.05 7.18 0 13-4.03 13-9s-5.82-9-13-9z"
-                  fill="none" stroke="black" stroke-width="2" />
-                <path d="M17 24h2m2 0h2m2 0h2" stroke="black" stroke-width="2" stroke-linecap="round" />
-              </svg>
-            </span>
-            <span class="text-white font-medium text-base sm:text-sm xs:text-xs hide-on-925-768-custom">Follow us on
-              Line</span>
-          </a>
-        </div>
-      </div>
-      <div
-        class="flex flex-col md:flex-row justify-end items-center mt-10 mr-5 pt-6 border-t border-[#2e5c47] text-xs text-[#b6e388]">
-        <span>&copy; 2024 Toriew. All rights reserved.</span>
       </div>
     </div>
   </footer>
 </template>
 
 <style scoped>
-.hide-on-925-768-custom {
-  display: inline;
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s;
 }
-
-@media (max-width: 925px) and (min-width: 768px) {
-  .hide-on-925-768-custom {
-    display: none !important;
-  }
-
-  .custom-center-925-768 {
-    display: flex;
-    align-items: center;
-  }
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
