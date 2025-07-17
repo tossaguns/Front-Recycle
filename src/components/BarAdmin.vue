@@ -57,8 +57,8 @@
                         @click="navigateTo('/manageemployee')">จัดการพนักงาน</li>
                     <li :class="['menu-underline', $route.path === '/admin/members' ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : '', 'cursor-pointer']"
                         @click="navigateTo('/admin/members')">สมาชิก</li>
-                    <li :class="['menu-underline', $route.path === '/admin/products' ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : '', 'cursor-pointer']"
-                        @click="navigateTo('/admin/products')">จัดการสินค้า</li>
+                    <li :class="['menu-underline', $route.path === '/addproduct' ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : '', 'cursor-pointer']"
+                        @click="navigateTo('/addproduct')">จัดการสินค้า</li>
                     <li :class="['menu-underline', $route.path === '/admin/report1' ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : '', 'cursor-pointer']"
                         @click="navigateTo('/admin/report1')">รายงาน1</li>
                     <li :class="['menu-underline', $route.path === '/admin/report2' ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : '', 'cursor-pointer']"
@@ -87,8 +87,8 @@
                     @click="navigateTo('/manageemployee')">จัดการพนักงาน</li>
                 <li :class="['menu-underline', $route.path === '/admin/members' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
                     @click="navigateTo('/admin/members')">สมาชิก</li>
-                <li :class="['menu-underline', $route.path === '/admin/products' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
-                    @click="navigateTo('/admin/products')">จัดการสินค้า</li>
+                <li :class="['menu-underline', $route.path === '/addproduct' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
+                    @click="navigateTo('/addproduct')">จัดการสินค้า</li>
                 <li :class="['menu-underline', $route.path === '/admin/report1' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
                     @click="navigateTo('/admin/report1')">รายงาน1</li>
                 <li :class="['menu-underline', $route.path === '/admin/report2' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"

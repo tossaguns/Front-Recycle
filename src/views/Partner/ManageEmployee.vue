@@ -1,6 +1,6 @@
 <template>
+    <BarAdmin />
     <div class="min-h-screen bg-gradient-to-br from-[#e6f7e6] via-white to-[#b6e388] pb-8">
-        <BarAdmin />
         <div class="container mx-auto px-4 py-8 max-w-7xl">
             <!-- Header -->
             <div class="mb-8">

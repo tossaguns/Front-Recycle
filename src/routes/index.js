@@ -8,6 +8,7 @@ import Login from "../views/LoginView.vue";
 
 //Partner
 import Activity from '../views/Partner/Activity.vue'
+import AddProduct from '../views/Partner/AddProduct.vue'
 import DashboardPartner from '../views/Partner/DashboardPartner.vue'
 import ProfilePartner from '../views/Partner/ProfilePartner.vue'
 import ManageEmployee from '../views/Partner/ManageEmployee.vue'
@@ -42,6 +43,11 @@ const routes = [
     meta: { requiresAuth: true, roles: ['partner'] }
   },
   { 
+    path: "/addproduct", 
+    component: AddProduct,
+    // meta: { requiresAuth: true, roles: ['partner'] }
+  },
+  { 
     path: "/dashboardpartner", 
     component: DashboardPartner,
     meta: { requiresAuth: true, roles: ['partner'] }
@@ -54,7 +60,7 @@ const routes = [
   { 
     path: "/manageemployee", 
     component: ManageEmployee,
-    meta: { requiresAuth: true, roles: ['partner', 'employee'] }
+    // meta: { requiresAuth: true, roles: ['partner', 'employee'] }
   },
 
   // Member - เข้าได้เฉพาะ member เท่านั้น
