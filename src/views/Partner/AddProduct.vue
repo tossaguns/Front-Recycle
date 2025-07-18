@@ -26,8 +26,11 @@
                             <li v-if="filteredCategories.length === 0" class="px-3 py-2 text-gray-400">ไม่พบข้อมูล</li>
                         </ul>
                     </div>
-                    <button class="bg-green-100 text-[#184c36] hover:bg-green-200 px-4 py-2 rounded shadow-sm mb-2"
-                        @click="showCategoryModal = true">สร้างใหม่</button>
+                    <div class="flex flex-col md:flex-row items-start md:items-center gap-1 md:gap-2 mb-2">
+                        <button class="bg-green-100 text-[#184c36] hover:bg-green-200 px-4 py-2 rounded shadow-sm"
+                            @click="showCategoryModal = true">สร้างใหม่</button>
+                        <span class="text-xs text-gray-500 mt-1 md:mt-0">💡 คำแนะนำ: ค้นหาก่อนเพื่อหลีกเลี่ยงการสร้างซ้ำ</span>
+                    </div>
                 </div>
 
                 <!-- ประเภทย่อย (แสดงเมื่อเลือกประเภทหลัก) -->
@@ -52,8 +55,11 @@
                             </li>
                         </ul>
                     </div>
-                    <button class="bg-green-100 text-[#184c36] hover:bg-green-200 px-4 py-2 rounded shadow-sm mb-2"
-                        @click="showSubCategoryModal = true">สร้างใหม่</button>
+                    <div class="flex flex-col md:flex-row items-start md:items-center gap-1 md:gap-2 mb-2">
+                        <button class="bg-green-100 text-[#184c36] hover:bg-green-200 px-4 py-2 rounded shadow-sm"
+                            @click="showSubCategoryModal = true">สร้างใหม่</button>
+                        <span class="text-xs text-gray-500 mt-1 md:mt-0">💡 คำแนะนำ: ค้นหาก่อนเพื่อหลีกเลี่ยงการสร้างซ้ำ</span>
+                    </div>
                 </div>
             </div>
 
@@ -80,8 +86,11 @@
                             <li v-if="filteredProducts.length === 0" class="px-3 py-2 text-gray-400">ไม่พบข้อมูล</li>
                         </ul>
                     </div>
-                    <button class="bg-green-100 text-[#184c36] hover:bg-green-200 px-4 py-2 rounded shadow-sm mb-2"
-                        @click="showProductModal = true">สร้างใหม่</button>
+                    <div class="flex flex-col md:flex-row items-start md:items-center gap-1 md:gap-2 mb-2">
+                        <button class="bg-green-100 text-[#184c36] hover:bg-green-200 px-4 py-2 rounded shadow-sm"
+                            @click="showProductModal = true">สร้างใหม่</button>
+                        <span class="text-xs text-gray-500 mt-1 md:mt-0">💡 คำแนะนำ: ค้นหาก่อนเพื่อหลีกเลี่ยงการสร้างซ้ำ</span>
+                    </div>
                 </div>
                 <!-- ราคาต่อกิโลกรัม -->
                 <div class="flex-1" v-if="selectedProductId || newProduct.name">

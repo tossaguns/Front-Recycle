@@ -12,6 +12,7 @@ import AddProduct from '../views/Partner/AddProduct.vue'
 import DashboardPartner from '../views/Partner/DashboardPartner.vue'
 import ProfilePartner from '../views/Partner/ProfilePartner.vue'
 import ManageEmployee from '../views/Partner/ManageEmployee.vue'
+import MemberOfPartner from '../views/Partner/MemberOfPartner.vue'
 
 // Memeber
 import Home from "../views/Member/Home.vue";
@@ -26,6 +27,7 @@ import SubCategory from "../views/Member/SubCategory.vue";
 import Bar from "../components/Bar.vue";
 import Footer from "../components/Footer.vue";
 import BarAdmin from "../components/BarAdmin.vue";
+import BarEmployee from "../components/BarEmployee.vue";
 
 // Oder
 import RecycleOrder from "../views/Orders/RecycleOrder.vue";
@@ -62,6 +64,11 @@ const routes = [
     component: ManageEmployee,
     // meta: { requiresAuth: true, roles: ['partner', 'employee'] }
   },
+  { 
+    path: "/memberofpartner", 
+    component: MemberOfPartner,
+    // meta: { requiresAuth: true, roles: ['partner'] }
+  },
 
   // Member - เข้าได้เฉพาะ member เท่านั้น
   { 
@@ -80,6 +87,7 @@ const routes = [
   { path: "/bar", component: Bar },
   { path: "/footer", component: Footer },
   { path: "/baradmin", component: BarAdmin },
+  { path: "/baremployee", component: BarEmployee },
 
   // Order
   { path: "/recycleorder", component: RecycleOrder },
