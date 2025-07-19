@@ -3,71 +3,117 @@
     <div class="max-w-full mx-auto bg-white rounded-xl shadow border border-[#e6e6e6] p-8">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-[#184c36]">สมาชิก</h2>
-            <button class="bg-[#184c36] hover:bg-green-700 text-white px-6 py-2 rounded shadow-sm transition"
-                @click="showAddModal = true">+ เพิ่มสมาชิก</button>
+            <button class="bg-gradient-to-r from-[#184c36] to-[#b6e388] hover:from-[#b6e388] hover:to-[#184c36] text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
+                @click="showAddModal = true">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                เพิ่มสมาชิก
+            </button>
         </div>
 
         <!-- Modal เพิ่มสมาชิก -->
         <div v-if="showAddModal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-            <div class="bg-white rounded-xl shadow border border-[#e6e6e6] p-8 w-full max-w-2xl relative">
-                <h2 class="text-xl font-bold text-[#184c36] mb-6">เพิ่มสมาชิกใหม่</h2>
+            <div class="bg-white rounded-xl shadow-xl border border-[#e6e6e6] p-8 w-full max-w-2xl relative">
+                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-[#e6f7e6]">
+                    <div class="w-12 h-12 bg-gradient-to-br from-[#b6e388] to-[#184c36] rounded-xl flex items-center justify-center shadow-lg">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold bg-gradient-to-r from-[#184c36] to-[#b6e388] bg-clip-text text-transparent">เพิ่มสมาชิกใหม่</h2>
+                        <p class="text-sm text-[#184c36] mt-1">กรุณากรอกข้อมูลสมาชิกให้ครบถ้วน</p>
+                    </div>
+                </div>
                 <form class="grid grid-cols-1 md:grid-cols-2 gap-4" @submit.prevent="handleAddMember">
-                    <div>
-                        <label class="block font-semibold mb-1 text-[#184c36]">ชื่อ-นามสกุล</label>
-                        <input v-model="form.fullName" required
-                            class="border border-[#e6e6e6] rounded px-3 py-2 w-full" />
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-[#184c36]">
+                            ชื่อ-นามสกุล <span class="text-red-600">*</span>
+                        </label>
+                        <input v-model="form.fullName" required placeholder="กรอกชื่อ-นามสกุล"
+                            class="w-full px-4 py-3 border-2 border-[#e6f7e6] rounded-lg focus:border-[#b6e388] focus:ring-2 focus:ring-[#b6e388]/20 transition-all duration-300 outline-none" />
                     </div>
-                    <div>
-                        <label class="block font-semibold mb-1 text-[#184c36]">Username</label>
-                        <input v-model="form.username" required
-                            class="border border-[#e6e6e6] rounded px-3 py-2 w-full" />
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-[#184c36]">
+                            Username <span class="text-red-600">*</span>
+                        </label>
+                        <input v-model="form.username" required placeholder="กรอก username"
+                            class="w-full px-4 py-3 border-2 border-[#e6f7e6] rounded-lg focus:border-[#b6e388] focus:ring-2 focus:ring-[#b6e388]/20 transition-all duration-300 outline-none" />
                     </div>
-                    <div>
-                        <label class="block font-semibold mb-1 text-[#184c36]">Password</label>
-                        <input v-model="form.password" type="password" required
-                            class="border border-[#e6e6e6] rounded px-3 py-2 w-full" />
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-[#184c36]">
+                            Password <span class="text-red-600">*</span>
+                        </label>
+                        <input v-model="form.password" type="password" required placeholder="กรอกรหัสผ่าน"
+                            class="w-full px-4 py-3 border-2 border-[#e6f7e6] rounded-lg focus:border-[#b6e388] focus:ring-2 focus:ring-[#b6e388]/20 transition-all duration-300 outline-none" />
                     </div>
-                    <div>
-                        <label class="block font-semibold mb-1 text-[#184c36]">เบอร์โทร</label>
-                        <input v-model="form.phone" required class="border border-[#e6e6e6] rounded px-3 py-2 w-full" />
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-[#184c36]">
+                            เบอร์โทร <span class="text-red-600">*</span>
+                        </label>
+                        <input v-model="form.phone" required placeholder="0812345678"
+                            class="w-full px-4 py-3 border-2 border-[#e6f7e6] rounded-lg focus:border-[#b6e388] focus:ring-2 focus:ring-[#b6e388]/20 transition-all duration-300 outline-none" />
                     </div>
-                    <div class="md:col-span-2">
-                        <label class="block font-semibold mb-1 text-[#184c36]">ที่อยู่</label>
-                        <input v-model="form.address" required
-                            class="border border-[#e6e6e6] rounded px-3 py-2 w-full mb-2"
-                            placeholder="บ้านเลขที่ หมู่ ถนน" />
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
-                            <select v-model="form.province_id" required @change="loadDistricts" class="border border-[#e6e6e6] rounded px-3 py-2 w-full">
+                    <div class="md:col-span-2 space-y-2">
+                        <label class="block text-sm font-semibold text-[#184c36]">
+                            ที่อยู่ <span class="text-red-600">*</span>
+                        </label>
+                        <input v-model="form.address" required placeholder="บ้านเลขที่ หมู่ ถนน"
+                            class="w-full px-4 py-3 border-2 border-[#e6f7e6] rounded-lg focus:border-[#b6e388] focus:ring-2 focus:ring-[#b6e388]/20 transition-all duration-300 outline-none mb-3" />
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                            <select v-model="form.province_id" required @change="loadDistricts" 
+                                class="w-full px-4 py-3 border-2 border-[#e6f7e6] rounded-lg focus:border-[#b6e388] focus:ring-2 focus:ring-[#b6e388]/20 transition-all duration-300 outline-none bg-white">
                                 <option value="">เลือกจังหวัด</option>
                                 <option v-for="province in provinces" :key="province.id" :value="province.id">{{ province.name_th }}</option>
                             </select>
-                            <select v-model="form.district_id" required @change="loadSubdistricts" :disabled="!form.province_id" class="border border-[#e6e6e6] rounded px-3 py-2 w-full">
+                            <select v-model="form.district_id" required @change="loadSubdistricts" :disabled="!form.province_id" 
+                                class="w-full px-4 py-3 border-2 border-[#e6f7e6] rounded-lg focus:border-[#b6e388] focus:ring-2 focus:ring-[#b6e388]/20 transition-all duration-300 outline-none bg-white disabled:opacity-50 disabled:cursor-not-allowed">
                                 <option value="">เลือกอำเภอ</option>
                                 <option v-for="district in districts" :key="district.id" :value="district.id">{{ district.name_th }}</option>
                             </select>
-                            <select v-model="form.subdistrict_id" required @change="setZipcode" :disabled="!form.district_id" class="border border-[#e6e6e6] rounded px-3 py-2 w-full">
+                            <select v-model="form.subdistrict_id" required @change="setZipcode" :disabled="!form.district_id" 
+                                class="w-full px-4 py-3 border-2 border-[#e6f7e6] rounded-lg focus:border-[#b6e388] focus:ring-2 focus:ring-[#b6e388]/20 transition-all duration-300 outline-none bg-white disabled:opacity-50 disabled:cursor-not-allowed">
                                 <option value="">เลือกตำบล</option>
                                 <option v-for="subdistrict in subdistricts" :key="subdistrict.id" :value="subdistrict.id">{{ subdistrict.name_th }}</option>
                             </select>
-                            <input v-model="form.zipcode" readonly class="border border-[#e6e6e6] rounded px-3 py-2 w-full bg-gray-100 text-gray-500" placeholder="รหัสไปรษณีย์" />
+                            <input v-model="form.zipcode" readonly placeholder="รหัสไปรษณีย์"
+                                class="w-full px-4 py-3 border-2 border-[#e6f7e6] rounded-lg bg-gray-100 text-gray-500" />
                         </div>
                     </div>
-                    <div>
-                        <label class="block font-semibold mb-1 text-[#184c36]">ระดับ</label>
-                        <select v-model="form.level" required class="border border-[#e6e6e6] rounded px-3 py-2 w-full">
-                            <option value="">เลือก</option>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-[#184c36]">
+                            ระดับ <span class="text-red-600">*</span>
+                        </label>
+                        <select v-model="form.level" required 
+                            class="w-full px-4 py-3 border-2 border-[#e6f7e6] rounded-lg focus:border-[#b6e388] focus:ring-2 focus:ring-[#b6e388]/20 transition-all duration-300 outline-none bg-white">
+                            <option value="">เลือกระดับ</option>
                             <option value="3">3 (สูงสุด)</option>
                             <option value="2">2</option>
                             <option value="1">1 (ต่ำสุด)</option>
                         </select>
                     </div>
-                    <div class="md:col-span-2 flex justify-end gap-2 mt-4">
+                    <div class="md:col-span-2 flex justify-end gap-3 mt-6">
                         <button type="button"
-                            class="px-6 py-2 rounded border border-gray-300 text-gray-600 hover:bg-gray-100"
-                            @click="showAddModal = false">ยกเลิก</button>
+                            class="px-6 py-3 rounded-xl border-2 border-gray-300 text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 font-medium"
+                            @click="showAddModal = false">
+                            <span class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                ยกเลิก
+                            </span>
+                        </button>
                         <button
-                            class="bg-[#184c36] hover:bg-green-700 text-white px-8 py-2 rounded shadow-sm disabled:opacity-50 transition"
-                            :disabled="!canAddMember">เพิ่มสมาชิก</button>
+                            class="bg-gradient-to-r from-[#184c36] to-[#b6e388] hover:from-[#b6e388] hover:to-[#184c36] disabled:from-gray-400 disabled:to-gray-500 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
+                            :disabled="!canAddMember">
+                            <span class="flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                เพิ่มสมาชิก
+                            </span>
+                        </button>
                     </div>
                 </form>
             </div>
@@ -103,11 +149,11 @@
                             {{ member.address }} {{ member.subdistrict }} {{ member.district }} {{ member.province }} {{ member.zipcode }}
                         </td>
                         <td class="px-4 py-3 border-b border-[#e6e6e6] text-center">
-                            <button class="text-blue-600 hover:underline mr-2"
-                                @click="viewMember(member)">ดูข้อมูล</button>
-                            <button class="text-yellow-600 hover:underline mr-2"
-                                @click="editMember(member)">แก้ไข</button>
-                            <button class="text-red-600 hover:underline" @click="cancelMember(member)">ยกเลิก</button>
+                            <div class="flex justify-center items-center gap-3">
+                                <button class="text-blue-600 hover:underline" title="ดูข้อมูล" @click="viewMember(member)">🛈</button>
+                                <button class="text-yellow-600 hover:underline" title="แก้ไข" @click="editMember(member)">✏️</button>
+                                <button class="text-orange-600 hover:underline" title="ยกเลิก" @click="cancelMember(member)">🚫</button>
+                            </div>
                         </td>
                     </tr>
                     <tr v-if="filteredAndSortedMembers.length === 0">
@@ -156,7 +202,8 @@ const subdistricts = ref([]);
 onMounted(async () => {
     // โหลดข้อมูลจังหวัด
     const res = await axios.get('https://raw.githubusercontent.com/kongvut/thai-province-data/master/api_province_with_amphure_tambon.json');
-    provinces.value = res.data;
+    // เรียงลำดับจังหวัดตามตัวอักษร ก-ฮ
+    provinces.value = res.data.sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'));
 });
 
 function loadDistricts() {
