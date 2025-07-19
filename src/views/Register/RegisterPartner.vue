@@ -885,7 +885,8 @@ const fetchProvincesAmphureTambon = async () => {
         const response = await axios.get(
             'https://raw.githubusercontent.com/kongvut/thai-province-data/master/api_province_with_amphure_tambon.json'
         );
-        provinces.value = response.data;
+        // เรียงลำดับจังหวัดตามตัวอักษร ก-ฮ
+        provinces.value = response.data.sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'));
 
         console.log('province :', provinces.value)
     } catch (error) {
