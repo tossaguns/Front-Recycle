@@ -117,13 +117,39 @@
             <!-- Modal: สร้างประเภทหลัก -->
             <div v-if="showCategoryModal"
                 class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-                <div class="bg-white rounded-xl shadow border border-[#e6e6e6] p-6 w-full max-w-md">
+                <div class="bg-white rounded-xl shadow border border-[#e6e6e6] p-6 w-full max-w-md space-y-4">
                     <h3 class="font-bold mb-4 text-[#184c36]">สร้างประเภทหลักใหม่</h3>
                     <input v-model="newCategory.name" placeholder="ชื่อประเภทหลัก"
                         class="border border-[#e6e6e6] rounded px-3 py-2 w-full mb-1 focus:ring-2 focus:ring-green-200 focus:border-green-400 transition" />
                     <div v-if="categoryNameExists" class="text-red-500 text-sm mb-2">ชื่อมีอยู่แล้วสามารถเลือกหาเลือกได้
                     </div>
-                    <input type="file" @change="onCategoryImageChange" class="mb-3" />
+                    <div class="relative">
+                        <label for="categoryImageInput" class="upload-button">
+                            <span class="upload-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                            </span>
+                            <span class="upload-text">เลือกรูปภาพ</span>
+                            <span class="upload-hint">JPG, PNG, GIF (สูงสุด 2MB)</span>
+                            <input id="categoryImageInput" type="file" accept="image/*"
+                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                @change="onCategoryImageChange" />
+                        </label>
+                        <div v-if="categoryImageFileName"
+                            class="mt-2 p-2 bg-green-50 border border-green-200 rounded-lg">
+                            <div class="flex items-center gap-2 text-sm text-green-700">
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span class="truncate">{{ categoryImageFileName }}</span>
+                            </div>
+                        </div>
+                    </div>
                     <div class="flex justify-end gap-2">
                         <button class="px-4 py-2 text-[#184c36]" @click="showCategoryModal = false">ยกเลิก</button>
                         <button class="bg-[#184c36] hover:bg-green-700 text-white px-4 py-2 rounded shadow-sm"
@@ -135,13 +161,39 @@
             <!-- Modal: สร้างประเภทย่อย -->
             <div v-if="showSubCategoryModal"
                 class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-                <div class="bg-white rounded-xl shadow border border-[#e6e6e6] p-6 w-full max-w-md">
+                <div class="bg-white rounded-xl shadow border border-[#e6e6e6] p-6 w-full max-w-md space-y-4">
                     <h3 class="font-bold mb-4 text-[#184c36]">สร้างประเภทย่อยใหม่</h3>
                     <input v-model="newSubCategory.name" placeholder="ชื่อประเภทย่อย"
                         class="border border-[#e6e6e6] rounded px-3 py-2 w-full mb-1 focus:ring-2 focus:ring-green-200 focus:border-green-400 transition" />
                     <div v-if="subCategoryNameExists" class="text-red-500 text-sm mb-2">
                         ชื่อมีอยู่แล้วสามารถเลือกหาเลือกได้</div>
-                    <input type="file" @change="onSubCategoryImageChange" class="mb-3" />
+                    <div class="relative">
+                        <label for="subCategoryImageInput" class="upload-button">
+                            <span class="upload-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                            </span>
+                            <span class="upload-text">เลือกรูปภาพ</span>
+                            <span class="upload-hint">JPG, PNG, GIF (สูงสุด 2MB)</span>
+                            <input id="subCategoryImageInput" type="file" accept="image/*"
+                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                @change="onSubCategoryImageChange" />
+                        </label>
+                        <div v-if="subCategoryImageFileName"
+                            class="mt-2 p-2 bg-green-50 border border-green-200 rounded-lg">
+                            <div class="flex items-center gap-2 text-sm text-green-700">
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span class="truncate">{{ subCategoryImageFileName }}</span>
+                            </div>
+                        </div>
+                    </div>
                     <div class="flex justify-end gap-2">
                         <button class="px-4 py-2 text-[#184c36]" @click="showSubCategoryModal = false">ยกเลิก</button>
                         <button class="bg-[#184c36] hover:bg-green-700 text-white px-4 py-2 rounded shadow-sm"
@@ -153,11 +205,37 @@
             <!-- Modal: สร้างสินค้าใหม่ -->
             <div v-if="showProductModal"
                 class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-                <div class="bg-white rounded-xl shadow border border-[#e6e6e6] p-6 w-full max-w-md">
+                <div class="bg-white rounded-xl shadow border border-[#e6e6e6] p-6 w-full max-w-md space-y-4">
                     <h3 class="font-bold mb-4 text-[#184c36]">สร้างสินค้าใหม่</h3>
                     <input v-model="newProduct.name" placeholder="ชื่อสินค้า"
                         class="border border-[#e6e6e6] rounded px-3 py-2 w-full mb-3 focus:ring-2 focus:ring-green-200 focus:border-green-400 transition" />
-                    <input type="file" @change="onProductImageChange" class="mb-3" />
+                    <div class="relative">
+                        <label for="productImageInput" class="upload-button">
+                            <span class="upload-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                            </span>
+                            <span class="upload-text">เลือกรูปภาพ</span>
+                            <span class="upload-hint">JPG, PNG, GIF (สูงสุด 2MB)</span>
+                            <input id="productImageInput" type="file" accept="image/*"
+                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                @change="onProductImageChange" />
+                        </label>
+                        <div v-if="productImageFileName"
+                            class="mt-2 p-2 bg-green-50 border border-green-200 rounded-lg">
+                            <div class="flex items-center gap-2 text-sm text-green-700">
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span class="truncate">{{ productImageFileName }}</span>
+                            </div>
+                        </div>
+                    </div>
                     <div class="flex justify-end gap-2">
                         <button class="px-4 py-2 text-[#184c36]" @click="showProductModal = false">ยกเลิก</button>
                         <button class="bg-[#184c36] hover:bg-green-700 text-white px-4 py-2 rounded shadow-sm"
@@ -293,15 +371,32 @@ const subCategoryNameExists = computed(() => {
     return subcategories.value.some(sub => sub.categoryId === selectedCategoryId.value && sub.name.trim().toLowerCase() === newSubCategory.value.name.trim().toLowerCase());
 });
 
+// File name states
+const categoryImageFileName = ref('');
+const subCategoryImageFileName = ref('');
+const productImageFileName = ref('');
+
 // Handler สำหรับอัปโหลดรูป (mock)
 function onCategoryImageChange(e) {
-    newCategory.value.image = e.target.files[0];
+    const file = e.target.files[0];
+    if (file) {
+        newCategory.value.image = file;
+        categoryImageFileName.value = file.name;
+    }
 }
 function onSubCategoryImageChange(e) {
-    newSubCategory.value.image = e.target.files[0];
+    const file = e.target.files[0];
+    if (file) {
+        newSubCategory.value.image = file;
+        subCategoryImageFileName.value = file.name;
+    }
 }
 function onProductImageChange(e) {
-    newProduct.value.image = e.target.files[0];
+    const file = e.target.files[0];
+    if (file) {
+        newProduct.value.image = file;
+        productImageFileName.value = file.name;
+    }
 }
 
 // Handler สำหรับ searchable select
@@ -348,6 +443,7 @@ function handleCreateCategory() {
     });
     showCategoryModal.value = false;
     newCategory.value = { name: '', image: null };
+    categoryImageFileName.value = '';
 }
 function handleCreateSubCategory() {
     if (subCategoryNameExists.value || !newSubCategory.value.name) return;
@@ -359,11 +455,13 @@ function handleCreateSubCategory() {
     });
     showSubCategoryModal.value = false;
     newSubCategory.value = { name: '', image: null };
+    subCategoryImageFileName.value = '';
 }
 function handleCreateProduct() {
     // TODO: เชื่อม API
     showProductModal.value = false;
     newProduct.value = { name: '', image: null };
+    productImageFileName.value = '';
 }
 
 function handleSave() {
@@ -430,5 +528,63 @@ function clearProduct() {
 </script>
 
 <style scoped>
-/* เพิ่มเติมถ้าต้องการ */
+.upload-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    border: 2px dashed #e5e7eb;
+    border-radius: 0.75rem;
+    background-color: #f9fafb;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    min-height: 120px;
+    cursor: pointer;
+}
+
+.upload-button:hover {
+    border-color: #84f857;
+    background-color: #eefae8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(179, 239, 68, 0.1), 0 2px 4px -1px rgba(179, 239, 68, 0.06);
+}
+
+.upload-button:active {
+    transform: translateY(0);
+}
+
+.upload-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-bottom: 0.5rem;
+    color: #2e5200;
+    background-color: #f1fee2;
+    border-radius: 50%;
+    padding: 0.5rem;
+}
+
+.upload-text {
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.25rem;
+}
+
+.upload-hint {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.upload-button:hover .upload-icon {
+    background-color: #b6ffa0;
+    color: #276901;
+}
+
+.upload-button:hover .upload-text {
+    color: #276901;
+}
 </style>
