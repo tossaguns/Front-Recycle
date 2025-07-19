@@ -281,7 +281,7 @@ const onProvinceChange = () => {
     // ดึงข้อมูลอำเภอจากร้านในจังหวัดที่เลือก
     const storesInProvince = stores.value.filter(s => s.province === selectedProvince.value);
     const districtSet = new Set(storesInProvince.map(s => s.district).filter(Boolean));
-    districts.value = Array.from(districtSet).sort();
+    districts.value = Array.from(districtSet).sort((a, b) => a.localeCompare(b, 'th'));
   }
   
   currentPage.value = 1; // รีเซ็ตหน้า
@@ -299,7 +299,7 @@ const onDistrictChange = () => {
       s.district === selectedDistrict.value
     );
     const subdistrictSet = new Set(storesInDistrict.map(s => s.subdistrict).filter(Boolean));
-    subdistricts.value = Array.from(subdistrictSet).sort();
+    subdistricts.value = Array.from(subdistrictSet).sort((a, b) => a.localeCompare(b, 'th'));
   }
   
   currentPage.value = 1; // รีเซ็ตหน้า
@@ -341,7 +341,7 @@ onMounted(async () => {
     }));
     // สร้าง list จังหวัดจากข้อมูลร้าน
     const provinceSet = new Set(stores.value.map(s => s.province).filter(Boolean));
-    provinces.value = Array.from(provinceSet).sort();
+    provinces.value = Array.from(provinceSet).sort((a, b) => a.localeCompare(b, 'th'));
     // รอ DOM render เสร็จแล้วค่อย updateScrollState
     setTimeout(() => {
       if (scrollRef.value) {
