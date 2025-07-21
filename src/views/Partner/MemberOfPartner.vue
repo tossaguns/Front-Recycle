@@ -1,290 +1,439 @@
 <template>
-    <BarAdmin />
-    <div class="max-w-full mx-auto bg-white rounded-xl shadow border border-[#e6e6e6] p-8">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-[#184c36]">สมาชิก</h2>
-            <button class="bg-gradient-to-r from-[#184c36] to-[#b6e388] hover:from-[#b6e388] hover:to-[#184c36] text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
-                @click="showAddModal = true">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                เพิ่มสมาชิก
+  <BarAdmin />
+  <div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-5xl mx-auto">
+      <!-- ปุ่มเพิ่มสมาชิกใหม่ -->
+      <div class="flex justify-end mb-4">
+        <button @click="toggleAddForm" class="bg-[#184c36] hover:bg-green-700 text-white px-6 py-2 rounded-lg shadow font-semibold">
+          {{ showAddForm ? 'ปิดฟอร์ม' : '+ เพิ่มสมาชิกใหม่' }}
+        </button>
+      </div>
+      <!-- ฟอร์มเพิ่มสมาชิก (toggle) -->
+      <div v-if="showAddForm" class="bg-white rounded-xl shadow-lg border border-[#e6e6e6] p-6 mb-8">
+        <h2 class="text-xl font-bold text-[#184c36] mb-4 flex items-center gap-2">
+          <span class="bg-green-100 text-[#184c36] rounded-full px-3 py-1 text-base font-semibold">เพิ่มสมาชิกใหม่</span>
+        </h2>
+        <form @submit.prevent="submitAddMember" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-semibold mb-1 text-[#184c36]">ชื่อ-นามสกุล</label>
+            <input v-model="addForm.fullName" required class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-green-200 focus:border-green-400 transition" />
+          </div>
+          <div>
+            <label class="block font-semibold mb-1 text-[#184c36]">Username</label>
+            <input v-model="addForm.username" required minlength="6" class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-green-200 focus:border-green-400 transition" />
+          </div>
+          <div class="relative">
+            <label class="block font-semibold mb-1 text-[#184c36]">Password</label>
+            <input :type="showPassword ? 'text' : 'password'" v-model="addForm.password" required minlength="8" class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-green-200 focus:border-green-400 transition pr-10" />
+            <button type="button" @click="showPassword = !showPassword" class="absolute right-3 top-8 text-gray-500 focus:outline-none">
+              <span v-if="showPassword">🙈</span>
+              <span v-else>👁️</span>
             </button>
+          </div>
+          <div>
+            <label class="block font-semibold mb-1 text-[#184c36]">เบอร์โทร</label>
+            <input v-model="addForm.personalPhone" required maxlength="10" pattern="[0-9]*" inputmode="numeric" class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-green-200 focus:border-green-400 transition" />
+          </div>
+          <div>
+            <label class="block font-semibold mb-1 text-[#184c36]">อีเมล</label>
+            <input v-model="addForm.personalEmail" required type="email" class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-green-200 focus:border-green-400 transition" />
+          </div>
+          <div>
+            <label class="block font-semibold mb-1 text-[#184c36]">ระดับ</label>
+            <select v-model="addForm.level" required class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-green-200 focus:border-green-400 transition">
+              <option value="">เลือก</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold mb-1 text-[#184c36]">ชื่อเฉพาะร้าน (optional)</label>
+            <input v-model="addForm.display_name" class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-green-200 focus:border-green-400 transition" />
+          </div>
+          <div class="md:col-span-2">
+            <label class="block font-semibold mb-1 text-[#184c36]">ที่อยู่</label>
+            <input v-model="addForm.personalAddress" required class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-green-200 focus:border-green-400 transition" />
+          </div>
+          <!-- จังหวัด/อำเภอ/ตำบล/รหัสไปรษณีย์ -->
+          <div>
+            <label class="block font-semibold mb-1 text-[#184c36]">จังหวัด</label>
+            <select v-model="addForm.personalProvinceId" required @change="loadDistricts" class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-green-200 focus:border-green-400 transition">
+              <option value="">เลือกจังหวัด</option>
+              <option v-for="province in provinces" :key="province.id" :value="province.id">{{ province.name_th }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold mb-1 text-[#184c36]">อำเภอ</label>
+            <select v-model="addForm.personalDistrictId" required :disabled="!addForm.personalProvinceId" @change="loadSubdistricts" class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-green-200 focus:border-green-400 transition">
+              <option value="">เลือกอำเภอ</option>
+              <option v-for="district in districts" :key="district.id" :value="district.id">{{ district.name_th }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold mb-1 text-[#184c36]">ตำบล</label>
+            <select v-model="addForm.personalSubdistrictId" required :disabled="!addForm.personalDistrictId" @change="loadPostalCode" class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-green-200 focus:border-green-400 transition">
+              <option value="">เลือกตำบล</option>
+              <option v-for="subdistrict in subdistricts" :key="subdistrict.id" :value="subdistrict.id">{{ subdistrict.name_th }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold mb-1 text-[#184c36]">รหัสไปรษณีย์</label>
+            <input v-model="addForm.personalPostalCode" readonly class="border rounded-lg px-3 py-2 w-full bg-gray-100 text-gray-500" />
+          </div>
+          <div>
+            <label class="block font-semibold mb-1 text-[#184c36]">สถานะ</label>
+            <select v-model="addForm.status" required class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-green-200 focus:border-green-400 transition">
+              <option value="active">active</option>
+              <option value="blocked">blocked</option>
+            </select>
+          </div>
+          <div class="md:col-span-2 flex justify-end gap-2 mt-2">
+            <button type="button" class="px-4 py-2 text-[#184c36] border border-[#e6e6e6] rounded-lg hover:bg-gray-100" @click="clearAddForm">ล้าง</button>
+            <button type="submit" class="bg-[#184c36] hover:bg-green-700 text-white px-6 py-2 rounded-lg shadow font-semibold">บันทึก</button>
+          </div>
+        </form>
+      </div>
+      <!-- Search & Table -->
+      <div class="bg-white rounded-xl shadow border border-[#e6e6e6] p-6">
+        <div class="flex flex-col md:flex-row gap-4 mb-6 justify-between items-center">
+          <input v-model="search" @input="filterMembers" placeholder="ค้นหาชื่อ/เบอร์/ระดับ..."
+            class="border border-[#e6e6e6] rounded px-3 py-2 w-full md:w-80 focus:ring-2 focus:ring-green-200 focus:border-green-400 transition" />
         </div>
-
-        <!-- Modal เพิ่มสมาชิก -->
-        <div v-if="showAddModal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-            <div class="bg-white rounded-xl shadow-xl border border-[#e6e6e6] p-8 w-full max-w-2xl relative">
-                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-[#e6f7e6]">
-                    <div class="w-12 h-12 bg-gradient-to-br from-[#b6e388] to-[#184c36] rounded-xl flex items-center justify-center shadow-lg">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h2 class="text-xl font-bold bg-gradient-to-r from-[#184c36] to-[#b6e388] bg-clip-text text-transparent">เพิ่มสมาชิกใหม่</h2>
-                        <p class="text-sm text-[#184c36] mt-1">กรุณากรอกข้อมูลสมาชิกให้ครบถ้วน</p>
-                    </div>
-                </div>
-                <form class="grid grid-cols-1 md:grid-cols-2 gap-4" @submit.prevent="handleAddMember">
-                    <div class="space-y-2">
-                        <label class="block text-sm font-semibold text-[#184c36]">
-                            ชื่อ-นามสกุล <span class="text-red-600">*</span>
-                        </label>
-                        <input v-model="form.fullName" required placeholder="กรอกชื่อ-นามสกุล"
-                            class="w-full px-4 py-3 border-2 border-[#e6f7e6] rounded-lg focus:border-[#b6e388] focus:ring-2 focus:ring-[#b6e388]/20 transition-all duration-300 outline-none" />
-                    </div>
-                    <div class="space-y-2">
-                        <label class="block text-sm font-semibold text-[#184c36]">
-                            Username <span class="text-red-600">*</span>
-                        </label>
-                        <input v-model="form.username" required placeholder="กรอก username"
-                            class="w-full px-4 py-3 border-2 border-[#e6f7e6] rounded-lg focus:border-[#b6e388] focus:ring-2 focus:ring-[#b6e388]/20 transition-all duration-300 outline-none" />
-                    </div>
-                    <div class="space-y-2">
-                        <label class="block text-sm font-semibold text-[#184c36]">
-                            Password <span class="text-red-600">*</span>
-                        </label>
-                        <input v-model="form.password" type="password" required placeholder="กรอกรหัสผ่าน"
-                            class="w-full px-4 py-3 border-2 border-[#e6f7e6] rounded-lg focus:border-[#b6e388] focus:ring-2 focus:ring-[#b6e388]/20 transition-all duration-300 outline-none" />
-                    </div>
-                    <div class="space-y-2">
-                        <label class="block text-sm font-semibold text-[#184c36]">
-                            เบอร์โทร <span class="text-red-600">*</span>
-                        </label>
-                        <input v-model="form.phone" required placeholder="0812345678"
-                            class="w-full px-4 py-3 border-2 border-[#e6f7e6] rounded-lg focus:border-[#b6e388] focus:ring-2 focus:ring-[#b6e388]/20 transition-all duration-300 outline-none" />
-                    </div>
-                    <div class="md:col-span-2 space-y-2">
-                        <label class="block text-sm font-semibold text-[#184c36]">
-                            ที่อยู่ <span class="text-red-600">*</span>
-                        </label>
-                        <input v-model="form.address" required placeholder="บ้านเลขที่ หมู่ ถนน"
-                            class="w-full px-4 py-3 border-2 border-[#e6f7e6] rounded-lg focus:border-[#b6e388] focus:ring-2 focus:ring-[#b6e388]/20 transition-all duration-300 outline-none mb-3" />
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                            <select v-model="form.province_id" required @change="loadDistricts" 
-                                class="w-full px-4 py-3 border-2 border-[#e6f7e6] rounded-lg focus:border-[#b6e388] focus:ring-2 focus:ring-[#b6e388]/20 transition-all duration-300 outline-none bg-white">
-                                <option value="">เลือกจังหวัด</option>
-                                <option v-for="province in provinces" :key="province.id" :value="province.id">{{ province.name_th }}</option>
-                            </select>
-                            <select v-model="form.district_id" required @change="loadSubdistricts" :disabled="!form.province_id" 
-                                class="w-full px-4 py-3 border-2 border-[#e6f7e6] rounded-lg focus:border-[#b6e388] focus:ring-2 focus:ring-[#b6e388]/20 transition-all duration-300 outline-none bg-white disabled:opacity-50 disabled:cursor-not-allowed">
-                                <option value="">เลือกอำเภอ</option>
-                                <option v-for="district in districts" :key="district.id" :value="district.id">{{ district.name_th }}</option>
-                            </select>
-                            <select v-model="form.subdistrict_id" required @change="setZipcode" :disabled="!form.district_id" 
-                                class="w-full px-4 py-3 border-2 border-[#e6f7e6] rounded-lg focus:border-[#b6e388] focus:ring-2 focus:ring-[#b6e388]/20 transition-all duration-300 outline-none bg-white disabled:opacity-50 disabled:cursor-not-allowed">
-                                <option value="">เลือกตำบล</option>
-                                <option v-for="subdistrict in subdistricts" :key="subdistrict.id" :value="subdistrict.id">{{ subdistrict.name_th }}</option>
-                            </select>
-                            <input v-model="form.zipcode" readonly placeholder="รหัสไปรษณีย์"
-                                class="w-full px-4 py-3 border-2 border-[#e6f7e6] rounded-lg bg-gray-100 text-gray-500" />
-                        </div>
-                    </div>
-                    <div class="space-y-2">
-                        <label class="block text-sm font-semibold text-[#184c36]">
-                            ระดับ <span class="text-red-600">*</span>
-                        </label>
-                        <select v-model="form.level" required 
-                            class="w-full px-4 py-3 border-2 border-[#e6f7e6] rounded-lg focus:border-[#b6e388] focus:ring-2 focus:ring-[#b6e388]/20 transition-all duration-300 outline-none bg-white">
-                            <option value="">เลือกระดับ</option>
-                            <option value="3">3 (สูงสุด)</option>
-                            <option value="2">2</option>
-                            <option value="1">1 (ต่ำสุด)</option>
-                        </select>
-                    </div>
-                    <div class="md:col-span-2 flex justify-end gap-3 mt-6">
-                        <button type="button"
-                            class="px-6 py-3 rounded-xl border-2 border-gray-300 text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 font-medium"
-                            @click="showAddModal = false">
-                            <span class="flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                                ยกเลิก
-                            </span>
-                        </button>
-                        <button
-                            class="bg-gradient-to-r from-[#184c36] to-[#b6e388] hover:from-[#b6e388] hover:to-[#184c36] disabled:from-gray-400 disabled:to-gray-500 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
-                            :disabled="!canAddMember">
-                            <span class="flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                </svg>
-                                เพิ่มสมาชิก
-                            </span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <h2 class="text-xl font-bold text-[#184c36] mb-4">ค้นหาสมาชิก</h2>
-        <div class="mb-6">
-            <input v-model="searchKeyword" placeholder="ค้นหาชื่อ-นามสกุล, ระดับ, เบอร์โทร..." class="border border-[#e6e6e6] rounded px-3 py-2 w-full max-w-md" />
-        </div>
-
         <div class="overflow-x-auto">
-            <table class="min-w-full border text-sm rounded-xl overflow-hidden">
-                <thead class="bg-green-100 text-[#184c36] border-b border-[#e6e6e6]">
-                    <tr>
-                        <th class="px-4 py-2 border-[#e6e6e6] text-center">ชื่อ-นามสกุล</th>
-                        <th class="px-4 py-2 border-[#e6e6e6] text-center cursor-pointer select-none"
-                            @click="toggleSortLevel">
-                            ระดับ
-                            <span v-if="sortLevel === 'asc'">▲</span>
-                            <span v-else-if="sortLevel === 'desc'">▼</span>
-                        </th>
-                        <th class="px-4 py-2 border-[#e6e6e6] text-center">เบอร์โทร</th>
-                        <th class="px-4 py-2 border-[#e6e6e6] text-center">ที่อยู่</th>
-                        <th class="px-4 py-2 border-[#e6e6e6] text-center">จัดการ</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="member in filteredAndSortedMembers" :key="member.id" class="hover:bg-green-50">
-                        <td class="px-4 py-3 border-b border-[#e6e6e6] text-center">{{ member.fullName }}</td>
-                        <td class="px-4 py-3 border-b border-[#e6e6e6] text-center">{{ member.level }}</td>
-                        <td class="px-4 py-3 border-b border-[#e6e6e6] text-center">{{ member.phone }}</td>
-                        <td class="px-4 py-3 border-b border-[#e6e6e6] text-center max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap">
-                            {{ member.address }} {{ member.subdistrict }} {{ member.district }} {{ member.province }} {{ member.zipcode }}
-                        </td>
-                        <td class="px-4 py-3 border-b border-[#e6e6e6] text-center">
-                            <div class="flex justify-center items-center gap-3">
-                                <button class="text-blue-600 hover:underline" title="ดูข้อมูล" @click="viewMember(member)">🛈</button>
-                                <button class="text-yellow-600 hover:underline" title="แก้ไข" @click="editMember(member)">✏️</button>
-                                <button class="text-orange-600 hover:underline" title="ยกเลิก" @click="cancelMember(member)">🚫</button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr v-if="filteredAndSortedMembers.length === 0">
-                        <td colspan="5" class="text-center text-gray-400 py-4">ไม่พบสมาชิก</td>
-                    </tr>
-                </tbody>
-            </table>
+          <table class="min-w-full border text-sm rounded-xl overflow-hidden">
+            <thead class="bg-green-100 text-[#184c36] border-b border-[#e6e6e6]">
+              <tr>
+                <th class="px-4 py-2">ชื่อ</th>
+                <th class="px-4 py-2">เบอร์โทร</th>
+                <th class="px-4 py-2">ระดับ</th>
+                <th class="px-4 py-2">ชื่อเฉพาะร้าน</th>
+                <th class="px-4 py-2">วันที่เข้าร้าน</th>
+                <th class="px-4 py-2">สถานะ</th>
+                <th class="px-4 py-2">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="m in filteredMembers" :key="m._id" class="hover:bg-green-50">
+                <td class="px-4 py-2">{{ m.member_id?.fullName }}</td>
+                <td class="px-4 py-2">{{ m.member_id?.phone }}</td>
+                <td class="px-4 py-2">{{ m.member_id?.level }}</td>
+                <td class="px-4 py-2">{{ m.display_name || '-' }}</td>
+                <td class="px-4 py-2">{{ formatDate(m.joined_at) }}</td>
+                <td class="px-4 py-2">
+                  <span :class="m.status === 'active' ? 'text-green-700' : 'text-red-500'">
+                    {{ m.status === 'active' ? 'ใช้งาน' : 'ยกเลิก' }}
+                  </span>
+                </td>
+                <td class="px-4 py-2">
+                  <div class="flex gap-2 justify-center">
+                    <button @click="viewMember(m)" class="text-blue-600 hover:text-blue-900" title="ดูข้อมูล">🛈</button>
+                    <button @click="editMember(m)" class="text-yellow-600 hover:text-yellow-700" title="แก้ไข">✏️</button>
+                    <button @click="deleteMember(m)" class="text-red-600 hover:text-red-900" title="ลบ/ยกเลิก">🗑️</button>
+                  </div>
+                </td>
+              </tr>
+              <tr v-if="filteredMembers.length === 0">
+                <td colspan="7" class="text-center text-gray-400 py-4">ไม่พบสมาชิก</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+      </div>
     </div>
+    <!-- Modal: View/แก้ไข (คงเดิม) -->
+    <div v-if="viewingMember" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+      <div class="bg-white rounded-xl shadow border border-[#e6e6e6] p-6 w-full max-w-md">
+        <h3 class="font-bold mb-4 text-[#184c36] text-xl">ข้อมูลสมาชิก</h3>
+        <div class="mb-2">ชื่อ: {{ viewingMember.member_id?.fullName }}</div>
+        <div class="mb-2">เบอร์โทร: {{ viewingMember.member_id?.phone }}</div>
+        <div class="mb-2">ระดับ: {{ viewingMember.member_id?.level }}</div>
+        <div class="mb-2">ชื่อเฉพาะร้าน: {{ viewingMember.display_name || '-' }}</div>
+        <div class="mb-2">วันที่เข้าร้าน: {{ formatDate(viewingMember.joined_at) }}</div>
+        <div class="mb-2">สถานะ: {{ viewingMember.status }}</div>
+        <button class="mt-4 px-6 py-2 bg-[#184c36] hover:bg-green-700 text-white rounded shadow" @click="closeViewModal">ปิด</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import BarAdmin from '../../components/BarAdmin.vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import axios from 'axios';
+import BarAdmin from '../../components/BarAdmin.vue';
+import Swal from 'sweetalert2';
 
-// mock data
-const members = ref([
-    { id: 1, fullName: 'สมชาย ใจดี', username: 'somchai', phone: '0812345678', address: '123/4', province: 'กรุงเทพ', district: 'บางรัก', subdistrict: 'สีลม', zipcode: '10500', level: 2 },
-    { id: 2, fullName: 'สมหญิง สวยงาม', username: 'somying', phone: '0898765432', address: '56/7', province: 'เชียงใหม่', district: 'เมือง', subdistrict: 'สุเทพ', zipcode: '50000', level: 1 },
-    { id: 3, fullName: 'ประยุทธ์ ขยัน', username: 'prayut', phone: '0865432198', address: '99/1', province: 'ขอนแก่น', district: 'เมือง', subdistrict: 'ในเมือง', zipcode: '40000', level: 3 },
-]);
-
-const form = ref({
-    fullName: '',
-    username: '',
-    password: '',
-    phone: '',
-    address: '',
-    province: '',
-    district: '',
-    subdistrict: '',
-    zipcode: '',
-    province_id: '',
-    district_id: '',
-    subdistrict_id: '',
-    level: '',
+const members = ref([]);
+const filteredMembers = ref([]);
+const search = ref('');
+const showModal = ref(false);
+const isEditing = ref(false);
+const isSubmitting = ref(false);
+const viewingMember = ref(null);
+const form = reactive({
+  fullName: '', username: '', password: '', phone: '', address: '', province: '', district: '', subDistrict: '', postalCode: '', level: '', display_name: '', status: 'active',
 });
+const partnerId = localStorage.getItem('partnerId') || '';
 
-const showAddModal = ref(false);
+function formatDate(date) {
+  if (!date) return '-';
+  return new Date(date).toLocaleDateString('th-TH');
+}
 
+async function loadMembers() {
+  const res = await axios.get(`${import.meta.env.VITE_API_URL}/partner-members?partner_id=${partnerId}`);
+  members.value = res.data;
+  filteredMembers.value = res.data;
+}
+
+function filterMembers() {
+  const q = search.value.trim().toLowerCase();
+  filteredMembers.value = members.value.filter(m => {
+    const mem = m.member_id || {};
+    return (
+      (mem.fullName && mem.fullName.toLowerCase().includes(q)) ||
+      (mem.phone && mem.phone.includes(q)) ||
+      (mem.level && mem.level.toLowerCase().includes(q)) ||
+      (m.display_name && m.display_name.toLowerCase().includes(q))
+    );
+  });
+}
+
+function openAddModal() {
+  isEditing.value = false;
+  Object.assign(form, { fullName: '', username: '', password: '', phone: '', address: '', province: '', district: '', subDistrict: '', postalCode: '', level: '', display_name: '', status: 'active' });
+  showModal.value = true;
+}
+
+function editMember(m) {
+  isEditing.value = true;
+  Object.assign(form, {
+    fullName: m.member_id?.fullName || '',
+    username: m.member_id?.username || '',
+    password: '',
+    phone: m.member_id?.phone || '',
+    address: m.member_id?.address || '',
+    province: m.member_id?.province || '',
+    district: m.member_id?.district || '',
+    subDistrict: m.member_id?.subDistrict || '',
+    postalCode: m.member_id?.postalCode || '',
+    level: m.member_id?.level || '',
+    display_name: m.display_name || '',
+    status: m.status || 'active',
+  });
+  form._id = m._id;
+  showModal.value = true;
+}
+
+function viewMember(m) {
+  viewingMember.value = m;
+}
+function closeViewModal() {
+  viewingMember.value = null;
+}
+function closeModal() {
+  showModal.value = false;
+}
+
+function clearForm() {
+  Object.assign(form, { fullName: '', username: '', password: '', phone: '', address: '', province: '', district: '', subDistrict: '', postalCode: '', level: '', display_name: '', status: 'active' });
+}
+
+// async function submitForm() {
+//   isSubmitting.value = true;
+//   try {
+//     if (isEditing.value) {
+//       // update partner-member (display_name, status)
+//       await axios.put(`${import.meta.env.VITE_API_URL}/partner-members/${form._id}`, {
+//         display_name: form.display_name,
+//         status: form.status,
+//         level: form.level,
+//       });
+//       // update member info
+//       await axios.put(`${import.meta.env.VITE_API_URL}/members/${form.username}`, {
+//         fullName: form.fullName,
+//         phone: form.phone,
+//         address: form.address,
+//         province: form.province,
+//         district: form.district,
+//         subDistrict: form.subDistrict,
+//         postalCode: form.postalCode,
+//         ...(form.password ? { password: form.password } : {})
+//       });
+//       await Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ', showConfirmButton: false, timer: 1200 });
+//     } else {
+//       // create member
+//       const memberRes = await axios.post(`${import.meta.env.VITE_API_URL}/members`, {
+//         fullName: form.fullName,
+//         username: form.username,
+//         password: form.password,
+//         phone: form.phone,
+//         address: form.address,
+//         province: form.province,
+//         district: form.district,
+//         subDistrict: form.subDistrict,
+//         postalCode: form.postalCode,
+//         level: form.level,
+//         status: form.status
+//       });
+//       // create partner-member
+//       await axios.post(`${import.meta.env.VITE_API_URL}/partner-members`, {
+//         partner_id: partnerId,
+//         member_id: memberRes.data._id,
+//         display_name: form.display_name,
+//         status: form.status
+//       });
+//       await Swal.fire({ icon: 'success', title: 'เพิ่มสมาชิกสำเร็จ', showConfirmButton: false, timer: 1200 });
+//     }
+//     await loadMembers();
+//     showModal.value = false;
+//   } catch (err) {
+//     await Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err?.response?.data?.error || err.message });
+//   } finally {
+//     isSubmitting.value = false;
+//   }
+// }
+
+async function deleteMember(m) {
+  const result = await Swal.fire({
+    title: 'ยืนยันการลบ/ยกเลิกสมาชิก?',
+    text: 'คุณต้องการลบ/ยกเลิกสมาชิกนี้หรือไม่',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'ลบ',
+    cancelButtonText: 'ยกเลิก'
+  });
+  if (result.isConfirmed) {
+    await axios.delete(`${import.meta.env.VITE_API_URL}/partner-members/${m._id}`);
+    await loadMembers();
+    Swal.fire('ลบสำเร็จ', 'ลบสมาชิกเรียบร้อยแล้ว', 'success');
+  }
+}
+
+// จังหวัด/อำเภอ/ตำบล/รหัสไปรษณีย์
 const provinces = ref([]);
 const districts = ref([]);
 const subdistricts = ref([]);
 
-onMounted(async () => {
-    // โหลดข้อมูลจังหวัด
-    const res = await axios.get('https://raw.githubusercontent.com/kongvut/thai-province-data/master/api_province_with_amphure_tambon.json');
-    // เรียงลำดับจังหวัดตามตัวอักษร ก-ฮ
-    provinces.value = res.data.sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'));
+const showAddForm = ref(false);
+const showPassword = ref(false);
+
+const addForm = reactive({
+  fullName: '',
+  username: '',
+  password: '',
+  email: '',
+  personalPhone: '',
+  level: '',
+  display_name: '',
+  personalEmail: '',
+  personalAddress: '',
+  personalProvinceId: '',
+  personalProvince: '',
+  personalDistrictId: '',
+  personalDistrict: '',
+  personalSubdistrictId: '',
+  personalSubdistrict: '',
+  personalPostalCode: '',
+  status: 'active',
 });
 
+function toggleAddForm() {
+  showAddForm.value = !showAddForm.value;
+}
+
+function clearAddForm() {
+  Object.assign(addForm, { fullName: '', username: '', password: '', personalPhone: '', personalEmail: '', level: '', display_name: '', personalAddress: '', personalProvinceId: '', personalProvince: '', personalDistrictId: '', personalDistrict: '', personalSubdistrictId: '', personalSubdistrict: '', personalPostalCode: '', status: 'active' });
+}
+
+async function fetchProvinces() {
+  const res = await axios.get('https://raw.githubusercontent.com/kongvut/thai-province-data/master/api_province_with_amphure_tambon.json');
+  provinces.value = res.data.sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'));
+}
+
 function loadDistricts() {
-    const province = provinces.value.find(p => String(p.id) === String(form.value.province_id));
-    districts.value = province ? province.amphure : [];
-    form.value.district_id = '';
-    form.value.subdistrict_id = '';
-    form.value.zipcode = '';
+  const province = provinces.value.find(p => p.id == addForm.personalProvinceId);
+  if (province) {
+    addForm.personalProvince = province.name_th;
+    districts.value = province.amphure || [];
+    addForm.personalDistrictId = '';
+    addForm.personalDistrict = '';
+    addForm.personalSubdistrictId = '';
+    addForm.personalSubdistrict = '';
+    addForm.personalPostalCode = '';
     subdistricts.value = [];
+  }
 }
 
 function loadSubdistricts() {
-    const district = districts.value.find(d => String(d.id) === String(form.value.district_id));
-    subdistricts.value = district ? district.tambon : [];
-    form.value.subdistrict_id = '';
-    form.value.zipcode = '';
+  const district = districts.value.find(d => d.id == addForm.personalDistrictId);
+  if (district) {
+    addForm.personalDistrict = district.name_th;
+    subdistricts.value = district.tambon || [];
+    addForm.personalSubdistrictId = '';
+    addForm.personalSubdistrict = '';
+    addForm.personalPostalCode = '';
+  }
 }
 
-function setZipcode() {
-    const subdistrict = subdistricts.value.find(s => String(s.id) === String(form.value.subdistrict_id));
-    form.value.zipcode = subdistrict ? subdistrict.zip_code : '';
+function loadPostalCode() {
+  const subdistrict = subdistricts.value.find(s => s.id == addForm.personalSubdistrictId);
+  if (subdistrict) {
+    addForm.personalSubdistrict = subdistrict.name_th;
+    addForm.personalPostalCode = subdistrict.zip_code || '';
+  }
 }
 
-const searchKeyword = ref('');
-
-const canAddMember = computed(() => {
-    return form.value.fullName && form.value.username && form.value.password && form.value.phone && form.value.address && form.value.province_id && form.value.district_id && form.value.subdistrict_id && form.value.zipcode && form.value.level;
-});
-
-function handleAddMember() {
-    // mock add
-    const province = provinces.value.find(p => String(p.id) === String(form.value.province_id));
-    const district = districts.value.find(d => String(d.id) === String(form.value.district_id));
-    const subdistrict = subdistricts.value.find(s => String(s.id) === String(form.value.subdistrict_id));
-    members.value.push({
-        id: Date.now(),
-        fullName: form.value.fullName,
-        username: form.value.username,
-        phone: form.value.phone,
-        address: form.value.address,
-        province: province ? province.name_th : '',
-        district: district ? district.name_th : '',
-        subdistrict: subdistrict ? subdistrict.name_th : '',
-        zipcode: form.value.zipcode,
-        level: Number(form.value.level),
-    });
-    form.value = { fullName: '', username: '', password: '', phone: '', address: '', province: '', district: '', subdistrict: '', zipcode: '', province_id: '', district_id: '', subdistrict_id: '', level: '' };
-    showAddModal.value = false;
-}
-
-const sortLevel = ref('desc');
-
-const filteredAndSortedMembers = computed(() => {
-  let arr = members.value.filter(m => {
-    const keyword = searchKeyword.value.trim().toLowerCase();
-    if (!keyword) return true;
-    const matchName = m.fullName && m.fullName.toLowerCase().includes(keyword);
-    const matchLevel = m.level && String(m.level).includes(keyword);
-    let matchPhone = false;
-    if (keyword.startsWith('0')) {
-      matchPhone = m.phone && m.phone.includes(keyword);
+async function submitAddMember() {
+  try {
+    // Validate เบอร์โทรเป็นตัวเลข
+    if (!/^[0-9]{10}$/.test(addForm.personalPhone)) {
+      Swal.fire('กรุณากรอกเบอร์โทร 10 หลัก (ตัวเลขเท่านั้น)', '', 'warning');
+      return;
     }
-    return matchName || matchLevel || matchPhone;
-  });
-  arr = arr.slice().sort((a, b) => sortLevel.value === 'asc' ? a.level - b.level : b.level - a.level);
-  return arr;
+    // 1. สร้าง member
+    const memberRes = await axios.post(`${import.meta.env.VITE_API_URL}/members/register`, {
+      username: addForm.username,
+      password: addForm.password,
+      role: 'member',
+      fullName: addForm.fullName,
+      personalPhone: addForm.personalPhone,
+      personalEmail: addForm.personalEmail,
+      email: addForm.email,
+      personalAddress: addForm.personalAddress,
+      personalProvince: addForm.personalProvince,
+      personalDistrict: addForm.personalDistrict,
+      personalSubdistrict: addForm.personalSubdistrict,
+      personalPostalCode: addForm.personalPostalCode,
+      personalProvinceId: addForm.personalProvinceId,
+      personalDistrictId: addForm.personalDistrictId,
+      personalSubdistrictId: addForm.personalSubdistrictId,
+    });
+    const member_id = memberRes.data.member?._id || memberRes.data._id;
+    if (!member_id) throw new Error('สร้างสมาชิกไม่สำเร็จ');
+    // 2. สร้าง partner-member
+    const partnerId = localStorage.getItem('partnerId');
+    await axios.post(`${import.meta.env.VITE_API_URL}/partner-members`, {
+      partner_id: partnerId,
+      member_id,
+      level: addForm.level,
+      status: addForm.status,
+      display_name: addForm.display_name,
+    });
+    Swal.fire('เพิ่มสมาชิกสำเร็จ', '', 'success');
+    clearAddForm();
+    showAddForm.value = false;
+    // รีเฟรชตารางสมาชิก (ควรมีฟังก์ชัน fetchMembers)
+    loadMembers();
+  } catch (err) {
+    Swal.fire('เกิดข้อผิดพลาด', err?.response?.data?.error || err.message, 'error');
+  }
+}
+
+onMounted(() => {
+  loadMembers();
+  fetchProvinces();
 });
-
-function toggleSortLevel() {
-    sortLevel.value = sortLevel.value === 'asc' ? 'desc' : 'asc';
-}
-
-function viewMember(member) {
-    alert('ดูข้อมูล: ' + member.fullName);
-}
-function editMember(member) {
-    alert('แก้ไข: ' + member.fullName);
-}
-function cancelMember(member) {
-    alert('ยกเลิก: ' + member.fullName);
-}
 </script>
 
 <style scoped>

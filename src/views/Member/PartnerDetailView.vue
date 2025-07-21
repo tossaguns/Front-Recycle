@@ -180,7 +180,7 @@ function handleBookRecycleOrder() {
     text-transform: none;
     display: inline-block;
     direction: ltr;
-    -webkit-font-feature-settings: 'liga';
+    /* -webkit-font-feature-settings: 'liga'; */
     -webkit-font-smoothing: antialiased;
 }
 </style>

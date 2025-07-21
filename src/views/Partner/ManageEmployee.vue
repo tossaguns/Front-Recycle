@@ -85,17 +85,14 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex items-center gap-2">
-                                        <button @click="viewEmployee(employee)"
-                                            class="text-blue-600 hover:text-blue-900">
-                                            ข้อมูล
+                                        <button @click="viewEmployee(employee)" class="text-blue-600 hover:text-blue-900" title="ดูข้อมูล">
+                                          🛈
                                         </button>
-                                        <button @click="editEmployee(employee)"
-                                            class="text-green-600 hover:text-green-900">
-                                            แก้ไข
+                                        <button @click="editEmployee(employee)" class="text-yellow-600 hover:text-yellow-700" title="แก้ไข">
+                                          ✏️
                                         </button>
-                                        <button @click="deleteEmployee(employee)"
-                                            class="text-red-600 hover:text-red-900">
-                                            ลบ
+                                        <button @click="deleteEmployee(employee)" class="text-red-600 hover:text-red-900" title="ลบ">
+                                          🗑️
                                         </button>
                                     </div>
                                 </td>

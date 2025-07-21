@@ -100,10 +100,19 @@ const filteredProducts = computed(() => {
   return items
 })
 
+const uniqueProducts = computed(() => {
+  const seen = new Set();
+  return filteredProducts.value.filter(prod => {
+    if (seen.has(prod.name)) return false;
+    seen.add(prod.name);
+    return true;
+  });
+});
+
 // pagination
 const pageCount = computed(() => Math.ceil(filteredProducts.value.length / pageSize))
 const pagedProducts = computed(() =>
-  filteredProducts.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize)
+  uniqueProducts.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize)
 )
 
 // เปลี่ยนหน้า

@@ -47,7 +47,7 @@ const routes = [
   { 
     path: "/addproduct", 
     component: AddProduct,
-    // meta: { requiresAuth: true, roles: ['partner'] }
+    meta: { requiresAuth: true, roles: ['partner'] }
   },
   { 
     path: "/dashboardpartner", 
@@ -62,12 +62,12 @@ const routes = [
   { 
     path: "/manageemployee", 
     component: ManageEmployee,
-    // meta: { requiresAuth: true, roles: ['partner', 'employee'] }
+    meta: { requiresAuth: true, roles: ['partner', 'employee'] }
   },
   { 
     path: "/memberofpartner", 
     component: MemberOfPartner,
-    // meta: { requiresAuth: true, roles: ['partner'] }
+    meta: { requiresAuth: true, roles: ['partner'] }
   },
 
   // Member - เข้าได้เฉพาะ member เท่านั้น
