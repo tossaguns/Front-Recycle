@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-white flex flex-col">
-    <Bar />
+    <Bar v-if="showBarFooter" />
 
     <div class="bg-[#f7faf0] min-h-screen">
       <main class="flex-1 max-w-7xl mx-auto w-full px-8 py-8 relative flex flex-col justify-center ">
@@ -152,7 +152,7 @@
           </nav>
         </div>
       </main>
-      <Footer />
+      <Footer v-if="showBarFooter" />
     </div>
   </div>
 </template>
@@ -163,6 +163,9 @@ import axios from 'axios';
 import Bar from '../../components/Bar.vue';
 import Footer from '../../components/Footer.vue';
 import { useRouter } from 'vue-router';
+import { defineProps } from 'vue';
+const props = defineProps({ showBarFooter: { type: Boolean, default: false } });
+const showBarFooter = props.showBarFooter;
 
 const router = useRouter();
 const stores = ref([]);

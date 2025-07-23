@@ -32,7 +32,7 @@
             <div class="flex items-center justify-center lg:items-start lg:justify-start">
                 <!-- Right: Price Table -->
                 <div class="flex-1 min-w-[320px] max-w-lg mr-0 lg:mr-20">
-                    <div class="w-full bg-[#f7faf7] rounded-2xl shadow-xl overflow-hidden border border-[#e6f7e6]">
+                    <div class="w-full bg-[#f7faf7] rounded-2xl shadow-xl overflow-hidden border border-[#e6f7e6] cursor-pointer" @click="goToBuyBackPrice">
                         <div class="bg-[#e6f7e6] px-6 py-4 border-b border-[#e6f7e6]">
                             <span class="font-bold text-[#184c36] text-lg block">ราคารับ - ซื้อ</span>
                             <span class="text-xs text-[#7a7a7a]">ณ วันที่ 06/09/2567</span>
@@ -92,26 +92,61 @@
             </div>
         </div>
     </div>
+    <Category />
+    <PartnerStores />
+    <Footer />
 </template>
 
 <script>
-import Bar from '../../components/Bar.vue'
-import Footer from '../../components/Footer.vue'
+import axios from 'axios';
+import Bar from '../../components/Bar.vue';
+import Footer from '../../components/Footer.vue';
+import Category from './Category.vue';
+import PartnerStores from './PartnerStores.vue';
+
 export default {
     name: "Home",
-    components: { Bar },
+    components: { Bar, Footer, Category, PartnerStores },
     data() {
         return {
-            priceList: [
-                { type: "ทองแดงปอก", unit: "กิโล", price: "270.00", change: -10 },
-                { type: "ทองแดงชิ้นขนาดเล็ก", unit: "กิโล", price: "250.00", change: 5 },
-                { type: "ทองแดงชิ้นขนาดเล็ก", unit: "กิโล", price: "250.00", change: 0 },
-                { type: "ทองแดงชิ้นขนาดเล็ก", unit: "กิโล", price: "250.00", change: 5 },
-                { type: "ทองแดงชิ้นขนาดเล็ก", unit: "กิโล", price: "250.00", change: 5 },
-                { type: "ทองแดงชิ้นขนาดเล็ก", unit: "กิโล", price: "250.00", change: 5 },
-                { type: "ทองแดงชิ้นขนาดเล็ก", unit: "กิโล", price: "250.00", change: 5 },
-            ],
+            priceList: [],
         };
+    },
+    mounted() {
+        this.fetchBuyBackPrices();
+    },
+    methods: {
+        async fetchBuyBackPrices() {
+            try {
+                const res = await axios.get('http://localhost:8888/recycle/scrape');
+                const raw = Array.isArray(res.data) ? res.data : (res.data.table || []);
+                let items = [];
+                if (raw.length > 0) {
+                    for (const row of raw[0]) {
+                        // ฝั่งซ้าย
+                        let leftName = row[0];
+                        let leftPrice = row[1] || '';
+                        if (leftPrice) leftPrice = leftPrice.replace('|', '').trim();
+                        if (leftName && leftPrice) {
+                            items.push({ type: leftName, unit: 'กิโล', price: leftPrice, change: '-' });
+                        }
+                        // ฝั่งขวา
+                        let rightName = row[2];
+                        let rightPrice = row[3] || '';
+                        if (rightPrice) rightPrice = rightPrice.replace('|', '').trim();
+                        if (rightName && rightPrice) {
+                            items.push({ type: rightName, unit: 'กิโล', price: rightPrice, change: '-' });
+                        }
+                    }
+                }
+                this.priceList = items.slice(0, 10);
+            } catch (err) {
+                this.priceList = [];
+            }
+        },
+        goToBuyBackPrice() {
+            this.$router.push({ path: '/buybackprice' });
+        },
     },
 };
 </script>

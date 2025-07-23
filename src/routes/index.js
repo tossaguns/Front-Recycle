@@ -5,6 +5,7 @@ import { useAuthStore } from "../stores/auth";
 import Register from "../views/Register/RegisterView.vue";
 import RegisterPartner from "../views/Register/RegisterPartner.vue";
 import Login from "../views/LoginView.vue";
+import BuyBackPrice from "../views/BuyBackPrice.vue";
 
 //Partner
 import Activity from '../views/Partner/Activity.vue'
@@ -37,6 +38,7 @@ const routes = [
   { path: "/register", component: Register },
   { path: "/registerpartner", component: RegisterPartner },
   { path: "/login", component: Login },
+  { path: "/buybackprice", component: BuyBackPrice },
 
   //Partner - เพิ่ม route guard
   { 
@@ -76,10 +78,10 @@ const routes = [
     component: Home,
     meta: { requiresAuth: true, roles: ['member'] }
   },
-  { path: "/category", component: Category },
+  { path: "/category", component: Category, props: { showBarFooter: true } },
   { path: "/productcategory", name: "productcategory", component: ProductCategory },
   { path: "/profilemember", name: "productCategory", component: ProfileMember },
-  { path: '/partnerstores', component: PartnerStores },
+  { path: '/partnerstores', component: PartnerStores, props: { showBarFooter: true } },
   { path: '/partnerdetail', component: PartnerDetailView },
   { path: "/subcategory", component: SubCategory },
 
