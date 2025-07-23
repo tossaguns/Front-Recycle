@@ -87,7 +87,8 @@
             <ul class="flex gap-6 text-sm text-[#222] font-medium">
                 <li :class="['menu-underline', $route.path === '/' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
                     @click="$router.push('/')">หน้าหลัก</li>
-                <li class="hover:text-[#184c36] cursor-pointer menu-underline">ราคารับซื้อ – ขาย</li>
+                <li :class="['menu-underline', $route.path === '/buybackprice' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
+                    @click="$router.push('/buybackprice')">ราคารับซื้อ – ขาย</li>
                 <li :class="['menu-underline', $route.path === '/category' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
                     @click="$router.push('/category')">หมวดหมู่สินค้า</li>
                 <li :class="['menu-underline', $route.path === '/partnerstores' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
