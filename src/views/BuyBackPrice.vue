@@ -41,7 +41,7 @@
                                 <td class="px-4 py-4">
                                     <span v-if="pair[0]"
                                         class="inline-flex items-center gap-1 bg-[#e6f7e6] rounded-full px-2 py-1 text-gray-500 font-bold text-sm">
-                                        -
+                                        {{ pair[0].diff }}
                                     </span>
                                 </td>
                                 <!-- ฝั่งขวา -->
@@ -56,7 +56,7 @@
                                 <td class="px-4 py-4">
                                     <span v-if="pair[1]"
                                         class="inline-flex items-center gap-1 bg-[#e6f7e6] rounded-full px-2 py-1 text-gray-500 font-bold text-sm">
-                                        -
+                                        {{ pair[1].diff }}
                                     </span>
                                 </td>
                             </tr>
@@ -87,6 +87,7 @@ export default {
         return {
             tableRows: [],
             todayDate: '',
+            prevPriceMap: new Map(),
         };
     },
     mounted() {
@@ -108,11 +109,34 @@ export default {
             return items;
         },
         pairedItems() {
-            // จับคู่ข้อมูลทีละ 2 รายการ
+            // จับคู่ข้อมูลทีละ 2 รายการ พร้อม diff
             const pairs = [];
             const arr = this.flatItems;
             for (let i = 0; i < arr.length; i += 2) {
-                pairs.push([arr[i], arr[i + 1] || null]);
+                // เพิ่ม diff (การเปลี่ยนแปลง) ให้แต่ละฝั่ง
+                let left = arr[i] ? { ...arr[i] } : null;
+                let right = arr[i + 1] ? { ...arr[i + 1] } : null;
+                if (left) {
+                    const prev = this.prevPriceMap.get(left.name);
+                    const curr = parseFloat(left.price);
+                    if (prev !== undefined && !isNaN(curr) && !isNaN(prev)) {
+                        const d = +(curr - prev).toFixed(2);
+                        left.diff = d === 0 ? '-' : (d > 0 ? '+' + d : d);
+                    } else {
+                        left.diff = '-';
+                    }
+                }
+                if (right) {
+                    const prev = this.prevPriceMap.get(right.name);
+                    const curr = parseFloat(right.price);
+                    if (prev !== undefined && !isNaN(curr) && !isNaN(prev)) {
+                        const d = +(curr - prev).toFixed(2);
+                        right.diff = d === 0 ? '-' : (d > 0 ? '+' + d : d);
+                    } else {
+                        right.diff = '-';
+                    }
+                }
+                pairs.push([left, right]);
             }
             return pairs;
         }
@@ -120,25 +144,34 @@ export default {
     methods: {
         async fetchPrices() {
             try {
-                const res = await axios.get('http://localhost:8888/recycle/scrape');
-                const raw = Array.isArray(res.data) ? res.data : (res.data.table || []);
+                // ดึง current/previous จาก backend
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/scrape`);
+                const current = Array.isArray(res.data.current) ? res.data.current : (res.data.current?.table || []);
+                const previous = Array.isArray(res.data.previous) ? res.data.previous : (res.data.previous?.table || []);
+                // เตรียม prevPriceMap
+                const prevMap = new Map();
+                if (previous.length > 0) {
+                    for (const row of previous[0]) {
+                        if (row[0] && row[1]) prevMap.set(row[0], parseFloat((row[1] || '').replace('|', '').trim()));
+                        if (row[2] && row[3]) prevMap.set(row[2], parseFloat((row[3] || '').replace('|', '').trim()));
+                    }
+                }
+                this.prevPriceMap = prevMap;
+                // เตรียม tableRows จาก current
                 let tableRows = [];
-                if (raw.length > 0) {
-                    for (const row of raw[0]) {
+                if (current.length > 0) {
+                    for (const row of current[0]) {
                         let r = [];
                         for (let i = 0; i < 4; i++) {
                             let val = row[i] || '';
                             if (i === 1 || i === 3) val = val.replace('|', '').trim();
-                            // ถ้าเป็นคอลัมน์ชื่อ (0 หรือ 2) และเป็น 'กลุ่มพลาสติก', 'ู่มบ็ตต็ด', หรือ 'งดรับ' ให้เปลี่ยนเป็น null
                             if ((i === 0 || i === 2) && (val === 'กลุ่มพลาสติก' || val === 'ู่มบ็ตต็ด' || val === 'งดรับ')) val = null;
                             r.push(val);
                         }
-                        // ถ้า row[0] หรือ row[1] เป็น 'งดรับ' ให้ r[0]=null, r[1]=null
                         if (row[0] === 'งดรับ' || row[1] === 'งดรับ') {
                             r[0] = null;
                             r[1] = null;
                         }
-                        // ถ้า row[2] หรือ row[3] เป็น 'งดรับ' ให้ r[2]=null, r[3]=null
                         if (row[2] === 'งดรับ' || row[3] === 'งดรับ') {
                             r[2] = null;
                             r[3] = null;

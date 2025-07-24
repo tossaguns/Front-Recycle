@@ -35,7 +35,7 @@
                     <div class="w-full bg-[#f7faf7] rounded-2xl shadow-xl overflow-hidden border border-[#e6f7e6] cursor-pointer" @click="goToBuyBackPrice">
                         <div class="bg-[#e6f7e6] px-6 py-4 border-b border-[#e6f7e6]">
                             <span class="font-bold text-[#184c36] text-lg block">ราคารับ - ซื้อ</span>
-                            <span class="text-xs text-[#7a7a7a]">ณ วันที่ 06/09/2567</span>
+                            <span class="text-xs text-[#7a7a7a]">ณ วันที่ {{ todayDate }}</span>
                         </div>
                         <table class="w-full border-collapse text-sm">
                             <thead>
@@ -110,32 +110,65 @@ export default {
     data() {
         return {
             priceList: [],
+            todayDate: '',
         };
     },
     mounted() {
         this.fetchBuyBackPrices();
+        this.setTodayDate();
     },
     methods: {
+        setTodayDate() {
+            const d = new Date();
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear() + 543;
+            this.todayDate = `${day}/${month}/${year}`;
+        },
         async fetchBuyBackPrices() {
             try {
-                const res = await axios.get('http://localhost:8888/recycle/scrape');
-                const raw = Array.isArray(res.data) ? res.data : (res.data.table || []);
+                // ดึง current/previous จาก backend
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/scrape`);
+                const current = Array.isArray(res.data.current) ? res.data.current : (res.data.current?.table || []);
+                const previous = Array.isArray(res.data.previous) ? res.data.previous : (res.data.previous?.table || []);
+                // เตรียม prevPriceMap
+                const prevMap = new Map();
+                if (previous.length > 0) {
+                    for (const row of previous[0]) {
+                        if (row[0] && row[1]) prevMap.set(row[0], parseFloat((row[1] || '').replace('|', '').trim()));
+                        if (row[2] && row[3]) prevMap.set(row[2], parseFloat((row[3] || '').replace('|', '').trim()));
+                    }
+                }
                 let items = [];
-                if (raw.length > 0) {
-                    for (const row of raw[0]) {
+                if (current.length > 0) {
+                    for (const row of current[0]) {
                         // ฝั่งซ้าย
                         let leftName = row[0];
                         let leftPrice = row[1] || '';
                         if (leftPrice) leftPrice = leftPrice.replace('|', '').trim();
+                        let leftChange = '-';
                         if (leftName && leftPrice) {
-                            items.push({ type: leftName, unit: 'กิโล', price: leftPrice, change: '-' });
+                            const prev = prevMap.get(leftName);
+                            const curr = parseFloat(leftPrice);
+                            if (prev !== undefined && !isNaN(curr) && !isNaN(prev)) {
+                                const d = +(curr - prev).toFixed(2);
+                                leftChange = d === 0 ? '-' : (d > 0 ? '+' + d : d);
+                            }
+                            items.push({ type: leftName, unit: 'กิโล', price: leftPrice, change: leftChange });
                         }
                         // ฝั่งขวา
                         let rightName = row[2];
                         let rightPrice = row[3] || '';
                         if (rightPrice) rightPrice = rightPrice.replace('|', '').trim();
+                        let rightChange = '-';
                         if (rightName && rightPrice) {
-                            items.push({ type: rightName, unit: 'กิโล', price: rightPrice, change: '-' });
+                            const prev = prevMap.get(rightName);
+                            const curr = parseFloat(rightPrice);
+                            if (prev !== undefined && !isNaN(curr) && !isNaN(prev)) {
+                                const d = +(curr - prev).toFixed(2);
+                                rightChange = d === 0 ? '-' : (d > 0 ? '+' + d : d);
+                            }
+                            items.push({ type: rightName, unit: 'กิโล', price: rightPrice, change: rightChange });
                         }
                     }
                 }
