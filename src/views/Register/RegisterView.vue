@@ -79,11 +79,15 @@
               <span v-else class="loading loading-spinner"></span>
             </button>
             <div class="divider">หรือ</div>
-            <button type="button"
-              class="btn w-full bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 hover:shadow-md transform hover:-translate-y-1 transition-all duration-200"
-              @click="goToLogin">
-              <p>เข้าสู่ระบบ / Login</p>
-            </button>
+            <!-- ปุ่มเข้าสู่ระบบ glassmorphism -->
+            <div
+              class="glass-btn relative flex items-center justify-center gap-2 w-full px-8 py-3 rounded-xl font-extrabold text-green-900 transition overflow-hidden group mt-4"
+              @click="goToLogin"
+              role="button"
+              tabindex="0"
+            >
+              <span class="z-10">เข้าสู่ระบบ</span>
+            </div>
           </form>
         </div>
       </div>
@@ -484,5 +488,29 @@ onMounted(() => {
   margin-top: 0.25rem;
   color: #ef4444;
   font-size: 0.75rem;
+}
+
+.glass-btn {
+  background: linear-gradient(135deg, rgba(182, 227, 136, 0.25) 0%, rgba(236, 255, 236, 0.45) 100%);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.10), 0 1.5px 0 0 rgba(255, 255, 255, 0.7) inset;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  position: relative;
+}
+.glass-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 55%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(182, 227, 136, 0.15) 100%);
+  opacity: 0.7;
+  pointer-events: none;
+  z-index: 1;
+}
+.glass-btn:hover {
+  background: linear-gradient(135deg, rgba(182, 227, 136, 0.45) 0%, rgba(236, 255, 236, 0.65) 100%);
+  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.18), 0 1.5px 0 0 rgba(255, 255, 255, 0.7) inset;
 }
 </style>

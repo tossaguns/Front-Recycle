@@ -1,7 +1,7 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-white">
+  <div class="flex flex-col bg-white">
     <Bar v-if="showBarFooter" />
-    <main class="flex-1 max-w-[1550px] mx-auto w-full px-10 py-10 relative">
+    <main class="flex-1  mx-auto w-full px-10 py-10 relative">
       <h1 class="text-3xl md:text-5xl font-bold mb-7 text-[#222]">หมวดหมู่สินค้ารีไซเคิล</h1>
       <p class="mb-12 text-[#666]">สัมผัสเนื้อหาหมวดหมู่ประเภทของรีไซเคิล คุณสามารถกดดูรายละเอียดเพิ่มเติมได้ที่นี่</p>
       <div class="relative flex items-center">
@@ -12,10 +12,10 @@
           </svg>
         </button>
         <div ref="scrollRef"
-          class="flex gap-4 md:gap-10 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-[#b6e388] scrollbar-track-[#f0f0f0] mx-4 md:mx-20"
+          class="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-[#b6e388] scrollbar-track-[#f0f0f0] px-2 md:px-4"
           style="scrollbar-width: thin; scroll-behavior: smooth;">
           <div v-for="(cat, idx) in categories" :key="idx"
-            class="min-w-[180px] max-w-[200px] md:min-w-[300px] md:max-w-[340px] flex-shrink-0 flex flex-col">
+            class="flex-1 min-w-[220px] md:min-w-[300px] flex flex-col" style="max-width: 500px;">
             <div class="rounded-2xl overflow-hidden aspect-[3/4] bg-[#eee]">
               <img :src="cat.img" :alt="cat.name" class="w-full h-full object-cover" />
             </div>
@@ -42,9 +42,9 @@
 <script setup>
 import Bar from '../../components/Bar.vue'
 import Footer from '../../components/Footer.vue'
-import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import axios from 'axios'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { defineProps } from 'vue';
 const props = defineProps({ showBarFooter: { type: Boolean, default: false } });
 const showBarFooter = props.showBarFooter;
@@ -58,6 +58,7 @@ const isAtEnd = ref(false)
 let cardsPerScroll = 5
 
 const router = useRouter()
+const route = useRoute();
 
 function updateCardsPerScroll() {
   const el = scrollRef.value
@@ -102,6 +103,25 @@ function goToCategory(cat) {
   router.push({ path: '/subcategory' })
 }
 
+// Animation highlight
+function highlightCategory(name) {
+  nextTick(() => {
+    const idx = categories.value.findIndex(cat => cat.name === name);
+    if (idx !== -1) {
+      const card = scrollRef.value?.children[idx];
+      if (card) {
+        card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        card.classList.add('highlight-animate');
+        setTimeout(() => card.classList.remove('highlight-animate'), 1200);
+      }
+    }
+  });
+}
+
+watch(() => route.query.highlight, (val) => {
+  if (val) highlightCategory(val);
+});
+
 onMounted(async () => {
   try {
     const res = await axios.get(`${import.meta.env.VITE_API_URL}/categories`)
@@ -123,6 +143,8 @@ onMounted(async () => {
     scrollRef.value.addEventListener('scroll', updateScrollButtons)
   }
   window.addEventListener('resize', handleResize)
+
+  if (route.query.highlight) highlightCategory(route.query.highlight);
 })
 
 onBeforeUnmount(() => {
@@ -150,5 +172,18 @@ onBeforeUnmount(() => {
 .scrollbar-thin::-webkit-scrollbar-track {
   background: #f0f0f0;
   border-radius: 8px;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 #b6e388; }
+  20% { transform: scale(1.10); box-shadow: 0 0 0 8px #b6e38844; }
+  40% { transform: scale(1); box-shadow: 0 0 0 0 #b6e388; }
+  60% { transform: scale(1.10); box-shadow: 0 0 0 8px #b6e38844; }
+  80% { transform: scale(1); box-shadow: 0 0 0 0 #b6e388; }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 #b6e388; }
+}
+.highlight-animate {
+  animation: pulse 1.2s 2;
+  z-index: 2;
 }
 </style>

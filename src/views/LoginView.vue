@@ -28,7 +28,7 @@
 
 
     <div class="relative z-10 max-w-md w-full p-4">
-        <div class="bg-white bg-opacity-95 rounded-2xl shadow-xl p-8 animate-fadeIn">
+      <div class="bg-white bg-opacity-95 rounded-2xl shadow-xl p-8 animate-fadeIn">
         <div class="flex justify-center">
           <div class="w-20 h-20 rounded-full overflow-hidden pulse-animation">
             <img src="../assets/logorecycle.png" alt="Logo" class="w-full h-full object-cover">
@@ -58,23 +58,26 @@
             <input v-model="password" type="password" placeholder="รหัสผ่าน / Password"
               class="input input-bordered w-full focus:border-[#b6e388] focus:ring focus:ring-[#b6e388] focus:ring-opacity-50" />
           </label>
-          <div @click="login"
-            class="mt-6 btn w-full bg-[#b6e388] hover:bg-[#184c36] border-none text-[#184c36] hover:text-white font-bold hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
-            <p>เข้าสู่ระบบ / Login</p>
+          <!-- ปุ่มเข้าสู่ระบบแบบ glassmorphism เหมือนแก้ว (div) -->
+          <div
+            class="glass-btn relative flex items-center justify-center gap-2 w-full px-8 py-3 rounded-xl font-extrabold text-base text-green-900 transition overflow-hidden group mt-4"
+            @click="login" role="button" tabindex="0">
+            <span class="z-10">เข้าสู่ระบบ</span>
           </div>
 
           <div class="divider">หรือ</div>
 
+          <!-- ปุ่มสมัครสมาชิก -->
           <div
-            class="mt-2 btn w-full bg-white hover:bg-[#e6f7e6] border border-[#b6e388] text-[#184c36] hover:shadow-md transform hover:-translate-y-1 transition-all duration-200"
+            class="glass-btn relative flex items-center justify-center gap-2 w-full px-8 py-3 rounded-xl font-extrabold text-base text-green-900 transition overflow-hidden group mt-2"
             @click="goToRegister">
-            <p>สมัครสมาชิก / Register</p>
+            <span class="z-10">สมัครสมาชิก</span>
           </div>
-
+          <!-- ปุ่มสมัครสมาชิกพาร์ทเนอร์ -->
           <div
-            class="mt-4 btn w-full bg-white hover:bg-[#e6f7e6] border border-[#b6e388] text-[#184c36] hover:shadow-md transform hover:-translate-y-1 transition-all duration-200"
+            class="glass-btn relative flex items-center justify-center gap-2 w-full px-8 py-3 rounded-xl font-extrabold text-base text-green-900 transition overflow-hidden group mt-2"
             @click="goToRegisterPartner">
-            <p>สมัครสมาชิกพาร์ทเนอร์ / RegisterPartner</p>
+            <span class="z-10">สมัครสมาชิกพาร์ทเนอร์</span>
           </div>
         </div>
       </div>
@@ -118,9 +121,9 @@ const login = async () => {
     })
     const userData = response.data.user;
     const token = response.data.token;
-    
+
     console.log('Login response:', { userData, hasToken: !!token });
-    
+
     if (response.data.success) {
       await Swal.fire({
         icon: 'success',
@@ -375,5 +378,31 @@ onMounted(() => {
 /* ปรับระยะห่างของ grid จังหวัด/อำเภอ/ตำบล */
 .grid-cols-3 {
   gap: 0.5rem;
+}
+
+.glass-btn {
+  background: linear-gradient(135deg, rgba(182, 227, 136, 0.25) 0%, rgba(236, 255, 236, 0.45) 100%);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.10), 0 1.5px 0 0 rgba(255, 255, 255, 0.7) inset;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  position: relative;
+}
+
+.glass-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 55%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(182, 227, 136, 0.15) 100%);
+  opacity: 0.7;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.glass-btn:hover {
+  background: linear-gradient(135deg, rgba(182, 227, 136, 0.45) 0%, rgba(236, 255, 236, 0.65) 100%);
+  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.18), 0 1.5px 0 0 rgba(255, 255, 255, 0.7) inset;
 }
 </style>

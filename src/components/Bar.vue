@@ -10,7 +10,7 @@
 
             <!-- Search Bar & จองคิว (Desktop) -->
             <div class="flex space-x-4 items-center hidden sm:flex">
-                <form class="flex items-center">
+                <form class="flex items-center" @submit.prevent="onSearch">
                     <div class="relative w-full">
                         <!-- ไอคอนแว่นขยายแบบ SVG -->
                         <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
@@ -20,8 +20,12 @@
                         </svg>
 
                         <!-- ช่องค้นหา -->
-                        <input type="text" placeholder="พิมพ์ชื่อที่ต้องการค้นหา..."
-                            class="w-full rounded-full border border-[#dcdcdc] bg-white px-4 py-[10px] pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388]" />
+                        <input
+                            v-model="search"
+                            type="text"
+                            placeholder="พิมพ์ชื่อที่ต้องการค้นหา..."
+                            class="w-full rounded-full border border-[#dcdcdc] bg-white px-4 py-[10px] pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388]"
+                        />
                     </div>
 
                     <button type="submit"
@@ -32,7 +36,8 @@
 
                 <!-- จองคิว Button -->
                 <button
-                    class="ml-2 bg-[#184c36] hover:bg-[#0e2d1e] text-white text-sm font-medium rounded-full px-6 py-2 flex items-center gap-2 transition">
+                    class="ml-2 bg-[#184c36] hover:bg-[#0e2d1e] text-white text-sm font-medium rounded-full px-6 py-2 flex items-center gap-2 transition"
+                    @click="goToPartnerStores">
                     จองคิว
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <rect x="3" y="4" width="18" height="18" rx="2" />
@@ -44,7 +49,8 @@
             <!-- ปุ่มจองคิว + Hamburger (Mobile) -->
             <div class="flex items-center space-x-2 sm:hidden">
                 <button
-                    class="bg-[#184c36] hover:bg-[#0e2d1e] text-white text-sm font-medium rounded-full px-6 py-2 flex items-center gap-2 transition">
+                    class="bg-[#184c36] hover:bg-[#0e2d1e] text-white text-sm font-medium rounded-full px-6 py-2 flex items-center gap-2 transition"
+                    @click="goToPartnerStores">
                     จองคิว
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <rect x="3" y="4" width="18" height="18" rx="2" />
@@ -105,7 +111,9 @@
 <script setup>
 import { useAuthStore } from '../stores/auth';
 import { useRouter } from 'vue-router';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const authStore = useAuthStore();
 const showMobileMenu = ref(false);
@@ -114,6 +122,78 @@ const router = useRouter();
 function handleLogout() {
     authStore.logout();
     router.push('/login');
+}
+
+function goToPartnerStores() {
+  router.push('/partnerstores');
+}
+
+// --- ระบบค้นหา ---
+const search = ref("");
+const categories = ref([]);
+const subcategories = ref([]);
+const products = ref([]);
+const stores = ref([]);
+
+onMounted(async () => {
+  // ดึงชื่อหมวดหมู่หลัก
+  try {
+    const resCat = await axios.get(`${import.meta.env.VITE_API_URL}/categories`);
+    categories.value = Array.isArray(resCat.data) ? resCat.data.map(c => c.name) : [];
+  } catch {}
+  // ดึงชื่อหมวดหมู่ย่อย
+  try {
+    const resSub = await axios.get(`${import.meta.env.VITE_API_URL}/categories/subcategories/all`);
+    subcategories.value = Array.isArray(resSub.data) ? resSub.data.map(s => s.name) : [];
+  } catch {}
+  // ดึงชื่อสินค้า
+  try {
+    const resProd = await axios.get(`${import.meta.env.VITE_API_URL}/products`);
+    products.value = Array.isArray(resProd.data) ? resProd.data.map(p => p.name) : [];
+  } catch {}
+  // ดึงชื่อร้านค้า
+  try {
+    const resStore = await axios.get(`${import.meta.env.VITE_API_URL}/partners`);
+    const partnerList = resStore.data.data;
+    stores.value = Array.isArray(partnerList) ? partnerList.map(p => p.companyName) : [];
+  } catch {}
+});
+
+async function onSearch(e) {
+  if (e) e.preventDefault();
+  const keyword = search.value.trim();
+  if (!keyword) return;
+  // ค้นหาในหมวดหมู่หลัก
+  if (categories.value.includes(keyword)) {
+    router.push({ path: '/category', query: { highlight: keyword } });
+    return;
+  }
+  // ค้นหาในหมวดหมู่ย่อย
+  if (subcategories.value.includes(keyword)) {
+    router.push({ path: '/subcategory', query: { highlight: keyword } });
+    return;
+  }
+  // ค้นหาในสินค้า
+  if (products.value.includes(keyword)) {
+    router.push({ path: '/productcategory', query: { highlight: keyword } });
+    return;
+  }
+  // ค้นหาในร้านค้า
+  if (stores.value.includes(keyword)) {
+    router.push({ path: '/partnerstores', query: { highlight: keyword } });
+    return;
+  }
+  // ค้นหาราคารับซื้อ-ขาย
+  if (["ราคา", "ราคารับซื้อ", "ราคารับซื้อ-ขาย", "buyback", "price"].some(k => keyword.includes(k))) {
+    router.push({ path: '/buybackprice' });
+    return;
+  }
+  // ไม่พบอะไรเลย
+  await Swal.fire({
+    icon: 'warning',
+    title: 'ไม่พบข้อมูลที่ค้นหา',
+    confirmButtonText: 'ตกลง'
+  });
 }
 </script>
 

@@ -67,13 +67,14 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import axios from 'axios'
 import Bar from '../../components/Bar.vue'
 import Footer from '../../components/Footer.vue'
 
 const router = useRouter()
+const route = useRoute();
 const allSubCategories = ref([])
 const currentPage = ref(1)
 const pageSize = 8
@@ -114,6 +115,30 @@ const goToCategory = () => {
     router.push('/category')
 }
 
+// Animation highlight
+function highlightSubCategory(name) {
+  nextTick(() => {
+    const idx = pagedSubCategories.value.findIndex(sub => sub.name === name);
+    if (idx !== -1) {
+      const cards = document.querySelectorAll('.subcat-card');
+      const card = cards[idx];
+      if (card) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+        card.classList.add('highlight-animate');
+        setTimeout(() => card.classList.remove('highlight-animate'), 1200);
+      }
+    }
+  });
+}
+
+watch(() => route.query.highlight, (val) => {
+  if (val) highlightSubCategory(val);
+});
+
+onMounted(() => {
+  if (route.query.highlight) highlightSubCategory(route.query.highlight);
+});
+
 onMounted(async () => {
     try {
         const res = await axios.get(`${import.meta.env.VITE_API_URL}/categories/subcategories/${categoryId.value}`)
@@ -131,5 +156,17 @@ onMounted(async () => {
 <style scoped>
 .shadow-card {
     box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.08);
+}
+@keyframes pulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 #b6e388; }
+  20% { transform: scale(1.10); box-shadow: 0 0 0 8px #b6e38844; }
+  40% { transform: scale(1); box-shadow: 0 0 0 0 #b6e388; }
+  60% { transform: scale(1.10); box-shadow: 0 0 0 8px #b6e38844; }
+  80% { transform: scale(1); box-shadow: 0 0 0 0 #b6e388; }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 #b6e388; }
+}
+.highlight-animate {
+  animation: pulse 1.2s 2;
+  z-index: 2;
 }
 </style>

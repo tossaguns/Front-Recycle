@@ -1,36 +1,45 @@
 <template>
     <Bar />
-    <div class="relative w-full min-h-screen bg-[#f7faf7] flex flex-col items-center overflow-x-hidden">
+    <section class="relative w-full bg-[#f7faf7] flex flex-col items-center overflow-x-hidden pb-0">
         <!-- BG Layer -->
-        <div class="absolute top-0 left-0 w-full lg:w-1/3 h-full lg:h-[730px] bg-lime-300 z-0"></div>
-
-        <div class="absolute top-10 left-0 w-full h-[550px] bg-emerald-950 shadow-lg z-0"></div>
-
+        <div
+            class="absolute top-0 left-0 w-full lg:w-1/3 h-full lg:h-[730px] bg-lime-300 z-0"
+            :class="heroLeftVisible ? 'slide-in-top' : 'opacity-0'"
+        ></div>
+        <div
+            class="absolute top-10 left-0 w-full h-[550px] bg-emerald-950 shadow-lg z-0"
+            :class="heroLeftVisible ? 'slide-in-right' : 'opacity-0'"
+        ></div>
         <!-- Content Area -->
-        <div class="relative w-full max-w-[1620px] flex flex-col lg:flex-row gap-8 pt-20 pb-8 px-4 z-10 space-y-10">
+        <div class="relative w-full max-w-[1620px] flex flex-col lg:flex-row gap-8 pt-16 pb-0 px-4 z-10">
             <!-- Left: Info -->
-            <div class="flex-1 flex justify-center lg:items-start lg:justify-start text-start">
+            <div
+                ref="heroLeftRef"
+                :class="heroLeftVisible ? 'slide-in-left' : 'opacity-0'"
+                class="flex-1 flex justify-center lg:items-start lg:justify-start text-start"
+            >
                 <div class="min-w-[320px] max-w-x ml-0 lg:ml-20 mb-5 mt-20 lg:mb-0">
                     <h1 class="text-5xl md:text-6xl font-bold text-white mb-4 drop-shadow leading-snug">
                         รับซื้อ - ขายสินค้า<br>รีไซเคิล
                     </h1>
-
                     <div class="mb-6">
                         <span class="text-[#e6f7e6] text-base max-w-md drop-shadow leading-relaxed">
                             ความมุ่งมั่นของเราคือการซื้อขายสินค้ารีไซเคิล<br>
                             กำลังนำบ้านเมืองไปสู่โลกที่สะอาดและสุขภาพที่ดีขึ้น
                         </span>
                     </div>
-
                     <button
                         class="bg-lime-300 hover:bg-[#e6f7e6] text-[#184c36] rounded-full px-6 py-3 text-base font-semibold shadow transition">
                         ดาวน์โหลดไฟล์ราคา
                     </button>
                 </div>
             </div>
-
-            <div class="flex items-center justify-center lg:items-start lg:justify-start">
-                <!-- Right: Price Table -->
+            <!-- Right: Price Table -->
+            <div
+                ref="heroRightRef"
+                :class="heroRightVisible ? 'slide-in-right' : 'opacity-0'"
+                class="flex items-center justify-center lg:items-start lg:justify-start mb-5"
+            >
                 <div class="flex-1 min-w-[320px] max-w-lg mr-0 lg:mr-20">
                     <div class="w-full bg-[#f7faf7] rounded-2xl shadow-xl overflow-hidden border border-[#e6f7e6] cursor-pointer" @click="goToBuyBackPrice">
                         <div class="bg-[#e6f7e6] px-6 py-4 border-b border-[#e6f7e6]">
@@ -91,95 +100,177 @@
                 </div>
             </div>
         </div>
-    </div>
-    <Category />
-    <PartnerStores />
+    </section>
+
+    <section class="bg-white w-full py-8">
+        <div
+            ref="contentRef"
+            :class="contentVisible ? 'slide-in-right' : 'opacity-0'"
+            class="max-w-[1620px] mx-auto px-4"
+        >
+            <Category />
+        </div>
+    </section>
+
+    <section class="bg-[#f5faef] w-full py-8">
+        <div
+            ref="storeSection"
+            :class="[
+                'max-w-[1620px] mx-auto px-4',
+                storeVisible ? 'slide-in-left' : 'opacity-0'
+            ]"
+        >
+            <PartnerStores />
+        </div>
+    </section>
+
     <Footer />
 </template>
 
-<script>
+<script setup>
 import axios from 'axios';
 import Bar from '../../components/Bar.vue';
 import Footer from '../../components/Footer.vue';
 import Category from './Category.vue';
 import PartnerStores from './PartnerStores.vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { useRouter } from 'vue-router';
 
-export default {
-    name: "Home",
-    components: { Bar, Footer, Category, PartnerStores },
-    data() {
-        return {
-            priceList: [],
-            todayDate: '',
-        };
-    },
-    mounted() {
-        this.fetchBuyBackPrices();
-        this.setTodayDate();
-    },
-    methods: {
-        setTodayDate() {
-            const d = new Date();
-            const day = String(d.getDate()).padStart(2, '0');
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const year = d.getFullYear() + 543;
-            this.todayDate = `${day}/${month}/${year}`;
-        },
-        async fetchBuyBackPrices() {
-            try {
-                // ดึง current/previous จาก backend
-                const res = await axios.get(`${import.meta.env.VITE_API_URL}/scrape`);
-                const current = Array.isArray(res.data.current) ? res.data.current : (res.data.current?.table || []);
-                const previous = Array.isArray(res.data.previous) ? res.data.previous : (res.data.previous?.table || []);
-                // เตรียม prevPriceMap
-                const prevMap = new Map();
-                if (previous.length > 0) {
-                    for (const row of previous[0]) {
-                        if (row[0] && row[1]) prevMap.set(row[0], parseFloat((row[1] || '').replace('|', '').trim()));
-                        if (row[2] && row[3]) prevMap.set(row[2], parseFloat((row[3] || '').replace('|', '').trim()));
-                    }
-                }
-                let items = [];
-                if (current.length > 0) {
-                    for (const row of current[0]) {
-                        // ฝั่งซ้าย
-                        let leftName = row[0];
-                        let leftPrice = row[1] || '';
-                        if (leftPrice) leftPrice = leftPrice.replace('|', '').trim();
-                        let leftChange = '-';
-                        if (leftName && leftPrice) {
-                            const prev = prevMap.get(leftName);
-                            const curr = parseFloat(leftPrice);
-                            if (prev !== undefined && !isNaN(curr) && !isNaN(prev)) {
-                                const d = +(curr - prev).toFixed(2);
-                                leftChange = d === 0 ? '-' : (d > 0 ? '+' + d : d);
-                            }
-                            items.push({ type: leftName, unit: 'กิโล', price: leftPrice, change: leftChange });
-                        }
-                        // ฝั่งขวา
-                        let rightName = row[2];
-                        let rightPrice = row[3] || '';
-                        if (rightPrice) rightPrice = rightPrice.replace('|', '').trim();
-                        let rightChange = '-';
-                        if (rightName && rightPrice) {
-                            const prev = prevMap.get(rightName);
-                            const curr = parseFloat(rightPrice);
-                            if (prev !== undefined && !isNaN(curr) && !isNaN(prev)) {
-                                const d = +(curr - prev).toFixed(2);
-                                rightChange = d === 0 ? '-' : (d > 0 ? '+' + d : d);
-                            }
-                            items.push({ type: rightName, unit: 'กิโล', price: rightPrice, change: rightChange });
-                        }
-                    }
-                }
-                this.priceList = items.slice(0, 10);
-            } catch (err) {
-                this.priceList = [];
-            }
-        },
-        goToBuyBackPrice() {
-            this.$router.push({ path: '/buybackprice' });
-        },
-    },
-};
+// Reveal on scroll composable (เล่นซ้ำได้)
+function useRevealOnScroll() {
+  const isVisible = ref(false);
+  const el = ref(null);
+  let observer;
+  onMounted(() => {
+    observer = new window.IntersectionObserver(
+      ([entry]) => {
+        isVisible.value = entry.isIntersecting;
+      },
+      { threshold: 0.15 }
+    );
+    if (el.value) observer.observe(el.value);
+  });
+  onBeforeUnmount(() => {
+    if (observer && el.value) observer.unobserve(el.value);
+  });
+  return { el, isVisible };
+}
+
+const { el: headingRef, isVisible: headingVisible } = useRevealOnScroll();
+const { el: contentRef, isVisible: contentVisible } = useRevealOnScroll();
+const { el: storeSection, isVisible: storeVisible } = useRevealOnScroll();
+const { el: heroLeftRef, isVisible: heroLeftVisible } = useRevealOnScroll();
+const { el: heroRightRef, isVisible: heroRightVisible } = useRevealOnScroll();
+
+// --- data ---
+const priceList = ref([]);
+const todayDate = ref('');
+const router = useRouter();
+
+// --- methods ---
+function setTodayDate() {
+  const d = new Date();
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear() + 543;
+  todayDate.value = `${day}/${month}/${year}`;
+}
+
+async function fetchBuyBackPrices() {
+  try {
+    // ดึง current/previous จาก backend
+    const res = await axios.get(`${import.meta.env.VITE_API_URL}/scrape`);
+    const current = Array.isArray(res.data.current) ? res.data.current : (res.data.current?.table || []);
+    const previous = Array.isArray(res.data.previous) ? res.data.previous : (res.data.previous?.table || []);
+    // เตรียม prevPriceMap
+    const prevMap = new Map();
+    if (previous.length > 0) {
+      for (const row of previous[0]) {
+        if (row[0] && row[1]) prevMap.set(row[0], parseFloat((row[1] || '').replace('|', '').trim()));
+        if (row[2] && row[3]) prevMap.set(row[2], parseFloat((row[3] || '').replace('|', '').trim()));
+      }
+    }
+    let items = [];
+    if (current.length > 0) {
+      for (const row of current[0]) {
+        // ฝั่งซ้าย
+        let leftName = row[0];
+        let leftPrice = row[1] || '';
+        if (leftPrice) leftPrice = leftPrice.replace('|', '').trim();
+        if (leftPrice) leftPrice = leftPrice.replace(')', '').trim();
+        let leftChange = '-';
+        if (leftName && leftPrice) {
+          const prev = prevMap.get(leftName);
+          const curr = parseFloat(leftPrice);
+          if (prev !== undefined && !isNaN(curr) && !isNaN(prev)) {
+            const d = +(curr - prev).toFixed(2);
+            leftChange = d === 0 ? '-' : (d > 0 ? '+' + d : d);
+          }
+          items.push({ type: leftName, unit: 'กิโล', price: leftPrice, change: leftChange });
+        }
+        // ฝั่งขวา
+        let rightName = row[2];
+        let rightPrice = row[3] || '';
+        if (rightPrice) rightPrice = rightPrice.replace('|', '').trim();
+        if (rightPrice) rightPrice = rightPrice.replace(')', '').trim();
+        let rightChange = '-';
+        if (rightName && rightPrice) {
+          const prev = prevMap.get(rightName);
+          const curr = parseFloat(rightPrice);
+          if (prev !== undefined && !isNaN(curr) && !isNaN(prev)) {
+            const d = +(curr - prev).toFixed(2);
+            rightChange = d === 0 ? '-' : (d > 0 ? '+' + d : d);
+          }
+          items.push({ type: rightName, unit: 'กิโล', price: rightPrice, change: rightChange });
+        }
+      }
+    }
+    priceList.value = items.slice(0, 10);
+  } catch (err) {
+    priceList.value = [];
+  }
+}
+
+function goToBuyBackPrice() {
+  router.push({ path: '/buybackprice' });
+}
+
+onMounted(() => {
+  fetchBuyBackPrices();
+  setTodayDate();
+});
 </script>
+
+<style scoped>
+@keyframes slideInLeft {
+  0% { opacity: 0; transform: translateX(-80px);}
+  100% { opacity: 1; transform: translateX(0);}
+}
+@keyframes slideInRight {
+  0% { opacity: 0; transform: translateX(80px);}
+  100% { opacity: 1; transform: translateX(0);}
+}
+@keyframes slideInTop {
+  0% { opacity: 0; transform: translateY(-500px);}
+  100% { opacity: 1; transform: translateY(0);}
+}
+.slide-in-left {
+  animation: slideInLeft 0.9s cubic-bezier(.4,0,.2,1) both;
+}
+.slide-in-right {
+  animation: slideInRight 0.9s cubic-bezier(.4,0,.2,1) both;
+}
+.slide-in-top {
+  animation: slideInTop 0.9s cubic-bezier(.4,0,.2,1) both;
+}
+@keyframes bigSlideInUp {
+  0% { opacity: 0; transform: translateY(80px) scale(0.9); box-shadow: 0 0 0 0 #b6e388; }
+  30% { opacity: 1; transform: translateY(-10px) scale(1.12); box-shadow: 0 0 0 16px #b6e38844; }
+  60% { opacity: 1; transform: translateY(0) scale(1.04); box-shadow: 0 0 0 8px #b6e38844; }
+  100% { opacity: 1; transform: translateY(0) scale(1); box-shadow: 0 0 0 0 #b6e38800; }
+}
+.reveal-animate {
+  animation: bigSlideInUp 1.1s cubic-bezier(.4,0,.2,1);
+  will-change: transform, opacity, box-shadow;
+}
+</style>

@@ -5,66 +5,67 @@
             ตารางราคาสินค้ารีไซเคิล (BuyBack Price Table)
         </h1>
         <div class="flex justify-center items-center w-full flex-1 mb-10">
-            <div class="w-full max-w-[1550px]">
+            <div class="w-full max-w-[1450px]">
                 <div class="bg-gray-200 rounded-2xl shadow-xl overflow-hidden border border-gray-300">
                     <div
                         class="bg-[#e6f7e6] px-6 py-4 border-b border-gray-300 flex flex-col md:flex-row md:justify-between">
                         <span class="font-bold text-[#184c36] text-lg block">ราคารับ - ซื้อ</span>
                         <span class="text-xs text-[#7a7a7a]">ณ วันที่ {{ todayDate }}</span>
                     </div>
-                    <table class="w-full border-collapse text-sm">
-                        <thead>
-                            <tr>
-                                <th class="bg-[#e6f7e6] text-[#1a3d1a] px-4 py-2 text-left">รายการ</th>
-                                <th class="bg-[#e6f7e6] text-[#1a3d1a] px-4 py-2 text-left">หน่วยรับซื้อ</th>
-                                <th class="bg-[#e6f7e6] text-[#1a3d1a] px-4 py-2 text-left">ราคารับซื้อ</th>
-                                <th class="bg-[#e6f7e6] text-[#1a3d1a] px-4 py-2 text-left">การเปลี่ยนแปลง</th>
-                                <th class="bg-[#e6f7e6] text-[#1a3d1a] px-4 py-2 text-left border-l border-gray-300">
-                                    รายการ</th>
-                                <th class="bg-[#e6f7e6] text-[#1a3d1a] px-4 py-2 text-left">หน่วยรับซื้อ</th>
-                                <th class="bg-[#e6f7e6] text-[#1a3d1a] px-4 py-2 text-left">ราคารับซื้อ</th>
-                                <th class="bg-[#e6f7e6] text-[#1a3d1a] px-4 py-2 text-left">การเปลี่ยนแปลง</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="(pair, idx) in pairedItems" :key="idx"
-                                :class="`text-[#184c36] font-medium transition ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f7faf7]'}`">
-                                <!-- ฝั่งซ้าย -->
-                                <td class="px-4 py-4">{{ pair[0]?.name || '' }}</td>
-                                <td class="px-4 py-4"><span v-if="pair[0]">กิโล</span></td>
-                                <td class="px-4 py-4">
-                                    <span v-if="pair[0]"
-                                        class="inline-block bg-white rounded-full px-3 py-1 shadow text-[#184c36] font-bold">
-                                        {{ pair[0]?.price }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <span v-if="pair[0]"
-                                        class="inline-flex items-center gap-1 bg-[#e6f7e6] rounded-full px-2 py-1 text-gray-500 font-bold text-sm">
-                                        {{ pair[0].diff }}
-                                    </span>
-                                </td>
-                                <!-- ฝั่งขวา -->
-                                <td class="px-4 py-4 border-l border-gray-300">{{ pair[1]?.name || '' }}</td>
-                                <td class="px-4 py-4"><span v-if="pair[1]">กิโล</span></td>
-                                <td class="px-4 py-4">
-                                    <span v-if="pair[1]"
-                                        class="inline-block bg-white rounded-full px-3 py-1 shadow text-[#184c36] font-bold">
-                                        {{ pair[1]?.price }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <span v-if="pair[1]"
-                                        class="inline-flex items-center gap-1 bg-[#e6f7e6] rounded-full px-2 py-1 text-gray-500 font-bold text-sm">
-                                        {{ pair[1].diff }}
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr v-if="pairedItems.length === 0">
-                                <td colspan="8" class="text-center py-6 text-gray-400">ไม่มีข้อมูลราคา</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="overflow-x-auto w-full"> <!-- เพิ่ม div นี้ -->
+                        <table class="w-full min-w-[700px] border-collapse text-xs md:text-sm"> <!-- ปรับ min-w และ text-xs -->
+                            <thead>
+                                <tr>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] px-2 md:px-4 py-2 text-left whitespace-nowrap">รายการ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] px-2 md:px-4 py-2 text-left whitespace-nowrap">หน่วยรับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] px-2 md:px-4 py-2 text-left whitespace-nowrap">ราคารับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] px-2 md:px-4 py-2 text-left whitespace-nowrap">การเปลี่ยนแปลง</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] px-2 md:px-4 py-2 text-left border-l border-gray-300 whitespace-nowrap">รายการ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] px-2 md:px-4 py-2 text-left whitespace-nowrap">หน่วยรับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] px-2 md:px-4 py-2 text-left whitespace-nowrap">ราคารับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] px-2 md:px-4 py-2 text-left whitespace-nowrap">การเปลี่ยนแปลง</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(pair, idx) in pairedItems" :key="idx"
+                                    :class="`text-[#184c36] font-medium transition ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f7faf7]'}`">
+                                    <!-- ฝั่งซ้าย -->
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap">{{ formatName(pair[0]?.name) || '' }}</td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap"><span v-if="pair[0]">กิโล</span></td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap">
+                                        <span v-if="pair[0]"
+                                            class="inline-block bg-white rounded-full px-2 md:px-3 py-1 shadow text-[#184c36] font-bold">
+                                            {{ pair[0]?.price }}
+                                        </span>
+                                    </td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap">
+                                        <span v-if="pair[0]"
+                                            class="inline-flex items-center gap-1 bg-[#e6f7e6] rounded-full px-2 py-1 text-gray-500 font-bold text-xs md:text-sm">
+                                            {{ pair[0].diff }}
+                                        </span>
+                                    </td>
+                                    <!-- ฝั่งขวา -->
+                                    <td class="px-2 md:px-4 py-2 md:py-4 border-l border-gray-300 whitespace-nowrap">{{ formatName(pair[1]?.name) || '' }}</td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap"><span v-if="pair[1]">กิโล</span></td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap">
+                                        <span v-if="pair[1]"
+                                            class="inline-block bg-white rounded-full px-2 md:px-3 py-1 shadow text-[#184c36] font-bold">
+                                            {{ pair[1]?.price }}
+                                        </span>
+                                    </td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap">
+                                        <span v-if="pair[1]"
+                                            class="inline-flex items-center gap-1 bg-[#e6f7e6] rounded-full px-2 py-1 text-gray-500 font-bold text-xs md:text-sm">
+                                            {{ pair[1].diff }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr v-if="pairedItems.length === 0">
+                                    <td colspan="8" class="text-center py-6 text-gray-400">ไม่มีข้อมูลราคา</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div> <!-- ปิด div overflow-x-auto -->
                     <div class="text-xs text-gray-500 mt-4 px-4 pb-6">
                         หมายเหตุ: ราคาที่แจ้งอาจมีการเปลี่ยนแปลงอยู่ตลอด กรุณาตรวจสอบกับร้านค้าก่อนทำรายการทุกครั้ง
                     </div>
@@ -164,6 +165,7 @@ export default {
                         let r = [];
                         for (let i = 0; i < 4; i++) {
                             let val = row[i] || '';
+                            if (i === 1 || i === 3) val = val.replace(')', '').trim();
                             if (i === 1 || i === 3) val = val.replace('|', '').trim();
                             if ((i === 0 || i === 2) && (val === 'กลุ่มพลาสติก' || val === 'ู่มบ็ตต็ด' || val === 'งดรับ')) val = null;
                             r.push(val);
@@ -190,6 +192,17 @@ export default {
             const month = String(d.getMonth() + 1).padStart(2, '0');
             const year = d.getFullYear() + 543;
             this.todayDate = `${day}/${month}/${year}`;
+        },
+        formatName(name) {
+            if (!name) return '';
+            // เว้นวรรคหน้า +, %, หรือ ( ... )
+            name = name.replace(/([^\s+])\+/g, '$1 + ');
+            name = name.replace(/([^\s])%/g, '$1 %');
+            name = name.replace(/([^\s])\(/g, '$1 (');
+            name = name.replace(/\)([\p{L}0-9])/gu, ') $1');
+            name = name.replace(/([\p{L}])([0-9])/gu, '$1 $2');
+            name = name.replace(/([0-9])([\p{L}])/gu, '$1 $2');
+            return name.replace(/\s{2,}/g, ' ').trim();
         },
     },
 };

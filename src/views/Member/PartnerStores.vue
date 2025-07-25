@@ -1,8 +1,8 @@
 <template>
-  <div class="min-h-screen bg-white flex flex-col">
+  <div class="bg-white flex flex-col">
     <Bar v-if="showBarFooter" />
 
-    <div class="bg-[#f7faf0] min-h-screen">
+    <div class="bg-[#f7faf0]">
       <main class="flex-1 max-w-7xl mx-auto w-full px-8 py-8 relative flex flex-col justify-center ">
         <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-[#222] text-center my-6 sm:my-8 md:my-10">
           ร้านรับ - ซื้อสินค้ารีไซเคิล
@@ -99,7 +99,7 @@
         <!-- ร้านค้า -->
         <div v-if="pagedStores.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-8">
           <div v-for="(store, idx) in pagedStores" :key="store._id || idx"
-            class="flex flex-col items-center">
+            class="flex flex-col items-center store-card">
             <img :src="store.img || defaultImg" alt="store"
               class="rounded-xl w-full aspect-square object-cover mb-4" />
             <div class="text-lg font-semibold text-black mb-1">{{ store.name || 'ชื่อร้าน' }}</div>
@@ -158,16 +158,17 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import axios from 'axios';
 import Bar from '../../components/Bar.vue';
 import Footer from '../../components/Footer.vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { defineProps } from 'vue';
 const props = defineProps({ showBarFooter: { type: Boolean, default: false } });
 const showBarFooter = props.showBarFooter;
 
 const router = useRouter();
+const route = useRoute();
 const stores = ref([]);
 const provinces = ref([]);
 const districts = ref([]);
@@ -324,6 +325,26 @@ function selectPartner(store) {
   router.push('/partnerdetail');
 }
 
+// Animation highlight
+function highlightStore(name) {
+  nextTick(() => {
+    const idx = pagedStores.value.findIndex(store => store.name === name);
+    if (idx !== -1) {
+      const cards = document.querySelectorAll('.store-card');
+      const card = cards[idx];
+      if (card) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+        card.classList.add('highlight-animate');
+        setTimeout(() => card.classList.remove('highlight-animate'), 1200);
+      }
+    }
+  });
+}
+
+watch(() => route.query.highlight, (val) => {
+  if (val) highlightStore(val);
+});
+
 onMounted(async () => {
   if (scrollRef.value) {
     scrollRef.value.addEventListener('scroll', updateScrollState)
@@ -355,11 +376,24 @@ onMounted(async () => {
     stores.value = [];
     provinces.value = [];
   }
+  if (route.query.highlight) highlightStore(route.query.highlight);
 });
 </script>
 
 <style scoped>
 .bg-partner-bg {
   background: #f7faf0;
+}
+@keyframes pulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 #b6e388; }
+  20% { transform: scale(1.10); box-shadow: 0 0 0 8px #b6e38844; }
+  40% { transform: scale(1); box-shadow: 0 0 0 0 #b6e388; }
+  60% { transform: scale(1.10); box-shadow: 0 0 0 8px #b6e38844; }
+  80% { transform: scale(1); box-shadow: 0 0 0 0 #b6e388; }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 #b6e388; }
+}
+.highlight-animate {
+  animation: pulse 1.2s 2;
+  z-index: 2;
 }
 </style>
