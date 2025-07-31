@@ -16,21 +16,21 @@
                         <table class="w-full min-w-[700px] border-collapse text-xs md:text-sm"> <!-- ปรับ min-w และ text-xs -->
                             <thead>
                                 <tr>
-                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] px-2 md:px-4 py-2 text-left whitespace-nowrap">รายการ</th>
-                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] px-2 md:px-4 py-2 text-left whitespace-nowrap">หน่วยรับซื้อ</th>
-                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] px-2 md:px-4 py-2 text-left whitespace-nowrap">ราคารับซื้อ</th>
-                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] px-2 md:px-4 py-2 text-left whitespace-nowrap">การเปลี่ยนแปลง</th>
-                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] px-2 md:px-4 py-2 text-left border-l border-gray-300 whitespace-nowrap">รายการ</th>
-                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] px-2 md:px-4 py-2 text-left whitespace-nowrap">หน่วยรับซื้อ</th>
-                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] px-2 md:px-4 py-2 text-left whitespace-nowrap">ราคารับซื้อ</th>
-                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] px-2 md:px-4 py-2 text-left whitespace-nowrap">การเปลี่ยนแปลง</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left w-[30%]">รายการ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">หน่วยรับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">ราคารับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">การเปลี่ยนแปลง</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left border-l border-gray-300 w-[30%]">รายการ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">หน่วยรับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">ราคารับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">การเปลี่ยนแปลง</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr v-for="(pair, idx) in pairedItems" :key="idx"
-                                    :class="`text-[#184c36] font-medium transition ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f7faf7]'}`">
+                                    :class="`text-[#184c36] text-[10px] md:text-xs font-medium transition ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f7faf7]'}`">
                                     <!-- ฝั่งซ้าย -->
-                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap">{{ formatName(pair[0]?.name) || '' }}</td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 break-words">{{ formatName(pair[0]?.name) || '' }}</td>
                                     <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap"><span v-if="pair[0]">กิโล</span></td>
                                     <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap">
                                         <span v-if="pair[0]"
@@ -45,7 +45,7 @@
                                         </span>
                                     </td>
                                     <!-- ฝั่งขวา -->
-                                    <td class="px-2 md:px-4 py-2 md:py-4 border-l border-gray-300 whitespace-nowrap">{{ formatName(pair[1]?.name) || '' }}</td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 border-l border-gray-300 break-words">{{ formatName(pair[1]?.name) || '' }}</td>
                                     <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap"><span v-if="pair[1]">กิโล</span></td>
                                     <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap">
                                         <span v-if="pair[1]"
