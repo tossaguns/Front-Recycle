@@ -1,140 +1,205 @@
 <template>
     <Bar />
-    <section class="relative w-full bg-[#f7faf7] flex flex-col items-center overflow-x-hidden pb-0">
-        <!-- BG Layer -->
-        <div
-            class="absolute top-0 left-0 w-full lg:w-1/3 h-full lg:h-[730px] bg-lime-300 z-0"
-            :class="heroLeftVisible ? 'slide-in-top' : 'opacity-0'"
-        ></div>
-        <div
-            class="absolute top-10 left-0 w-full h-[550px] bg-emerald-950 shadow-lg z-0"
-            :class="heroLeftVisible ? 'slide-in-right' : 'opacity-0'"
-        ></div>
-        <!-- Content Area -->
-        <div class="relative w-full max-w-[1620px] flex flex-col lg:flex-row gap-8 pt-16 pb-0 px-4 z-10">
-            <!-- Left: Info -->
+    
+    <!-- Landing Page (เมื่อยังไม่ได้ล็อกอิน) -->
+    <div v-if="!authStore.isAuthenticated">
+        <!-- Background -->
+        <section class="relative w-full bg-[#f7faf7] flex flex-col items-center overflow-x-hidden pb-0">
+            <!-- BG Layer -->
             <div
-                ref="heroLeftRef"
-                :class="heroLeftVisible ? 'slide-in-left' : 'opacity-0'"
-                class="flex-1 flex justify-center lg:items-start lg:justify-start text-start"
-            >
-                <div class="min-w-[320px] max-w-x ml-0 lg:ml-20 mb-5 mt-20 lg:mb-0">
-                    <h1 class="text-5xl md:text-6xl font-bold text-white mb-4 drop-shadow leading-snug">
-                        รับซื้อ - ขายสินค้า<br>รีไซเคิล
-                    </h1>
-                    <div class="mb-6">
-                        <span class="text-[#e6f7e6] text-base max-w-md drop-shadow leading-relaxed">
-                            ความมุ่งมั่นของเราคือการซื้อขายสินค้ารีไซเคิล<br>
-                            กำลังนำบ้านเมืองไปสู่โลกที่สะอาดและสุขภาพที่ดีขึ้น
-                        </span>
-                    </div>
-                    <button
-                        class="bg-lime-300 hover:bg-[#e6f7e6] text-[#184c36] rounded-full px-6 py-3 text-base font-semibold shadow transition">
-                        ดาวน์โหลดไฟล์ราคา
-                    </button>
-                </div>
-            </div>
-            <!-- Right: Price Table -->
+                class="absolute top-0 left-0 lg:left-20 w-full lg:w-1/3 h-full bg-[#106154] z-0"
+                :class="heroLeftVisible ? 'slide-in-top' : 'opacity-0'"
+            ></div>
             <div
-                ref="heroRightRef"
-                :class="heroRightVisible ? 'slide-in-right' : 'opacity-0'"
-                class="flex items-center justify-center lg:items-start lg:justify-start mb-5"
-            >
-                <div class="flex-1 min-w-[320px] max-w-lg mr-0 lg:mr-20">
-                    <div class="w-full bg-[#f7faf7] rounded-2xl shadow-xl overflow-hidden border border-[#e6f7e6] cursor-pointer" @click="goToBuyBackPrice">
-                        <div class="bg-[#e6f7e6] px-6 py-4 border-b border-[#e6f7e6]">
-                            <span class="font-bold text-[#184c36] text-lg block">ราคารับ - ซื้อ</span>
-                            <span class="text-xs text-[#7a7a7a]">ณ วันที่ {{ todayDate }}</span>
+                class="absolute top-10 left-0 w-full h-[550px] bg-[#2BAC75] shadow-lg z-0"
+                :class="heroLeftVisible ? 'slide-in-right' : 'opacity-0'"
+            ></div>
+            <!-- Content Area -->
+            <div class="relative w-full max-w-[1620px] flex flex-col lg:flex-row gap-8 pt-16 pb-0 px-4 z-10">
+                <!-- Left: Info -->
+                <div
+                    ref="heroLeftRef"
+                    :class="heroLeftVisible ? 'slide-in-left' : 'opacity-0'"
+                    class="flex-1 flex justify-center lg:items-start lg:justify-start text-start"
+                >
+                    <div class="min-w-[320px] max-w-x ml-0 lg:ml-20 mb-5 mt-20 lg:mb-0">
+                        <h1 class="text-5xl md:text-6xl font-bold text-white mb-4 drop-shadow leading-snug">
+                            รับซื้อ - ขายสินค้า<br>รีไซเคิล
+                        </h1>
+                        <div class="mb-6">
+                            <span class="text-[#e6f7e6] text-base max-w-md drop-shadow leading-relaxed">
+                                ความมุ่งมั่นของเราคือการซื้อขายสินค้ารีไซเคิล<br>
+                                กำลังนำบ้านเมืองไปสู่โลกที่สะอาดและสุขภาพที่ดีขึ้น
+                            </span>
                         </div>
-                        <table class="w-full border-collapse text-sm">
-                            <thead>
-                                <tr>
-                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] px-4 py-2 text-left rounded-tl-2xl">ประเภท
-                                    </th>
-                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] px-4 py-2 text-left">หน่วยรับซื้อ</th>
-                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] px-4 py-2 text-left">ราคารับซื้อ</th>
-                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] px-4 py-2 text-left rounded-tr-2xl">
-                                        การเปลี่ยนแปลง</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="(item, idx) in priceList" :key="idx"
-                                    :class="`text-[#184c36] font-medium transition ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f7faf7]'}`"
-                                    style="border-bottom: 16px solid transparent;">
-                                    <td class="px-4 py-4">{{ item.type }}</td>
-                                    <td class="px-4 py-4">{{ item.unit }}</td>
-                                    <td class="px-4 py-4">
-                                        <span
-                                            class="inline-block bg-white rounded-full px-3 py-1 shadow text-[#184c36] font-bold">
-                                            {{ item.price }}
-                                        </span>
-                                    </td>
-                                    <td class="px-4 py-4">
-                                        <span v-if="item.change > 0"
-                                            class="inline-flex items-center gap-1 bg-[#e6f7e6] rounded-full px-2 py-1 text-green-600 font-bold text-sm">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
-                                                viewBox="0 0 24 24">
-                                                <path d="M5 12l5 5l9-9" stroke-linecap="round"
-                                                    stroke-linejoin="round" />
-                                            </svg>
-                                            +{{ item.change }}
-                                        </span>
-                                        <span v-else-if="item.change < 0"
-                                            class="inline-flex items-center gap-1 bg-[#fff0f0] rounded-full px-2 py-1 text-red-500 font-bold text-sm">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
-                                                viewBox="0 0 24 24">
-                                                <path d="M19 12l-7 7l-5-5" stroke-linecap="round"
-                                                    stroke-linejoin="round" />
-                                            </svg>
-                                            {{ item.change }}
-                                        </span>
-                                        <span v-else
-                                            class="inline-flex items-center gap-1 bg-[#e6f7e6] rounded-full px-2 py-1 text-gray-500 font-bold text-sm">
-                                            -
-                                        </span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <button @click="goToLogin"
+                            class="bg-[#FF9800] hover:bg-[#F57C00] text-white rounded-full px-6 py-3 text-base font-semibold shadow transition">
+                            เข้าสู่ระบบ
+                        </button>
+                    </div>
+                </div>
+                <!-- Right: Image -->
+                <div
+                    ref="heroRightRef"
+                    :class="heroRightVisible ? 'slide-in-right' : 'opacity-0'"
+                    class="flex items-center justify-center lg:items-center lg:justify-start mb-5"
+                >
+                    <div class="flex-1 min-w-[320px] max-w-lg mr-0 lg:mr-20">
+                        <div class="relative flex justify-center lg:justify-start">
+                            <img 
+                                src="../../assets/Rectangle 8.png" 
+                                alt="Recycling Symbol" 
+                                class="w-full h-auto max-w-sm lg:max-w-md rounded-2xl shadow-xl"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
+    </div>
 
-    <section class="bg-white w-full py-8">
-        <div
-            ref="contentRef"
-            :class="contentVisible ? 'slide-in-right' : 'opacity-0'"
-            class="max-w-[1620px] mx-auto px-4"
-        >
-            <Category />
-        </div>
-    </section>
+    <!-- Original Home Page (เมื่อล็อกอินแล้ว) -->
+    <div v-else>
+        <section class="relative w-full bg-[#f7faf7] flex flex-col items-center overflow-x-hidden pb-0">
+            <!-- BG Layer -->
+            <div
+                class="absolute top-0 left-0 lg:left-20 w-full lg:w-1/3 h-full lg:h-[730px] bg-[#106154] z-0"
+                :class="heroLeftVisible ? 'slide-in-top' : 'opacity-0'"
+            ></div>
+            <div
+                class="absolute top-10 left-0 w-full h-[550px] bg-[#2BAC75] shadow-lg z-0"
+                :class="heroLeftVisible ? 'slide-in-right' : 'opacity-0'"
+            ></div>
+            <!-- Content Area -->
+            <div class="relative w-full max-w-[1620px] flex flex-col lg:flex-row gap-8 pt-16 pb-0 px-4 z-10">
+                <!-- Left: Info -->
+                <div
+                    ref="heroLeftRef"
+                    :class="heroLeftVisible ? 'slide-in-left' : 'opacity-0'"
+                    class="flex-1 flex justify-center lg:items-start lg:justify-start text-start"
+                >
+                    <div class="min-w-[320px] max-w-x ml-0 lg:ml-20 mb-5 mt-20 lg:mb-0">
+                        <h1 class="text-5xl md:text-6xl font-bold text-white mb-4 drop-shadow leading-snug">
+                            รับซื้อ - ขายสินค้า<br>รีไซเคิล
+                        </h1>
+                        <div class="mb-6">
+                            <span class="text-[#e6f7e6] text-base max-w-md drop-shadow leading-relaxed">
+                                ความมุ่งมั่นของเราคือการซื้อขายสินค้ารีไซเคิล<br>
+                                กำลังนำบ้านเมืองไปสู่โลกที่สะอาดและสุขภาพที่ดีขึ้น
+                            </span>
+                        </div>
+                        <button
+                            class="bg-[#FF9800] hover:bg-[#F57C00] text-white rounded-full px-6 py-3 text-base font-semibold shadow transition">
+                            ดาวน์โหลดไฟล์ราคา
+                        </button>
+                    </div>
+                </div>
+                <!-- Right: Price Table -->
+                <div
+                    ref="heroRightRef"
+                    :class="heroRightVisible ? 'slide-in-right' : 'opacity-0'"
+                    class="flex items-center justify-center lg:items-start lg:justify-start mb-5"
+                >
+                    <div class="flex-1 min-w-[320px] max-w-lg mr-0 lg:mr-20">
+                        <div class="w-full bg-[#f7faf7] rounded-2xl shadow-xl overflow-hidden border border-[#e6f7e6] cursor-pointer" @click="goToBuyBackPrice">
+                            <div class="bg-[#e6f7e6] px-6 py-4 border-b border-[#e6f7e6]">
+                                <span class="font-bold text-[#184c36] text-lg block">ราคารับ - ซื้อ</span>
+                                <span class="text-xs text-[#7a7a7a]">ณ วันที่ {{ todayDate }}</span>
+                            </div>
+                            <table class="w-full border-collapse text-sm">
+                                <thead>
+                                    <tr>
+                                        <th class="bg-[#e6f7e6] text-[#1a3d1a] px-4 py-2 text-left rounded-tl-2xl">รายการ
+                                        </th>
+                                        <th class="bg-[#e6f7e6] text-[#1a3d1a] px-4 py-2 text-left">หน่วยรับซื้อ</th>
+                                        <th class="bg-[#e6f7e6] text-[#1a3d1a] px-4 py-2 text-left">ราคารับซื้อ</th>
+                                        <th class="bg-[#e6f7e6] text-[#1a3d1a] px-4 py-2 text-left rounded-tr-2xl">
+                                            การเปลี่ยนแปลง</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(item, idx) in priceList" :key="idx"
+                                        :class="`text-[#184c36] font-medium transition ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f7faf7]'}`"
+                                        style="border-bottom: 16px solid transparent;">
+                                        <td class="px-4 py-4">{{ item.type }}</td>
+                                        <td class="px-4 py-4">{{ item.unit }}</td>
+                                        <td class="px-4 py-4">
+                                            <span
+                                                class="inline-block bg-white rounded-full px-3 py-1 shadow text-[#184c36] font-bold">
+                                                {{ item.price }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-4">
+                                            <span v-if="item.change > 0"
+                                                class="inline-flex items-center gap-1 bg-[#e6f7e6] rounded-full px-2 py-1 text-green-600 font-bold text-sm">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                                                    viewBox="0 0 24 24">
+                                                    <path d="M5 12l5 5l9-9" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                </svg>
+                                                +{{ item.change }}
+                                            </span>
+                                            <span v-else-if="item.change < 0"
+                                                class="inline-flex items-center gap-1 bg-[#fff0f0] rounded-full px-2 py-1 text-red-500 font-bold text-sm">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                                                    viewBox="0 0 24 24">
+                                                    <path d="M19 12l-7 7l-5-5" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                </svg>
+                                                {{ item.change }}
+                                            </span>
+                                            <span v-else
+                                                class="inline-flex items-center gap-1 bg-[#e6f7e6] rounded-full px-2 py-1 text-gray-500 font-bold text-sm">
+                                                -
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    <section class="bg-[#f5faef] w-full py-8">
-        <div
-            ref="storeSection"
-            :class="[
-                'max-w-[1620px] mx-auto px-4',
-                storeVisible ? 'slide-in-left' : 'opacity-0'
-            ]"
-        >
-            <PartnerStores />
-        </div>
-    </section>
+        <section class="bg-white w-full py-8">
+            <div
+                ref="contentRef"
+                :class="contentVisible ? 'slide-in-right' : 'opacity-0'"
+                class="max-w-[1620px] mx-auto px-4"
+            >
+                <Category />
+            </div>
+        </section>
 
-    <Footer />
+        <section class="bg-[#f5faef] w-full py-8">
+            <div
+                ref="storeSection"
+                :class="[
+                    'max-w-[1620px] mx-auto px-4',
+                    storeVisible ? 'slide-in-left' : 'opacity-0'
+                ]"
+            >
+                <PartnerStores />
+            </div>
+        </section>
+
+        <Footer />
+    </div>
 </template>
 
 <script setup>
 import axios from 'axios';
+import { useAuthStore } from '../../stores/auth';
 import Bar from '../../components/Bar.vue';
 import Footer from '../../components/Footer.vue';
 import Category from './Category.vue';
 import PartnerStores from './PartnerStores.vue';
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
+
+const authStore = useAuthStore();
+const router = useRouter();
 
 // Reveal on scroll composable (เล่นซ้ำได้)
 function useRevealOnScroll() {
@@ -165,9 +230,12 @@ const { el: heroRightRef, isVisible: heroRightVisible } = useRevealOnScroll();
 // --- data ---
 const priceList = ref([]);
 const todayDate = ref('');
-const router = useRouter();
 
 // --- methods ---
+function goToLogin() {
+    router.push('/login');
+}
+
 function setTodayDate() {
   const d = new Date();
   const day = String(d.getDate()).padStart(2, '0');
@@ -273,4 +341,9 @@ onMounted(() => {
   animation: bigSlideInUp 1.1s cubic-bezier(.4,0,.2,1);
   will-change: transform, opacity, box-shadow;
 }
+
+/* Landing Page Styles */
+/* .landing-page {
+  min-height: 100vh;
+} */
 </style>

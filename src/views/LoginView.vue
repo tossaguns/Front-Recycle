@@ -28,10 +28,10 @@
 
 
     <div class="relative z-10 max-w-md w-full p-4">
-      <div class="bg-white bg-opacity-95 rounded-2xl shadow-xl p-8 animate-fadeIn">
+      <div class="bg-white bg-opacity-50 rounded-2xl shadow-xl p-8 animate-fadeIn backdrop-blur-xl">
         <div class="flex justify-center">
-          <div class="w-20 h-20 rounded-full overflow-hidden pulse-animation">
-            <img src="../assets/logorecycle.png" alt="Logo" class="w-full h-full object-cover">
+          <div class="pulse-animation">
+            <FullLogoIcon class="w-40 h-16" />
           </div>
         </div>
 
@@ -60,7 +60,7 @@
           </label>
           <!-- ปุ่มเข้าสู่ระบบแบบ glassmorphism เหมือนแก้ว (div) -->
           <div
-            class="glass-btn relative flex items-center justify-center gap-2 w-full px-8 py-3 rounded-xl font-extrabold text-base text-green-900 transition overflow-hidden group mt-4"
+            class="glass-btn relative flex items-center justify-center gap-2 w-full px-8 py-3 rounded-xl font-extrabold text-base text-gray-400 transition overflow-hidden group mt-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-lg hover:shadow-xl"
             @click="login" role="button" tabindex="0">
             <span class="z-10">เข้าสู่ระบบ</span>
           </div>
@@ -69,13 +69,13 @@
 
           <!-- ปุ่มสมัครสมาชิก -->
           <div
-            class="glass-btn relative flex items-center justify-center gap-2 w-full px-8 py-3 rounded-xl font-extrabold text-base text-green-900 transition overflow-hidden group mt-2"
+            class="glass-btn relative flex items-center justify-center gap-2 w-full px-8 py-3 rounded-xl font-extrabold text-base text-green-900 transition overflow-hidden group mt-2 bg-gradient-to-r from-green-200 to-green-300 hover:from-green-300 hover:to-green-400 shadow-lg hover:shadow-xl bg-opacity-80"
             @click="goToRegister">
             <span class="z-10">สมัครสมาชิก</span>
           </div>
           <!-- ปุ่มสมัครสมาชิกพาร์ทเนอร์ -->
           <div
-            class="glass-btn relative flex items-center justify-center gap-2 w-full px-8 py-3 rounded-xl font-extrabold text-base text-green-900 transition overflow-hidden group mt-2"
+            class="glass-btn relative flex items-center justify-center gap-2 w-full px-8 py-3 rounded-xl font-extrabold text-base text-green-900 transition overflow-hidden group mt-2 bg-gradient-to-r from-green-200 to-green-300 hover:from-green-300 hover:to-green-400 shadow-lg hover:shadow-xl bg-opacity-80"
             @click="goToRegisterPartner">
             <span class="z-10">สมัครสมาชิกพาร์ทเนอร์</span>
           </div>
@@ -92,6 +92,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import axios from 'axios'
 import Swal from 'sweetalert2'
+import { FullLogoIcon } from '../icons'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -124,26 +125,35 @@ const login = async () => {
 
     console.log('Login response:', { userData, hasToken: !!token });
 
-    if (response.data.success) {
-      await Swal.fire({
-        icon: 'success',
-        title: 'เข้าสู่ระบบสำเร็จ',
-        showConfirmButton: false,
-        timer: 1200
-      });
-      // ส่ง token ไปด้วย
-      authStore.login({ ...userData, token });
-      if (loginMode.value === 'partner' || userData.role === 'partner') {
-        localStorage.setItem('partner', JSON.stringify(userData));
-        localStorage.removeItem('user');
-      } else {
-        localStorage.setItem('user', JSON.stringify(userData));
-        localStorage.removeItem('partner');
+          if (response.data.success) {
+        await Swal.fire({
+          icon: 'success',
+          title: 'เข้าสู่ระบบสำเร็จ',
+          showConfirmButton: false,
+          timer: 1200
+        });
+        // ส่ง token ไปด้วย
+        authStore.login({ ...userData, token });
+        
+        // จัดการ localStorage และ navigation ตาม role
+        if (userData.role === 'partner') {
+          localStorage.setItem('partner', JSON.stringify(userData));
+          localStorage.removeItem('user');
+          router.push('/homepartner');
+        } else if (userData.role === 'member') {
+          localStorage.setItem('user', JSON.stringify(userData));
+          localStorage.removeItem('partner');
+          router.push('/');
+        } else {
+          // กรณี role อื่นๆ หรือไม่ระบุ
+          localStorage.setItem('user', JSON.stringify(userData));
+          localStorage.removeItem('partner');
+          router.push('/');
+        }
+        
+        username.value = ''
+        password.value = ''
       }
-      username.value = ''
-      password.value = ''
-      router.push('/')
-    }
   } catch (error) {
     if (error.response) {
       await Swal.fire({

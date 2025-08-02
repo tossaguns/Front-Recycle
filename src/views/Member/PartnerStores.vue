@@ -321,7 +321,7 @@ const clearFilters = () => {
 };
 
 function selectPartner(store) {
-  localStorage.setItem('partner', JSON.stringify(store));
+  localStorage.setItem('selectedPartner', JSON.stringify(store));
   router.push('/partnerdetail');
 }
 

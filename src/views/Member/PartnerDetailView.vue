@@ -9,17 +9,18 @@
                 <!-- Left: Store Info -->
                 <div class="flex-1 flex flex-col items-center md:items-start">
                     <div class="">
-                    <span
-                        class="inline-block bg-[#b6e388] text-[#184c36] px-4 py-1 rounded-full text-sm font-semibold mb-4">{{
-                            store?.name || '-' }}</span>
-                    <div class="flex items-center gap-2 mb-2">
-                        <img :src="store?.img || '/src/assets/NoPicture.webp'"
-                            class="w-10 h-10 rounded-full object-cover border-2 border-[#b6e388]" />
-                        <div class="flex flex-col">
-                            <span class="font-semibold text-base">{{ store?.fullName || '-' }}</span>
-                            <span class="text-xs text-gray-500">{{ companyFullAddress }}</span>
+                        <span
+                            class="inline-block bg-[#b6e388] text-[#184c36] px-4 py-1 rounded-full text-sm font-semibold mb-4">{{
+                                store?.name || '-' }}</span>
+                        <div class="flex items-center gap-2 mb-2">
+                            <img :src="store?.img || '/src/assets/NoPicture.webp'"
+                                class="w-10 h-10 rounded-full object-cover border-2 border-[#b6e388]" />
+                            <div class="flex flex-col">
+                                <span class="font-semibold text-base">{{ store?.fullName || '-' }}</span>
+                                <span class="text-xs text-gray-500">{{ companyFullAddress }}</span>
+                            </div>
                         </div>
-                    </div></div>
+                    </div>
                     <div class="mt-6 w-full max-w-md rounded-2xl overflow-hidden shadow-lg">
                         <img :src="store?.banner || '/src/assets/bannerSlider1.png'" class="w-full h-64 object-cover" />
                     </div>
@@ -28,38 +29,28 @@
                 <div class="flex-1 flex flex-col items-center md:items-start">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
                         <h2 class="font-bold text-lg">รายการสินค้าที่รับชื้อ</h2>
-                        <input
-                            v-model="searchProduct"
-                            type="text"
-                            placeholder="ค้นหาสินค้า..."
-                            class="rounded-full border border-[#e6e6e6] px-4 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] w-full sm:w-64"
-                        />
+                        <input v-model="searchProduct" type="text" placeholder="ค้นหาสินค้า..."
+                            class="rounded-full border border-[#e6e6e6] px-4 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] w-full sm:w-64" />
                     </div>
-                    <div
-                        class="w-full flex flex-col gap-2"
-                        :class="filteredProducts && filteredProducts.length > 4 ? 'overflow-y-auto max-h-80' : ''"
-                    >
-                        <div
-                            v-for="item in filteredProducts"
-                            :key="item._id"
-                            class="flex items-center bg-white rounded-xl shadow p-2 md:p-3 gap-3 border border-[#e6e6e6]"
-                        >
-                            <img
-                                :src="item.image || item.img || '/src/assets/NoPicture.webp'"
-                                class="w-16 h-16 rounded-lg object-cover border"
-                                :alt="item.name"
-                            />
+                    <div class="w-full flex flex-col gap-2"
+                        :class="filteredProducts && filteredProducts.length > 4 ? 'overflow-y-auto max-h-80' : ''">
+                        <div v-for="item in filteredProducts" :key="item._id"
+                            class="flex items-center bg-white rounded-xl shadow p-2 md:p-3 gap-3 border border-[#e6e6e6]">
+                            <img :src="item.image || item.img || '/src/assets/NoPicture.webp'"
+                                class="w-16 h-16 rounded-lg object-cover border" :alt="item.name" />
                             <div class="flex-1 flex flex-col justify-center">
                                 <div class="font-semibold text-base text-[#222]">{{ item.name }}</div>
                                 <div class="text-xs text-gray-400">ราคา {{ item.price_per_kg || '-' }} บาท/กก.</div>
                             </div>
                             <div>
-                                <span class="bg-[#f6b26b] text-[#7a3e00] rounded-full px-5 py-1 text-sm font-bold shadow">
+                                <span
+                                    class="bg-[#f6b26b] text-[#7a3e00] rounded-full px-5 py-1 text-sm font-bold shadow">
                                     {{ item.maxAmount || 1 }} โควต้า
                                 </span>
                             </div>
                         </div>
-                        <div v-if="!filteredProducts || !filteredProducts.length" class="text-center text-gray-400 py-8">
+                        <div v-if="!filteredProducts || !filteredProducts.length"
+                            class="text-center text-gray-400 py-8">
                             ไม่พบสินค้าที่รับซื้อ
                         </div>
                     </div>
@@ -104,41 +95,41 @@ const store = ref(null);
 const products = ref([]);
 const searchProduct = ref('');
 const filteredProducts = computed(() =>
-  products.value.filter(
-    p => p.name && p.name.toLowerCase().includes(searchProduct.value.toLowerCase())
-  )
+    products.value.filter(
+        p => p.name && p.name.toLowerCase().includes(searchProduct.value.toLowerCase())
+    )
 );
 
 onMounted(async () => {
-  const partner = JSON.parse(localStorage.getItem('partner') || '{}');
-  if (!partner || (!partner._id && !partner.id)) {
-    router.push('/partnerstores');
-    return;
-  }
-  store.value = partner;
-
-  // ดึงสินค้าทั้งหมดแล้ว filter เฉพาะที่ shopId === partner._id
-  try {
-    const res = await axios.get(`${import.meta.env.VITE_API_URL}/products`);
-    console.log("res", res.data)
-    if (res.data && Array.isArray(res.data.products)) {
-      products.value = res.data.products.filter(
-        p => String(p.shopId) === String(partner._id)
-      );
+    const partner = JSON.parse(localStorage.getItem('selectedPartner') || '{}');
+    if (!partner || (!partner._id && !partner.id)) {
+        router.push('/partnerstores');
+        return;
     }
-  } catch (e) {
-    products.value = [];
-  }
+    store.value = partner;
+
+    // ดึงสินค้าทั้งหมดแล้ว filter เฉพาะที่ shopId === partner._id
+    try {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/products`);
+        console.log("res", res.data)
+        if (res.data && Array.isArray(res.data.products)) {
+            products.value = res.data.products.filter(
+                p => String(p.shopId) === String(partner._id)
+            );
+        }
+    } catch (e) {
+        products.value = [];
+    }
 });
 
 const companyFullAddress = computed(() => {
-  if (!store.value) return '-';
-  const s = store.value;
-  return `${s.companyAddress || ''} ต.${s.companySubdistrict || ''} อ.${s.companyDistrict || ''} จ.${s.companyProvince || ''} ${s.companyPostalCode || ''}`.replace(/ +/g, ' ').trim();
+    if (!store.value) return '-';
+    const s = store.value;
+    return `${s.companyAddress || ''} ต.${s.companySubdistrict || ''} อ.${s.companyDistrict || ''} จ.${s.companyProvince || ''} ${s.companyPostalCode || ''}`.replace(/ +/g, ' ').trim();
 });
 
 const goBack = () => {
-  router.push('/partnerstores');
+    router.push('/partnerstores');
 };
 
 function handleBookRecycleOrder() {
@@ -163,7 +154,7 @@ function handleBookRecycleOrder() {
             partnerCompanySubdistrictId: store.value.companySubdistrictId,
             // เพิ่ม field อื่นๆ ตามต้องการ
         };
-        localStorage.setItem('partner', JSON.stringify(partnerData));
+        localStorage.setItem('selectedPartner', JSON.stringify(partnerData));
         router.push({ path: '/recycleorder' });
     }
 }

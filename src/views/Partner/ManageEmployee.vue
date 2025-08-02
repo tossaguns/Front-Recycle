@@ -1,7 +1,17 @@
 <template>
-    <BarAdmin />
-    <div class="min-h-screen bg-gradient-to-br from-[#e6f7e6] via-white to-[#b6e388] pb-8">
-        <div class="container mx-auto px-4 py-8 max-w-7xl">
+    <BarNoMenu />
+    <div class="min-h-screen bg-gradient-to-br from-[#e6f7e6] via-white to-[#b6e388]">
+        <!-- Back Navigation Header -->
+        <div class="bg-[#106154] py-4 px-6">
+            <div class="flex items-center">
+                <button @click="goBackToHomePartner" class="flex items-center text-white hover:text-gray-200 transition-colors">
+                    <ChevronLeftIcon class="w-6 h-6 mr-2" />
+                    <span class="text-lg font-medium">จัดการพนักงาน</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="container mx-auto px-4 py-8 max-w-7xl pb-8">
             <!-- Header -->
             <div class="mb-8">
                 <h1 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[#184c36] to-[#b6e388] bg-clip-text text-transparent mb-2">จัดการพนักงาน</h1>
@@ -248,10 +258,16 @@
 import { ref, onMounted, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
-import BarAdmin from '../../components/BarAdmin.vue';
+import BarNoMenu from '../../components/BarNoMenu.vue';
+import { ChevronLeftIcon } from '../../icons';
 import Swal from 'sweetalert2';
 
 const router = useRouter();
+
+// Navigation function
+const goBackToHomePartner = () => {
+    router.push('/homepartner');
+};
 
 // Reactive data
 const employees = ref([]);

@@ -382,7 +382,7 @@ const deliveryType = ref('จัดส่งด้วยต้นเอง');
 const today = new Date().toISOString().split('T')[0];
 
 // ข้อมูล partner
-const partner = JSON.parse(localStorage.getItem('partner') || '{}');
+const partner = JSON.parse(localStorage.getItem('selectedPartner') || '{}');
 const partnerId = ref(partner.id || partner._id);
 
 // ข้อมูลทั้งหมด

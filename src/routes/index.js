@@ -14,6 +14,7 @@ import DashboardPartner from '../views/Partner/DashboardPartner.vue'
 import ProfilePartner from '../views/Partner/ProfilePartner.vue'
 import ManageEmployee from '../views/Partner/ManageEmployee.vue'
 import MemberOfPartner from '../views/Partner/MemberOfPartner.vue'
+import HomePartner from '../views/Partner/HomePartner.vue'
 
 // Memeber
 import Home from "../views/Member/Home.vue";
@@ -71,12 +72,16 @@ const routes = [
     component: MemberOfPartner,
     meta: { requiresAuth: true, roles: ['partner'] }
   },
+  { 
+    path: "/homepartner", 
+    component: HomePartner,
+    meta: { requiresAuth: true, roles: ['partner'] }
+  },
 
   // Member - เข้าได้เฉพาะ member เท่านั้น
   { 
     path: "/", 
     component: Home,
-    meta: { requiresAuth: true, roles: ['member'] }
   },
   { path: "/category", component: Category, props: { showBarFooter: true } },
   { path: "/productcategory", name: "productcategory", component: ProductCategory },

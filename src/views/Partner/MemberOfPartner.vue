@@ -1,7 +1,17 @@
 <template>
-  <BarAdmin />
-  <div class="min-h-screen bg-gray-50 py-8">
-    <div class="max-w-7xl mx-auto">
+  <BarNoMenu />
+  <div class="min-h-screen bg-gray-50">
+    <!-- Back Navigation Header -->
+    <div class="bg-[#106154] py-4 px-6">
+      <div class="flex items-center">
+        <button @click="goBackToHomePartner" class="flex items-center text-white hover:text-gray-200 transition-colors">
+          <ChevronLeftIcon class="w-6 h-6 mr-2" />
+          <span class="text-lg font-medium">สมาชิก</span>
+        </button>
+      </div>
+    </div>
+    
+    <div class="max-w-7xl mx-auto py-8">
       <!-- ปุ่มเพิ่มสมาชิกใหม่ -->
       <div class="flex justify-end mb-4 mr-4">
         <button @click="toggleAddForm"
@@ -291,8 +301,17 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
 import axios from 'axios';
-import BarAdmin from '../../components/BarAdmin.vue';
+import BarNoMenu from '../../components/BarNoMenu.vue';
+import { ChevronLeftIcon } from '../../icons';
 import Swal from 'sweetalert2';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+// Navigation function
+const goBackToHomePartner = () => {
+  router.push('/homepartner');
+};
 
 const members = ref([]);
 const filteredMembers = ref([]);

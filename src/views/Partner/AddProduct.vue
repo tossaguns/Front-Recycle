@@ -1,6 +1,16 @@
 <template>
-    <BarAdmin />
-    <div class="min-h-screen bg-gray-50 py-8">
+    <BarNoMenu />
+    <div class="min-h-screen bg-gray-50 pb-5">
+        <!-- Back Navigation Header -->
+        <div class="bg-[#106154] py-4 px-6 mb-5">
+            <div class="flex items-center">
+                <button @click="goBackToHomePartner" class="flex items-center text-white hover:text-gray-200 transition-colors">
+                    <ChevronLeftIcon class="w-6 h-6 mr-2" />
+                    <span class="text-lg font-medium">เพิ่มสินค้าใหม่</span>
+                </button>
+            </div>
+        </div>
+        
         <div class="max-w-full mx-10 bg-white rounded-xl shadow border border-[#e6e6e6] p-8">
             <h2 class="text-2xl font-bold text-[#184c36] mb-8">เพิ่มสินค้าใหม่</h2>
             <!-- 1+2. เลือก/สร้างประเภทหลัก + ประเภทย่อย (แนวนอน) -->
@@ -367,8 +377,17 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
-import BarAdmin from '../../components/BarAdmin.vue';
+import BarNoMenu from '../../components/BarNoMenu.vue';
+import { ChevronLeftIcon } from '../../icons';
 import Swal from 'sweetalert2';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+// Navigation function
+const goBackToHomePartner = () => {
+    router.push('/homepartner');
+};
 
 // State หลัก
 const categories = ref([]);
