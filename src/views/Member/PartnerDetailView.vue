@@ -11,12 +11,12 @@
                     <div class="">
                         <span
                             class="inline-block bg-[#b6e388] text-[#184c36] px-4 py-1 rounded-full text-sm font-semibold mb-4">{{
-                                store?.name || '-' }}</span>
+                                store?.name || profile?.companyName || '-' }}</span>
                         <div class="flex items-center gap-2 mb-2">
                             <img :src="store?.img || '/src/assets/NoPicture.webp'"
                                 class="w-10 h-10 rounded-full object-cover border-2 border-[#b6e388]" />
                             <div class="flex flex-col">
-                                <span class="font-semibold text-base">{{ store?.fullName || '-' }}</span>
+                                <span class="font-semibold text-base">{{ store?.fullName || profile?.fullName || '-' }}</span>
                                 <span class="text-xs text-gray-500">{{ companyFullAddress }}</span>
                             </div>
                         </div>
@@ -92,6 +92,7 @@ import axios from 'axios';
 
 const router = useRouter();
 const store = ref(null);
+const profile = ref(null);
 const products = ref([]);
 const searchProduct = ref('');
 const filteredProducts = computed(() =>
@@ -108,10 +109,16 @@ onMounted(async () => {
     }
     store.value = partner;
 
+    try {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/partners/profile/${partner._id}`);
+        profile.value = res.data;
+    } catch (error) {
+        console.error('โหลดโปรไฟล์ล้มเหลว:', error);
+    }
+
     // ดึงสินค้าทั้งหมดแล้ว filter เฉพาะที่ shopId === partner._id
     try {
         const res = await axios.get(`${import.meta.env.VITE_API_URL}/products`);
-        console.log("res", res.data)
         if (res.data && Array.isArray(res.data.products)) {
             products.value = res.data.products.filter(
                 p => String(p.shopId) === String(partner._id)
@@ -123,8 +130,8 @@ onMounted(async () => {
 });
 
 const companyFullAddress = computed(() => {
-    if (!store.value) return '-';
-    const s = store.value;
+    const s = profile.value;
+    if (!s) return '-';
     return `${s.companyAddress || ''} ต.${s.companySubdistrict || ''} อ.${s.companyDistrict || ''} จ.${s.companyProvince || ''} ${s.companyPostalCode || ''}`.replace(/ +/g, ' ').trim();
 });
 

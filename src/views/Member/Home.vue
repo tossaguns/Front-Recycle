@@ -266,8 +266,17 @@ async function fetchBuyBackPrices() {
         let leftPrice = row[1] || '';
         if (leftPrice) leftPrice = leftPrice.replace('|', '').trim();
         if (leftPrice) leftPrice = leftPrice.replace(')', '').trim();
-        let leftChange = '-';
-        if (leftName && leftPrice) {
+        
+        // ตรวจสอบและข้ามรายการที่ไม่ต้องการแสดง
+        if (!leftName || !leftPrice || 
+            leftName === 'กลุ่มโลหะมีค่า' || 
+            leftName === 'กลุ่มพลาสติก' || 
+            leftName === 'ู่มบ็ตต็ด' || 
+            leftName === 'งดรับ' ||
+            leftPrice === 'งดรับ') {
+          // ข้ามรายการนี้
+        } else {
+          let leftChange = '-';
           const prev = prevMap.get(leftName);
           const curr = parseFloat(leftPrice);
           if (prev !== undefined && !isNaN(curr) && !isNaN(prev)) {
@@ -276,13 +285,23 @@ async function fetchBuyBackPrices() {
           }
           items.push({ type: leftName, unit: 'กิโล', price: leftPrice, change: leftChange });
         }
+        
         // ฝั่งขวา
         let rightName = row[2];
         let rightPrice = row[3] || '';
         if (rightPrice) rightPrice = rightPrice.replace('|', '').trim();
         if (rightPrice) rightPrice = rightPrice.replace(')', '').trim();
-        let rightChange = '-';
-        if (rightName && rightPrice) {
+        
+        // ตรวจสอบและข้ามรายการที่ไม่ต้องการแสดง
+        if (!rightName || !rightPrice || 
+            rightName === 'กลุ่มโลหะมีค่า' || 
+            rightName === 'กลุ่มพลาสติก' || 
+            rightName === 'ู่มบ็ตต็ด' || 
+            rightName === 'งดรับ' ||
+            rightPrice === 'งดรับ') {
+          // ข้ามรายการนี้
+        } else {
+          let rightChange = '-';
           const prev = prevMap.get(rightName);
           const curr = parseFloat(rightPrice);
           if (prev !== undefined && !isNaN(curr) && !isNaN(prev)) {
@@ -293,7 +312,7 @@ async function fetchBuyBackPrices() {
         }
       }
     }
-    priceList.value = items.slice(0, 10);
+    priceList.value = items.slice(0, 7);
   } catch (err) {
     priceList.value = [];
   }

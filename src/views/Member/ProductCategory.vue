@@ -145,7 +145,6 @@ onMounted(async () => {
         img: p.image || '/src/assets/NoPicture.webp'
       }))
     }
-    console.log("allProducts", allProducts.value)
   } catch (e) {
     console.error('โหลดสินค้าล้มเหลว', e)
     allProducts.value = []

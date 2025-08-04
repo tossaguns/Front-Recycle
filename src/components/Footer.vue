@@ -1,12 +1,55 @@
 <script setup>
 import { Facebook, Linkedin } from 'lucide-vue-next';
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '../stores/auth';
+import FullLogoIcon from '../icons/FullLogoIcon.vue';
+
+const router = useRouter();
+const authStore = useAuthStore();
 
 const accordions = ref({
   menu: false,
   about: false,
   contact: false,
 });
+
+// Navigation functions based on user role
+const navigateToHome = () => {
+  if (authStore.isAuthenticated) {
+    if (authStore.isMember()) {
+      router.push('/');
+    } else if (authStore.isPartnerOrAdmin()) {
+      router.push('/homepartner');
+    } else {
+      router.push('/');
+    }
+  } else {
+    router.push('/');
+  }
+};
+
+const navigateToCategory = () => {
+  router.push('/category');
+};
+
+const navigateToStores = () => {
+  router.push('/partnerstores');
+};
+
+const navigateToProfile = () => {
+  if (authStore.isAuthenticated) {
+    if (authStore.isMember()) {
+      router.push('/profilemember');
+    } else if (authStore.isPartnerOrAdmin()) {
+      router.push('/profilepartner');
+    } else {
+      router.push('/profilemember');
+    }
+  } else {
+    router.push('/login');
+  }
+};
 </script>
 
 <template>
@@ -24,9 +67,7 @@ const accordions = ref({
       <div class="md:hidden">
         <!-- Logo -->
         <div class="flex flex-col items-center mb-8">
-          <div class="bg-[#b6e388] rounded-xl w-12 h-12 flex items-center justify-center mb-4">
-            <img src="/vite.svg" alt="logo" class="w-7 h-7" />
-          </div>
+          <FullLogoIcon class="w-32 h-12" />
         </div>
         <div class="border-b border-[#b6e388]">
           <button class="w-full flex justify-between items-center py-4 font-bold focus:outline-none"
@@ -38,10 +79,10 @@ const accordions = ref({
           </button>
           <transition name="fade">
             <ul v-if="accordions.menu" class="pb-4 pl-2 text-white">
-              <li class="py-1">หน้าหลัก</li>
-              <li class="py-1">หมวดหมู่สินค้า</li>
-              <li class="py-1">ร้านค้า</li>
-              <li class="py-1">การตั้งค่าบัญชี</li>
+              <li class="py-1 cursor-pointer hover:text-[#b6e388] transition-colors" @click="navigateToHome">หน้าหลัก</li>
+              <li class="py-1 cursor-pointer hover:text-[#b6e388] transition-colors" @click="navigateToCategory">หมวดหมู่สินค้า</li>
+              <li class="py-1 cursor-pointer hover:text-[#b6e388] transition-colors" @click="navigateToStores">ร้านค้า</li>
+              <li class="py-1 cursor-pointer hover:text-[#b6e388] transition-colors" @click="navigateToProfile">การตั้งค่าบัญชี</li>
             </ul>
           </transition>
         </div>
@@ -84,18 +125,16 @@ const accordions = ref({
       <div class="hidden md:grid grid-cols-4 gap-8">
         <!-- Logo -->
         <div class="flex flex-col items-center mb-8 md:mb-0">
-          <div class="bg-[#b6e388] rounded-xl w-12 h-12 flex items-center justify-center mb-4">
-            <img src="/vite.svg" alt="logo" class="w-7 h-7" />
-          </div>
+          <FullLogoIcon class="w-40 h-14" />
         </div>
         <!-- เมนู -->
         <div class="flex flex-col mb-8 md:mb-0 items-center md:items-start">
           <span class="font-bold mb-2">เมนู</span>
           <ul class="space-y-1 text-sm">
-            <li>หน้าหลัก</li>
-            <li>หมวดหมู่สินค้า</li>
-            <li>ร้านค้า</li>
-            <li>การตั้งค่าบัญชี</li>
+            <li class="cursor-pointer hover:text-[#b6e388] transition-colors" @click="navigateToHome">หน้าหลัก</li>
+            <li class="cursor-pointer hover:text-[#b6e388] transition-colors" @click="navigateToCategory">หมวดหมู่สินค้า</li>
+            <li class="cursor-pointer hover:text-[#b6e388] transition-colors" @click="navigateToStores">ร้านค้า</li>
+            <li class="cursor-pointer hover:text-[#b6e388] transition-colors" @click="navigateToProfile">การตั้งค่าบัญชี</li>
           </ul>
         </div>
         <!-- เกี่ยวกับเว็บไซต์ -->

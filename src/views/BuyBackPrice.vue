@@ -167,7 +167,7 @@ export default {
                             let val = row[i] || '';
                             if (i === 1 || i === 3) val = val.replace(')', '').trim();
                             if (i === 1 || i === 3) val = val.replace('|', '').trim();
-                            if ((i === 0 || i === 2) && (val === 'กลุ่มพลาสติก' || val === 'ู่มบ็ตต็ด' || val === 'งดรับ')) val = null;
+                            if ((i === 0 || i === 2) && (val === 'กลุ่มพลาสติก' || val === 'ู่มบ็ตต็ด' || val === 'งดรับ' || val === 'กลุ่มโลหะมีค่า')) val = null;
                             r.push(val);
                         }
                         if (row[0] === 'งดรับ' || row[1] === 'งดรับ') {

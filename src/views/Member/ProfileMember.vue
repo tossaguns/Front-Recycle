@@ -23,6 +23,93 @@
           </label>
         </div>
 
+        <!-- ส่วนแสดงสถานะออเดอร์ -->
+        <div class="bg-white rounded-2xl shadow-xl border-l-4 border-[#b6e388] w-full px-3 sm:px-5 py-4 sm:py-6 mb-6">
+          <div class="p-3 sm:p-4 md:p-6 lg:p-8">
+            <div class="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6 pb-2 border-b border-[#e6f7e6]">
+              <div
+                class="w-9 h-9 sm:w-12 sm:h-12 bg-gradient-to-br from-[#b6e388] to-[#184c36] rounded-xl flex items-center justify-center shadow-lg">
+                <svg class="w-4 h-4 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+              </div>
+              <div>
+                <h2
+                  class="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-[#184c36] to-[#b6e388] bg-clip-text text-transparent">
+                  สถานะการจองคิว
+                </h2>
+                <p class="text-xs sm:text-sm text-[#184c36] mt-1">
+                  ติดตามสถานะการจองคิวของคุณ
+                </p>
+              </div>
+            </div>
+
+            <!-- ปุ่มสถานะออเดอร์ -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <!-- รอการยืนยัน -->
+              <button @click="viewOrders('รอยืนยัน')" 
+                class="bg-gradient-to-br from-yellow-50 to-yellow-100 border-2 border-yellow-300 rounded-xl p-4 hover:shadow-lg transition-all duration-200 group">
+                <div class="flex flex-col items-center text-center">
+                  <div class="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                  </div>
+                  <h3 class="font-semibold text-yellow-800 text-sm">รอการยืนยัน</h3>
+                  <p class="text-2xl font-bold text-yellow-600">{{ orderCounts.pending || 0 }}</p>
+                  <p class="text-xs text-yellow-600">ออเดอร์</p>
+                </div>
+              </button>
+
+              <!-- ยืนยันแล้ว -->
+              <button @click="viewOrders('ยืนยันแล้ว')" 
+                class="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-xl p-4 hover:shadow-lg transition-all duration-200 group">
+                <div class="flex flex-col items-center text-center">
+                  <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                  </div>
+                  <h3 class="font-semibold text-blue-800 text-sm">ยืนยันแล้ว</h3>
+                  <p class="text-2xl font-bold text-blue-600">{{ orderCounts.confirmed || 0 }}</p>
+                  <p class="text-xs text-blue-600">ออเดอร์</p>
+                </div>
+              </button>
+
+              <!-- กำลังดำเนินการ -->
+              <button @click="viewOrders('กำลังดำเนินการ')" 
+                class="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-300 rounded-xl p-4 hover:shadow-lg transition-all duration-200 group">
+                <div class="flex flex-col items-center text-center">
+                  <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                  </div>
+                  <h3 class="font-semibold text-purple-800 text-sm">กำลังดำเนินการ</h3>
+                  <p class="text-2xl font-bold text-purple-600">{{ orderCounts.processing || 0 }}</p>
+                  <p class="text-xs text-purple-600">ออเดอร์</p>
+                </div>
+              </button>
+
+              <!-- สรุปผล -->
+              <button @click="viewOrders('สรุปผล')" 
+                class="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300 rounded-xl p-4 hover:shadow-lg transition-all duration-200 group">
+                <div class="flex flex-col items-center text-center">
+                  <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                  </div>
+                  <h3 class="font-semibold text-green-800 text-sm">สรุปผล</h3>
+                  <p class="text-2xl font-bold text-green-600">{{ orderCounts.completed || 0 }}</p>
+                  <p class="text-xs text-green-600">ออเดอร์</p>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div class="bg-white rounded-2xl shadow-xl border-l-4 border-[#b6e388] w-full px-3 sm:px-5 py-4 sm:py-6">
           <div class="p-3 sm:p-4 md:p-6 lg:p-8">
             <div class="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6 pb-2 border-b border-[#e6f7e6]">
@@ -286,6 +373,14 @@ const error = ref('');
 const profileImg = ref('');
 const profileImageFile = ref(null);
 
+// ข้อมูลออเดอร์
+const orderCounts = ref({
+  pending: 0,
+  confirmed: 0,
+  processing: 0,
+  completed: 0
+});
+
 // Modal states
 const showAddAddressModal = ref(false);
 const showEditAddressModal = ref(false);
@@ -343,6 +438,49 @@ const fetchUserData = async () => {
   } catch (err) {
     error.value = 'ไม่สามารถดึงข้อมูลผู้ใช้ได้: ' + (err.response?.data?.error || err.message);
   }
+};
+
+// โหลดข้อมูลจำนวนออเดอร์ตามสถานะ
+const loadOrderCounts = async () => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/orders/member/${userId.value}`);
+    if (response.data.success) {
+      const orders = response.data.orders || [];
+      
+      // นับจำนวนตามสถานะ
+      orderCounts.value = {
+        pending: orders.filter(order => order.status === 'รอยืนยัน').length,
+        confirmed: orders.filter(order => order.status === 'ยืนยันแล้ว').length,
+        processing: orders.filter(order => order.status === 'กำลังดำเนินการ').length,
+        completed: orders.filter(order => order.status === 'เสร็จสิ้น' || order.status === 'ยกเลิก').length
+      };
+    }
+  } catch (error) {
+    console.error('Error loading order counts:', error);
+  }
+};
+
+// ดูรายการออเดอร์ตามสถานะ
+const viewOrders = (status) => {
+  let statusFilter = '';
+  
+  switch (status) {
+    case 'รอยืนยัน':
+      statusFilter = 'pending';
+      break;
+    case 'ยืนยันแล้ว':
+      statusFilter = 'confirmed';
+      break;
+    case 'กำลังดำเนินการ':
+      statusFilter = 'processing';
+      break;
+    case 'สรุปผล':
+      statusFilter = 'completed';
+      break;
+  }
+  
+  // ไปยังหน้าแสดงรายการออเดอร์
+  router.push(`/member/orders?status=${statusFilter}`);
 };
 
 async function saveEdit() {
@@ -752,6 +890,7 @@ onMounted(async () => {
   await fetchProvincesAmphureTambon();
   await fetchUserData();
   await loadMemberAddresses();
+  await loadOrderCounts();
 });
 
 const fetchProvincesAmphureTambon = async () => {

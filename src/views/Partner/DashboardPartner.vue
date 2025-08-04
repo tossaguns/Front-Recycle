@@ -217,7 +217,6 @@ onMounted(() => {
         return;
     }
     
-    console.log('Dashboard loaded for role:', authStore.user.role);
 });
 </script>
 

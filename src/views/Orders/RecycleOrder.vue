@@ -1,6 +1,17 @@
 <template>
+  <BarNoMenu />
   <div class="min-h-screen flex flex-col bg-white">
-    <Bar />
+    <!-- Back Navigation Header -->
+    <div class="bg-[#106154] py-4 px-6 -mx-4 mb-6">
+      <div class="flex items-center">
+        <button @click="goBack" class="flex items-center text-white hover:text-gray-200 transition-colors">
+          <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          <span class="text-lg font-medium">กลับไปหน้าร้านค้า</span>
+        </button>
+      </div>
+    </div>
     <main class="flex-1 max-w-5xl mx-auto w-full px-4 py-10 flex flex-col gap-8 relative">
       <h1 class="text-2xl md:text-3xl font-bold mb-6 text-[#222]">จองคิวขายสินค้ารีไซเคิล</h1>
       <!-- User Info -->
@@ -8,8 +19,6 @@
         <img :src="memberData.profile_img" class="w-12 h-12 rounded-full object-cover border-2 border-[#b6e388]" />
         <div class="flex flex-col">
           <span class="font-semibold text-lg">{{ memberData.fullName }}</span>
-          <span class="inline-block bg-[#e6f7e6] text-[#184c36] px-3 py-1 rounded-full text-xs font-semibold mt-1">50
-            โควต้า</span>
         </div>
       </div>
 
@@ -80,7 +89,7 @@
         </div> -->
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-5">
-          <div class="flex flex-col gap-4">
+          <!-- <div class="flex flex-col gap-4">
             <label class="font-medium text-[#184c36]">ชื่อ</label>
             <input type="text" v-model="bookingData.name"
               class="rounded-full border border-[#b6e388] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white" />
@@ -90,7 +99,7 @@
             <input type="text" v-model="bookingData.phone"
               class="rounded-full border border-[#b6e388] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white"
               placeholder="0891234567" />
-          </div>
+          </div> -->
           <div class="flex flex-col gap-4">
             <label class="font-medium text-[#184c36]">เลือกประเภทสินค้า</label>
             <select v-model="selectedCategory" @change="handleCategoryChange"
@@ -122,21 +131,21 @@
             </select>
           </div>
 
-          <!-- จำนวนกิโลกรัม: แสดงเมื่อเลือกสินค้าแล้ว -->
-          <div class="flex flex-col gap-4" v-if="selectedProductObj">
+          <!-- จำนวนกิโลกรัม: แสดงเลย -->
+          <div class="flex flex-col gap-4">
             <label class="font-medium text-[#184c36]">จำนวน (กิโลกรัม)</label>
-            <input
-              type="number"
-              v-model.number="sellAmount"
-              :min="1"
-              :max="selectedProductObj.maxAmount"
+            <input type="number" v-model.number="sellAmount" :min="1" :max="selectedProductObj?.maxAmount || 999"
               class="rounded-full border border-[#b6e388] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white"
-              placeholder="จำนวนกิโลกรัม"
-              @input="handleAmountInput"
-            />
-            <div v-if="sellAmount > selectedProductObj.maxAmount" class="text-red-600 text-xs mt-1">
+              placeholder="จำนวนกิโลกรัม" @input="handleAmountInput" />
+            <div v-if="selectedProductObj && sellAmount > selectedProductObj.maxAmount"
+              class="text-red-600 text-xs mt-1">
               จำนวนสูงสุดที่ขายได้คือ {{ selectedProductObj.maxAmount }} กิโลกรัม
             </div>
+            <!-- ปุ่มเพิ่มสินค้า -->
+            <button type="button" @click="addItem" :disabled="!selectedProduct.value"
+              class="bg-[#b6e388] hover:bg-[#a4d376] text-[#184c36] font-semibold py-2 px-4 rounded-full transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed">
+              เพิ่มสินค้า
+            </button>
           </div>
           <div class="flex flex-col gap-4">
             <label class="font-medium text-[#184c36]">เลือกวันที่จอง</label>
@@ -169,8 +178,14 @@
               <option>ให้รถเข้ารับสินค้า</option>
             </select>
             <span class="text-xs text-gray-500 pl-5">
-              *กรณีที่ให้ทางร้านเข้ามารับและไม่ส่งสินค้าตามที่กำหนด มีค่าปรับ
+              *ค่าจัดส่ง 15 บาท จะถูกหักจากยอดเงินที่ได้รับจากการขายสินค้า
             </span>
+          </div>
+          <div class="flex flex-col gap-4">
+            <label class="font-medium text-[#184c36]">หมายเหตุเพิ่มเติม</label>
+            <textarea v-model="bookingData.notes" rows="3"
+              class="rounded-xl border border-[#b6e388] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white resize-none"
+              placeholder="หมายเหตุเพิ่มเติม (ถ้ามี)"></textarea>
           </div>
         </div>
 
@@ -184,7 +199,8 @@
               <span>เพิ่มรูปภาพสินค้า</span>
               <input type="file" accept="image/*" class="hidden" @change="handleImageUpload($event, 'product')" />
             </label>
-            <div class="text-xs text-gray-500" v-if="uploadedImages.product && uploadedImages.product.name">{{ uploadedImages.product.name }}</div>
+            <div class="text-xs text-gray-500" v-if="uploadedImages.product && uploadedImages.product.name">{{
+              uploadedImages.product.name }}</div>
           </div>
 
           <!-- เฉพาะให้รถเข้ารับสินค้า -->
@@ -196,7 +212,8 @@
                 <span>เพิ่มรูปหน้าบ้าน</span>
                 <input type="file" accept="image/*" class="hidden" @change="handleImageUpload($event, 'front')" />
               </label>
-              <div class="text-xs text-gray-500" v-if="uploadedImages.front && uploadedImages.front.name">{{ uploadedImages.front.name }}</div>
+              <div class="text-xs text-gray-500" v-if="uploadedImages.front && uploadedImages.front.name">{{
+                uploadedImages.front.name }}</div>
             </div>
 
             <div class="flex flex-col gap-3">
@@ -206,11 +223,53 @@
                 <span>เพิ่มรูปปักหมุด</span>
                 <input type="file" accept="image/*" class="hidden" @change="handleImageUpload($event, 'map')" />
               </label>
-              <div class="text-xs text-gray-500" v-if="uploadedImages.map && uploadedImages.map.name">{{ uploadedImages.map.name }}</div>
+              <div class="text-xs text-gray-500" v-if="uploadedImages.map && uploadedImages.map.name">{{
+                uploadedImages.map.name }}</div>
             </div>
           </template>
         </div>
 
+        <!-- รายการสินค้าที่เลือก -->
+        <div v-if="selectedItems.length > 0" class="bg-[#f7faf0] rounded-xl p-6 mt-6">
+          <h3 class="font-semibold text-[#184c36] mb-4 text-lg">รายการสินค้าที่เลือก</h3>
+          <div class="space-y-4">
+            <div v-for="(item, index) in selectedItems" :key="index" class="bg-white rounded-lg p-4 shadow-sm">
+              <div class="flex justify-between items-start">
+                <div class="flex-1">
+                  <h4 class="font-medium text-[#184c36]">{{ item.product_name }}</h4>
+                  <p class="text-sm text-gray-600 mt-1">
+                    จำนวน: {{ item.amount }} กิโลกรัม | ราคา: ฿{{ item.unit_price }}/กก.
+                  </p>
+                  <p class="text-sm font-medium text-[#184c36] mt-1">
+                    ยอดรวม: ฿{{ item.subtotal.toLocaleString() }}
+                  </p>
+                </div>
+                <button type="button" @click="removeItem(index)" class="text-red-500 hover:text-red-700 p-1">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- สรุปราคา -->
+          <div class="mt-6 pt-4 border-t border-gray-200">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-gray-600">ราคาสินค้ารวม:</span>
+              <span class="font-medium">฿{{ totalPrice.toLocaleString() }}</span>
+            </div>
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-gray-600">ค่าจัดส่ง:</span>
+              <span class="font-medium text-red-600">-฿{{ pickupFee.toLocaleString() }}</span>
+            </div>
+            <div class="flex justify-between items-center text-lg font-semibold text-[#184c36]">
+              <span>เงินที่ได้รับจริง:</span>
+              <span>฿{{ grandTotal.toLocaleString() }}</span>
+            </div>
+          </div>
+        </div>
 
         <!-- Summary -->
         <div class="rounded-2xl shadow border-t-4 border-lime-400 p-6 mt-8 w-full bg-white">
@@ -229,7 +288,7 @@
                 </div>
               </div>
             </div>
-            <hr/>
+            <hr />
             <!-- ข้อมูล Partner -->
             <div>
               <h3 class="font-semibold text-[#184c36] mb-2 text-base">ข้อมูลร้านค้า</h3>
@@ -240,38 +299,37 @@
                 </div>
                 <div class="flex justify-between items-center">
                   <span class="text-gray-600">ที่อยู่:</span>
-                  <span class="font-medium">{{ partnerData.partnerCompanyAddress }} ต.{{ partnerData.partnerCompanySubdistrict }} อ.{{ partnerData.partnerCompanyDistrict }} จ.{{ partnerData.partnerCompanyProvince }} {{ partnerData.partnerCompanyPostalCode }}</span>
+                  <span class="font-medium">{{ partnerData.partnerCompanyAddress }} ต.{{
+                    partnerData.partnerCompanySubdistrict
+                  }} อ.{{ partnerData.partnerCompanyDistrict }} จ.{{ partnerData.partnerCompanyProvince }} {{
+                      partnerData.partnerCompanyPostalCode }}</span>
                 </div>
               </div>
             </div>
-            <hr/>
+            <hr />
             <!-- ข้อมูลสินค้า -->
-            <div v-if="selectedProduct">
+            <div v-if="selectedItems.length > 0">
               <h3 class="font-semibold text-[#184c36] mb-2 text-base">ข้อมูลสินค้า</h3>
               <div class="flex flex-col gap-1 mb-2">
                 <div class="flex justify-between items-center">
-                  <span class="text-gray-600">ประเภทสินค้า:</span>
-                  <span class="font-medium">{{ selectedCategoryObj?.name || '' }}</span>
+                  <span class="text-gray-600">จำนวนรายการ:</span>
+                  <span class="font-medium">{{ selectedItems.length }} รายการ</span>
                 </div>
                 <div class="flex justify-between items-center">
-                  <span class="text-gray-600">หมวดหมู่ย่อย:</span>
-                  <span class="font-medium">{{ selectedSubCategoryObj?.name || '' }}</span>
+                  <span class="text-gray-600">ราคาสินค้ารวม:</span>
+                  <span class="font-medium">฿{{ totalPrice.toLocaleString() }}</span>
                 </div>
                 <div class="flex justify-between items-center">
-                  <span class="text-gray-600">สินค้า:</span>
-                  <span class="font-medium">{{ selectedProductObj?.name || '' }}</span>
+                  <span class="text-gray-600">ค่าจัดส่ง:</span>
+                  <span class="font-medium text-red-600">-฿{{ pickupFee.toLocaleString() }}</span>
                 </div>
-                <div class="flex justify-between items-center">
-                  <span class="text-gray-600">ราคาต่อกิโลกรัม:</span>
-                  <span class="font-medium">฿{{ selectedProductObj?.price_per_kg || 0 }}/กก.</span>
-                </div>
-                <div class="flex justify-between items-center">
-                  <span class="text-gray-600">จำนวน:</span>
-                  <span class="font-medium">{{ sellAmount }} กิโลกรัม</span>
+                <div class="flex justify-between items-center font-semibold text-[#184c36]">
+                  <span>เงินที่ได้รับจริง:</span>
+                  <span>฿{{ grandTotal.toLocaleString() }}</span>
                 </div>
               </div>
             </div>
-            <hr/>
+            <hr />
             <!-- ข้อมูลการจอง -->
             <div v-if="bookingData.date && bookingData.time">
               <h3 class="font-semibold text-[#184c36] mb-2 text-base">ข้อมูลการจอง</h3>
@@ -288,13 +346,18 @@
                   <span class="text-gray-600">ประเภทการจัดส่ง:</span>
                   <span class="font-medium">{{ deliveryType }}</span>
                 </div>
-                <div v-if="deliveryType === 'ให้รถเข้ารับสินค้า' && bookingData.address" class="flex justify-between items-center">
+                <div v-if="deliveryType === 'ให้รถเข้ารับสินค้า' && bookingData.address"
+                  class="flex justify-between items-center">
                   <span class="text-gray-600">ที่อยู่รับสินค้า:</span>
                   <span class="font-medium text-sm">{{ bookingData.address }}</span>
                 </div>
+                <div v-if="bookingData.notes" class="flex justify-between items-center">
+                  <span class="text-gray-600">หมายเหตุ:</span>
+                  <span class="font-medium text-sm">{{ bookingData.notes }}</span>
+                </div>
               </div>
             </div>
-            <hr/>
+            <hr />
             <!-- รูปภาพที่อัปโหลด -->
             <div>
               <h3 class="font-semibold text-[#184c36] mb-2 text-base">รูปภาพที่อัปโหลด</h3>
@@ -309,30 +372,30 @@
                 <div class="text-sm text-blue-600">ยังไม่มีรูปภาพที่อัปโหลด</div>
               </div>
             </div>
-            <hr/>
+            <hr />
             <!-- ยอดเงิน -->
-            <div>
+            <div v-if="selectedItems.length > 0">
               <h3 class="font-semibold text-[#184c36] mb-2 text-base">ยอดเงิน</h3>
               <div class="flex flex-col gap-1 mb-2">
                 <div class="flex flex-col">
                   <span class="text-[#184c36] font-semibold">ยอดเงินที่ได้รับจากการขายรีไซเคิล</span>
                   <span class="text-lg font-bold text-[#184c36]">
-                    ฿ {{ (selectedProductObj?.price_per_kg || 0) * sellAmount }} บาท
+                    ฿ {{ totalPrice.toLocaleString() }} บาท
                   </span>
                 </div>
                 <div v-if="deliveryType === 'ให้รถเข้ารับสินค้า'" class="flex flex-col">
-                  <span class="text-gray-500 text-sm">ค่าบริการการจัดส่ง</span>
-                  <span class="text-base font-semibold text-[#184c36]">฿ 15 บาท</span>
+                  <span class="text-gray-500 text-sm">หักค่าบริการการจัดส่ง</span>
+                  <span class="text-base font-semibold text-red-600">-฿ {{ pickupFee.toLocaleString() }} บาท</span>
                 </div>
                 <div class="flex flex-col">
-                  <span class="text-black text-md font-semibold">ยอดรวม</span>
+                  <span class="text-black text-md font-semibold">เงินที่ได้รับจริง</span>
                   <span class="text-lg font-bold text-[#184c36]">
-                    ฿ {{ ((selectedProductObj?.price_per_kg || 0) * sellAmount) + (deliveryType === 'ให้รถเข้ารับสินค้า' ? 15 : 0) }} บาท
+                    ฿ {{ grandTotal.toLocaleString() }} บาท
                   </span>
                 </div>
               </div>
             </div>
-            <hr/>
+            <hr />
             <!-- หมายเหตุ -->
             <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
               <div class="flex items-start gap-2">
@@ -346,7 +409,8 @@
                   <p class="text-xs text-yellow-700 mt-1">
                     • กรุณามาให้ตรงเวลาเพื่อความสะดวกในการให้บริการ<br>
                     • กรณีที่ให้ทางร้านเข้ามารับและไม่ส่งสินค้าตามที่กำหนด มีค่าปรับ<br>
-                    • ยอดเงินที่ได้รับอาจเปลี่ยนแปลงตามน้ำหนักและคุณภาพของสินค้า
+                    • ยอดเงินที่ได้รับอาจเปลี่ยนแปลงตามน้ำหนักและคุณภาพของสินค้า<br>
+                    • ค่าจัดส่ง 15 บาท จะถูกหักจากยอดเงินที่ได้รับจากการขายสินค้า
                   </p>
                 </div>
               </div>
@@ -357,9 +421,9 @@
               class="bg-gray-400 text-white px-10 py-2 rounded-full text-sm hover:bg-[#145029] transition duration-200">
               ยกเลิก
             </button>
-            <button type="submit"
-              class="bg-[#184c36] text-white px-10 py-2 rounded-full text-sm hover:bg-[#145029] transition duration-200">
-              ยืนยัน
+            <button type="submit" :disabled="selectedItems.length === 0"
+              class="bg-[#184c36] text-white px-10 py-2 rounded-full text-sm hover:bg-[#145029] transition duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed">
+              {{ selectedItems.length === 0 ? 'กรุณาเลือกสินค้า' : 'จองคิว' }}
             </button>
           </div>
         </div>
@@ -373,7 +437,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
-import Bar from '../../components/Bar.vue';
+import BarNoMenu from '../../components/BarNoMenu.vue';
 import Footer from '../../components/Footer.vue';
 import Swal from 'sweetalert2'
 
@@ -398,11 +462,8 @@ onMounted(async () => {
     axios.get(`${import.meta.env.VITE_API_URL}/categories/subcategories/all`)
   ]);
   allProducts.value = productsRes.data.products || [];
-  console.log('allProducts', allProducts.value);
   allCategories.value = categoriesRes.data.categories || categoriesRes.data || [];
-  console.log('allCategories', allCategories.value);
   allSubcategories.value = subcategoriesRes.data.subcategories || subcategoriesRes.data || [];
-  console.log('allSubcategories', allSubcategories.value);
   // ... (โหลด member/partner data อื่นๆ ตามเดิม)
   loadMemberData();
   loadPartnerData();
@@ -458,13 +519,13 @@ const memberData = ref({
 
 // ข้อมูลการจอง
 const bookingData = ref({
-  name: '',
-  phone: '',
-  productType: '',
-  product: '',
+  // member_id: userId.value,
+  store_id: partnerId.value,
+  // phone: user.personalPhone,
   date: '',
   time: '',
-  address: ''
+  address: '',
+  notes: ''
 });
 
 // ข้อมูลรูปภาพ
@@ -473,6 +534,9 @@ const uploadedImages = ref({
   front: null,
   map: null
 });
+
+// รายการสินค้าที่เลือก
+const selectedItems = ref([]);
 
 // --- เพิ่มสำหรับที่อยู่สมาชิก ---
 const memberAddresses = ref([]);
@@ -520,7 +584,6 @@ const loadPartnerData = async () => {
   try {
     if (partnerId.value) {
       const response = await axios.get(`${import.meta.env.VITE_API_URL}/partners/profile/${partnerId.value}`);
-      console.log('response', response.data);
       if (response.data) {
         partnerData.value = {
           partnerfullName: response.data.fullName,
@@ -566,6 +629,11 @@ const loadProducts = async () => {
   }
 };
 
+const handleCategoryChange = () => {
+  selectedSubCategory.value = '';
+  selectedProduct.value = '';
+};
+
 const handleProductTypeChange = async () => {
   selectedProduct.value = '';
   // filterProductsByCategory(); // ลบฟังก์ชันที่ไม่ได้ใช้
@@ -597,7 +665,8 @@ const confirmBooking = async () => {
       });
       return;
     }
-    if (!selectedProduct.value) {
+
+    if (selectedItems.value.length === 0) {
       await Swal.fire({
         icon: 'warning',
         title: 'ยังไม่ได้เลือกสินค้า',
@@ -606,6 +675,7 @@ const confirmBooking = async () => {
       });
       return;
     }
+
     if (deliveryType.value === 'ให้รถเข้ารับสินค้า' && !bookingData.value.address) {
       await Swal.fire({
         icon: 'warning',
@@ -616,74 +686,105 @@ const confirmBooking = async () => {
       return;
     }
 
-    const userId = localStorage.getItem('userId');
-    if (!userId) {
-      await Swal.fire({
-        icon: 'warning',
-        title: 'ยังไม่ได้เข้าสู่ระบบ',
-        text: 'กรุณาเข้าสู่ระบบก่อนทำรายการ',
-        confirmButtonText: 'ตกลง'
-      });
-      return;
-    }
+    // แสดง loading
+    Swal.fire({
+      title: 'กำลังดำเนินการ',
+      text: 'กรุณารอสักครู่...',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
 
     // เตรียมข้อมูลสำหรับส่งไป API
     const orderData = {
-      user_id: userId.value,
-      store_id: partnerData.value.id,
-      date: bookingData.value.date,
-      time: bookingData.value.time,
-      delivery_type: deliveryType.value,
-      products: [{
-        product_id: selectedProduct.value,
-        quantity: 1
-      }],
-      pickup_address: deliveryType.value === 'ให้รถเข้ารับสินค้า' ? bookingData.value.address : '',
-      customer_name: bookingData.value.name,
-      customer_phone: bookingData.value.phone
+      member_id: userId.value,
+      store_id: partnerId.value,
+      booking_datetime: `${bookingData.value.date}T${bookingData.value.time}:00`,
+      delivery_type: deliveryType.value === 'ให้รถเข้ารับสินค้า' ? 'ให้รถเข้ารับสินค้า' : 'จัดส่งด้วยต้นเอง',
+      pickup_fee: pickupFee.value,
+      notes: bookingData.value.notes,
+      address: bookingData.value.address,
+      phone: bookingData.value.phone,
+      items: selectedItems.value.map(item => ({
+        product_id: item.product_id,
+        category_id: item.category_id,
+        subcategory_id: item.subcategory_id,
+        amount: item.amount,
+        unit_price: item.unit_price,
+        notes: item.notes
+      }))
     };
 
-    // อัปโหลดรูปภาพ (ถ้ามี)
-    const images = [];
-    for (const [type, file] of Object.entries(uploadedImages.value)) {
-      if (file) {
-        // ส่งรูปภาพไปยัง server และได้ URL กลับมา
-        const formData = new FormData();
-        formData.append('files', file);
-
-        try {
-          const uploadResponse = await axios.post(`${import.meta.env.VITE_API_URL}/partners/upload`, formData);
-          if (uploadResponse.data.files && uploadResponse.data.files.length > 0) {
-            images.push({
-              type: type,
-              url: uploadResponse.data.files[0].url
-            });
-          }
-        } catch (uploadError) {
-          console.error('Error uploading image:', uploadError);
-        }
-      }
-    }
-
-    if (images.length > 0) {
-      orderData.images = images;
-    }
-
+    // สร้างการจองคิวก่อน (ไม่มีรูปภาพ)
     const response = await axios.post(`${import.meta.env.VITE_API_URL}/orders/create`, orderData);
 
     if (response.data.success) {
-      alert('จองคิวสำเร็จ');
+      const orderId = response.data.order_id;
+
+      // อัปโหลดรูปภาพ (ถ้ามี)
+      const uploadedFiles = [];
+      const uploadedTypes = [];
+
+      for (const [type, file] of Object.entries(uploadedImages.value)) {
+        if (file) {
+          uploadedFiles.push(file);
+          uploadedTypes.push(type);
+        }
+      }
+
+      if (uploadedFiles.length > 0) {
+        try {
+          const formData = new FormData();
+          uploadedFiles.forEach(file => {
+            formData.append('images', file);
+          });
+          formData.append('types', JSON.stringify(uploadedTypes));
+
+          await axios.post(`${import.meta.env.VITE_API_URL}/orders/${orderId}/images`, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          });
+        } catch (uploadError) {
+          console.error('Error uploading images:', uploadError);
+          // แม้รูปภาพอัปโหลดไม่สำเร็จ แต่การจองคิวสำเร็จแล้ว
+        }
+      }
+
+      // ปิด loading และแสดงข้อความสำเร็จ
+      Swal.close();
+      await Swal.fire({
+        icon: 'success',
+        title: 'จองคิวสำเร็จ',
+        text: 'การจองคิวของคุณได้รับการบันทึกเรียบร้อยแล้ว',
+        confirmButtonText: 'ตกลง'
+      });
       router.push('/partnerstores');
     }
   } catch (error) {
-    console.error('Error booking:', error);
-    alert('เกิดข้อผิดพลาดในการจองคิว');
+    console.error('Error creating order:', error);
+    // ปิด loading และแสดงข้อความ error
+    Swal.close();
+    await Swal.fire({
+      icon: 'error',
+      title: 'เกิดข้อผิดพลาด',
+      text: 'เกิดข้อผิดพลาดในการจองคิว กรุณาลองใหม่อีกครั้ง',
+      confirmButtonText: 'ตกลง'
+    });
   }
 };
 
 // ยกเลิกการจอง
 const cancelBooking = () => {
-  router.push('/partnerstores');
+  router.push('/partnerdetail');
+};
+
+// กลับไปหน้าร้านค้า
+const goBack = () => {
+  router.push('/partnerdetail');
 };
 
 // โหลดที่อยู่เมื่อเลือก "ให้รถเข้ารับสินค้า"
@@ -752,6 +853,64 @@ function handleAmountInput() {
     sellAmount.value = 1;
   }
 }
+
+// เพิ่มสินค้าลงในรายการ
+const addItem = async () => {
+  if (!selectedProduct.value || !sellAmount.value) {
+    await Swal.fire({
+      icon: 'warning',
+      title: 'ข้อมูลไม่ครบถ้วน',
+      text: 'กรุณาเลือกสินค้าและจำนวน',
+      confirmButtonText: 'ตกลง'
+    });
+    return;
+  }
+
+  const product = selectedProductObj.value;
+  const existingItem = selectedItems.value.find(item => item.product_id === selectedProduct.value);
+
+  if (existingItem) {
+    existingItem.amount += sellAmount.value;
+    existingItem.subtotal = existingItem.amount * existingItem.unit_price;
+  } else {
+    selectedItems.value.push({
+      product_id: selectedProduct.value,
+      category_id: selectedCategory.value,
+      subcategory_id: selectedSubCategory.value,
+      amount: sellAmount.value,
+      unit_price: product.price_per_kg,
+      subtotal: sellAmount.value * product.price_per_kg,
+      notes: '',
+      product_name: product.name
+    });
+  }
+
+  // รีเซ็ตฟอร์ม
+  selectedProduct.value = '';
+  selectedSubCategory.value = '';
+  selectedCategory.value = '';
+  sellAmount.value = 1;
+};
+
+// ลบสินค้าออกจากรายการ
+const removeItem = (index) => {
+  selectedItems.value.splice(index, 1);
+};
+
+// คำนวณราคารวม
+const totalPrice = computed(() => {
+  return selectedItems.value.reduce((total, item) => total + item.subtotal, 0);
+});
+
+// คำนวณค่าจัดส่ง
+const pickupFee = computed(() => {
+  return deliveryType.value === 'ให้รถเข้ารับสินค้า' ? 15 : 0;
+});
+
+// ราคารวมทั้งหมด (เงินที่ลูกค้าได้จริง = ราคาสินค้า - ค่าจัดส่ง)
+const grandTotal = computed(() => {
+  return totalPrice.value - pickupFee.value;
+});
 </script>
 
 <style scoped>

@@ -31,8 +31,9 @@ import Footer from "../components/Footer.vue";
 import BarAdmin from "../components/BarAdmin.vue";
 import BarEmployee from "../components/BarEmployee.vue";
 
-// Oder
+// Order
 import RecycleOrder from "../views/Orders/RecycleOrder.vue";
+import Orders from "../views/Member/Orders.vue";
 
 const routes = [
   // Login and Register
@@ -98,6 +99,7 @@ const routes = [
 
   // Order
   { path: "/recycleorder", component: RecycleOrder },
+  { path: "/member/orders", component: Orders },
 
 ];
 
@@ -132,8 +134,8 @@ router.beforeEach((to, from, next) => {
     // ตรวจสอบ role ที่อนุญาต
     if (to.meta.roles && to.meta.roles.length > 0) {
       const userRole = authStore.user.role;
-      console.log("Required roles:", to.meta.roles);
-      console.log("User role:", userRole);
+      // console.log("Required roles:", to.meta.roles);
+      // console.log("User role:", userRole);
       
       if (!to.meta.roles.includes(userRole)) {
         console.log("Role not allowed, redirecting");
