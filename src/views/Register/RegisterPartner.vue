@@ -10,7 +10,7 @@
             <div class="text-center mb-8 lg:mb-12">
                 <div class="flex justify-center">
                     <div class="w-20 h-20 rounded-full overflow-hidden pulse-animation">
-                        <img src="../../assets/logorecycle.png" alt="Logo" class="w-full h-full object-cover" />
+                        <RecycleIcon class="w-full h-full p-1 object-cover" />
                     </div>
                 </div>
                 <h1
@@ -783,6 +783,8 @@ import { useRouter } from 'vue-router';
 import { VueSignaturePad } from 'vue-signature-pad';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import { RecycleIcon } from '../../icons';
+
 // Components
 const signaturePadRef = ref(null);
 

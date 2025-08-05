@@ -35,6 +35,10 @@ import BarEmployee from "../components/BarEmployee.vue";
 import RecycleOrder from "../views/Orders/RecycleOrder.vue";
 import Orders from "../views/Member/Orders.vue";
 
+// Admin
+import AdminDashboard from "../views/Admin/AdminDashboard.vue";
+import ManagePartner from "../views/Admin/ManagePartner.vue";
+
 const routes = [
   // Login and Register
   { path: "/register", component: Register },
@@ -101,6 +105,18 @@ const routes = [
   { path: "/recycleorder", component: RecycleOrder },
   { path: "/member/orders", component: Orders },
 
+  // Admin
+  { 
+    path: "/admin/dashboard", 
+    component: AdminDashboard,
+    meta: { requiresAuth: true, roles: ['admin'] }
+  },
+  { 
+    path: "/admin/partners", 
+    component: ManagePartner,
+    meta: { requiresAuth: true, roles: ['admin'] }
+  },
+
 ];
 
 const router = createRouter({
@@ -137,16 +153,18 @@ router.beforeEach((to, from, next) => {
       // console.log("Required roles:", to.meta.roles);
       // console.log("User role:", userRole);
       
-      if (!to.meta.roles.includes(userRole)) {
-        console.log("Role not allowed, redirecting");
-        // ถ้าไม่มีสิทธิ์ ให้ redirect ตาม role
-        if (authStore.isMember()) {
-          next('/');
-        } else if (authStore.isPartnerOrAdmin()) {
-          next('/dashboardpartner');
+              if (!to.meta.roles.includes(userRole)) {
+          console.log("Role not allowed, redirecting");
+          // ถ้าไม่มีสิทธิ์ ให้ redirect ตาม role
+          if (authStore.isAdmin()) {
+            next('/admin/dashboard');
+          } else if (authStore.isMember()) {
+            next('/');
+          } else if (authStore.isPartnerOrAdmin()) {
+            next('/dashboardpartner');
+          }
+          return;
         }
-        return;
-      }
     }
   }
   

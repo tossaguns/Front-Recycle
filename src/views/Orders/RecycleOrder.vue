@@ -142,7 +142,7 @@
               จำนวนสูงสุดที่ขายได้คือ {{ selectedProductObj.maxAmount }} กิโลกรัม
             </div>
             <!-- ปุ่มเพิ่มสินค้า -->
-            <button type="button" @click="addItem" :disabled="!selectedProduct.value"
+            <button type="button" @click="addItem" :disabled="!selectedProduct"
               class="bg-[#b6e388] hover:bg-[#a4d376] text-[#184c36] font-semibold py-2 px-4 rounded-full transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed">
               เพิ่มสินค้า
             </button>
@@ -189,8 +189,8 @@
           </div>
         </div>
 
-        <!-- อัปโหลดรูปภาพสินค้า/หน้าบ้าน/ปักหมุด -->
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-6 mt-6">
+        <!-- อัปโหลดรูปภาพสินค้า/หน้าบ้าน และ Google Maps -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
           <!-- อัปโหลดรูปภาพสินค้า -->
           <div class="flex flex-col gap-3">
             <label class="font-normal sm:font-medium text-sm text-md text-[#184c36]">อัปโหลดรูปภาพสินค้า</label>
@@ -216,15 +216,37 @@
                 uploadedImages.front.name }}</div>
             </div>
 
+            <!-- Google Maps สำหรับปักหมุดตำแหน่ง -->
             <div class="flex flex-col gap-3">
-              <label class="font-normal sm:font-medium text-sm text-md text-[#184c36]">อัปโหลดรูปปักหมุดแผนที่</label>
-              <label
-                class="aspect-square bg-[#f7faf0] rounded-xl flex items-center justify-center text-gray-300 border border-dashed border-[#b6e388] cursor-pointer hover:bg-[#edf5e1] transition">
-                <span>เพิ่มรูปปักหมุด</span>
-                <input type="file" accept="image/*" class="hidden" @change="handleImageUpload($event, 'map')" />
-              </label>
-              <div class="text-xs text-gray-500" v-if="uploadedImages.map && uploadedImages.map.name">{{
-                uploadedImages.map.name }}</div>
+              <label class="font-normal sm:font-medium text-sm text-md text-[#184c36]">ปักหมุดตำแหน่งหน้าบ้าน</label>
+              <div class="relative">
+                <!-- Google Maps Container -->
+                <div id="google-map" class="w-full h-64 rounded-xl border-2 border-[#b6e388] overflow-hidden"></div>
+                
+                <!-- ปุ่มค้นหาตำแหน่งปัจจุบัน -->
+                <button 
+                  @click="getCurrentLocation" 
+                  type="button"
+                  class="absolute top-2 right-2 bg-white hover:bg-gray-50 text-[#184c36] p-2 rounded-lg shadow-md transition-colors"
+                  title="ค้นหาตำแหน่งปัจจุบัน">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </button>
+
+                <!-- แสดงพิกัดที่เลือก -->
+                <div v-if="selectedLocation.lat && selectedLocation.lng" 
+                     class="absolute bottom-2 left-2 bg-white bg-opacity-90 px-3 py-2 rounded-lg text-xs text-[#184c36]">
+                  <div>ละติจูด: {{ selectedLocation.lat.toFixed(6) }}</div>
+                  <div>ลองจิจูด: {{ selectedLocation.lng.toFixed(6) }}</div>
+                </div>
+              </div>
+              
+              <!-- คำแนะนำ -->
+              <div class="text-xs text-gray-500">
+                คลิกบนแผนที่เพื่อปักหมุดตำแหน่งหน้าบ้านของคุณ
+              </div>
             </div>
           </template>
         </div>
@@ -365,11 +387,25 @@
                 <div class="flex gap-2 flex-wrap">
                   <div v-if="uploadedImages.product" class="text-sm text-blue-600">✓ รูปสินค้า</div>
                   <div v-if="uploadedImages.front" class="text-sm text-blue-600">✓ รูปหน้าบ้าน</div>
-                  <div v-if="uploadedImages.map" class="text-sm text-blue-600">✓ รูปปักหมุด</div>
                 </div>
               </div>
               <div v-else class="flex flex-col gap-2 mb-2">
                 <div class="text-sm text-blue-600">ยังไม่มีรูปภาพที่อัปโหลด</div>
+              </div>
+            </div>
+
+            <!-- ข้อมูลตำแหน่ง (เฉพาะเมื่อเลือกให้รถเข้ารับสินค้า) -->
+            <div v-if="deliveryType === 'ให้รถเข้ารับสินค้า' && selectedLocation.lat && selectedLocation.lng">
+              <h3 class="font-semibold text-[#184c36] mb-2 text-base">ข้อมูลตำแหน่ง</h3>
+              <div class="flex flex-col gap-1 mb-2">
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">ละติจูด:</span>
+                  <span class="font-medium text-sm">{{ selectedLocation.lat.toFixed(6) }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">ลองจิจูด:</span>
+                  <span class="font-medium text-sm">{{ selectedLocation.lng.toFixed(6) }}</span>
+                </div>
               </div>
             </div>
             <hr />
@@ -434,7 +470,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import BarNoMenu from '../../components/BarNoMenu.vue';
@@ -467,6 +503,11 @@ onMounted(async () => {
   // ... (โหลด member/partner data อื่นๆ ตามเดิม)
   loadMemberData();
   loadPartnerData();
+  
+  // โหลด Google Maps เมื่อเลือก "ให้รถเข้ารับสินค้า"
+  if (deliveryType.value === 'ให้รถเข้ารับสินค้า') {
+    initGoogleMaps();
+  }
 });
 
 // กรองเฉพาะสินค้าของร้านนี้
@@ -531,9 +572,18 @@ const bookingData = ref({
 // ข้อมูลรูปภาพ
 const uploadedImages = ref({
   product: null,
-  front: null,
-  map: null
+  front: null
 });
+
+// ข้อมูลตำแหน่งที่เลือกจาก Google Maps
+const selectedLocation = ref({
+  lat: null,
+  lng: null
+});
+
+// Google Maps variables
+let map = null;
+let marker = null;
 
 // รายการสินค้าที่เลือก
 const selectedItems = ref([]);
@@ -686,6 +736,17 @@ const confirmBooking = async () => {
       return;
     }
 
+    // ตรวจสอบว่ามีการปักหมุดตำแหน่งหรือไม่ (เฉพาะเมื่อเลือกให้รถเข้ารับสินค้า)
+    if (deliveryType.value === 'ให้รถเข้ารับสินค้า' && (!selectedLocation.value.lat || !selectedLocation.value.lng)) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'ยังไม่ได้ปักหมุดตำแหน่ง',
+        text: 'กรุณาปักหมุดตำแหน่งหน้าบ้านบนแผนที่',
+        confirmButtonText: 'ตกลง'
+      });
+      return;
+    }
+
     // แสดง loading
     Swal.fire({
       title: 'กำลังดำเนินการ',
@@ -708,6 +769,9 @@ const confirmBooking = async () => {
       notes: bookingData.value.notes,
       address: bookingData.value.address,
       phone: bookingData.value.phone,
+      // เพิ่มพิกัดตำแหน่ง (เฉพาะเมื่อเลือกให้รถเข้ารับสินค้า)
+      latitude: deliveryType.value === 'ให้รถเข้ารับสินค้า' ? selectedLocation.value.lat : null,
+      longitude: deliveryType.value === 'ให้รถเข้ารับสินค้า' ? selectedLocation.value.lng : null,
       items: selectedItems.value.map(item => ({
         product_id: item.product_id,
         category_id: item.category_id,
@@ -791,6 +855,10 @@ const goBack = () => {
 watch(deliveryType, (val) => {
   if (val === 'ให้รถเข้ารับสินค้า') {
     loadMemberAddresses();
+    // เริ่มต้น Google Maps เมื่อเลือกให้รถเข้ารับสินค้า
+    nextTick(() => {
+      initGoogleMaps();
+    });
   }
 });
 
@@ -911,6 +979,211 @@ const pickupFee = computed(() => {
 const grandTotal = computed(() => {
   return totalPrice.value - pickupFee.value;
 });
+
+// ========== Google Maps Functions ==========
+
+// เริ่มต้น Google Maps
+const initGoogleMaps = () => {
+  // ตรวจสอบว่า Google Maps API โหลดแล้วหรือยัง
+  if (typeof google === 'undefined') {
+    // ถ้ายังไม่โหลด ให้โหลด Google Maps API
+    loadGoogleMapsAPI();
+    return;
+  }
+  
+  // สร้างแผนที่
+  createMap();
+};
+
+// โหลด Google Maps API
+const loadGoogleMapsAPI = () => {
+  // ตรวจสอบว่าโหลดแล้วหรือยัง
+  if (window.google && window.google.maps) {
+    createMap();
+    return;
+  }
+
+  // สร้าง script tag สำหรับโหลด Google Maps API
+  const script = document.createElement('script');
+  script.src = `https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places`;
+  script.async = true;
+  script.defer = true;
+  script.onload = () => {
+    createMap();
+  };
+  script.onerror = () => {
+    console.error('ไม่สามารถโหลด Google Maps API ได้');
+    Swal.fire({
+      icon: 'error',
+      title: 'เกิดข้อผิดพลาด',
+      text: 'ไม่สามารถโหลดแผนที่ได้ กรุณาลองใหม่อีกครั้ง',
+      confirmButtonText: 'ตกลง'
+    });
+  };
+  document.head.appendChild(script);
+};
+
+// สร้างแผนที่
+const createMap = () => {
+  const mapContainer = document.getElementById('google-map');
+  if (!mapContainer) {
+    console.error('ไม่พบ element สำหรับแผนที่');
+    return;
+  }
+
+  // ตำแหน่งเริ่มต้น (กรุงเทพฯ)
+  const defaultLocation = { lat: 13.7563, lng: 100.5018 };
+  
+  // สร้างแผนที่
+  map = new google.maps.Map(mapContainer, {
+    center: defaultLocation,
+    zoom: 15,
+    mapTypeId: google.maps.MapTypeId.ROADMAP,
+    mapTypeControl: false,
+    streetViewControl: false,
+    fullscreenControl: false,
+    styles: [
+      {
+        featureType: 'poi',
+        elementType: 'labels',
+        stylers: [{ visibility: 'off' }]
+      }
+    ]
+  });
+
+  // เพิ่ม event listener สำหรับคลิกบนแผนที่
+  map.addListener('click', (event) => {
+    placeMarker(event.latLng);
+  });
+
+  // พยายามหาตำแหน่งปัจจุบัน
+  getCurrentLocation();
+};
+
+// วาง marker บนแผนที่
+const placeMarker = (latLng) => {
+  // ลบ marker เดิม (ถ้ามี)
+  if (marker) {
+    marker.setMap(null);
+  }
+
+  // สร้าง marker ใหม่
+  marker = new google.maps.Marker({
+    position: latLng,
+    map: map,
+    title: 'ตำแหน่งหน้าบ้าน',
+    icon: {
+      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+        <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="16" cy="16" r="12" fill="#b6e388" stroke="#184c36" stroke-width="2"/>
+          <circle cx="16" cy="16" r="4" fill="#184c36"/>
+        </svg>
+      `),
+      scaledSize: new google.maps.Size(32, 32),
+      anchor: new google.maps.Point(16, 16)
+    }
+  });
+
+  // บันทึกพิกัดที่เลือก
+  selectedLocation.value = {
+    lat: latLng.lat(),
+    lng: latLng.lng()
+  };
+
+  // แสดงข้อมูลพิกัด
+  const infoWindow = new google.maps.InfoWindow({
+    content: `
+      <div style="padding: 8px; font-family: Arial, sans-serif;">
+        <div style="font-weight: bold; color: #184c36; margin-bottom: 4px;">ตำแหน่งหน้าบ้าน</div>
+        <div style="font-size: 12px; color: #666;">
+          ละติจูด: ${latLng.lat().toFixed(6)}<br>
+          ลองจิจูด: ${latLng.lng().toFixed(6)}
+        </div>
+      </div>
+    `
+  });
+
+  marker.addListener('click', () => {
+    infoWindow.open(map, marker);
+  });
+
+  // ปิด info window หลังจาก 3 วินาที
+  setTimeout(() => {
+    infoWindow.close();
+  }, 3000);
+};
+
+// หาตำแหน่งปัจจุบัน
+const getCurrentLocation = () => {
+  if (!navigator.geolocation) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'ไม่รองรับการระบุตำแหน่ง',
+      text: 'เบราว์เซอร์ของคุณไม่รองรับการระบุตำแหน่งปัจจุบัน',
+      confirmButtonText: 'ตกลง'
+    });
+    return;
+  }
+
+  // แสดง loading
+  Swal.fire({
+    title: 'กำลังค้นหาตำแหน่ง',
+    text: 'กรุณารอสักครู่...',
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    showConfirmButton: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const pos = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      };
+
+      // ปิด loading
+      Swal.close();
+
+      // ย้ายแผนที่ไปตำแหน่งปัจจุบัน
+      if (map) {
+        map.setCenter(pos);
+        placeMarker(new google.maps.LatLng(pos.lat, pos.lng));
+      }
+    },
+    (error) => {
+      // ปิด loading
+      Swal.close();
+      
+      let errorMessage = 'เกิดข้อผิดพลาดในการค้นหาตำแหน่ง';
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          errorMessage = 'กรุณาอนุญาตให้เข้าถึงตำแหน่งของคุณ';
+          break;
+        case error.POSITION_UNAVAILABLE:
+          errorMessage = 'ไม่สามารถระบุตำแหน่งได้';
+          break;
+        case error.TIMEOUT:
+          errorMessage = 'หมดเวลาการค้นหาตำแหน่ง';
+          break;
+      }
+
+      Swal.fire({
+        icon: 'error',
+        title: 'ไม่สามารถค้นหาตำแหน่งได้',
+        text: errorMessage,
+        confirmButtonText: 'ตกลง'
+      });
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 60000
+    }
+  );
+};
 </script>
 
 <style scoped>

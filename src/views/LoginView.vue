@@ -136,18 +136,26 @@ const login = async () => {
         authStore.login({ ...userData, token });
         
         // จัดการ localStorage และ navigation ตาม role
-        if (userData.role === 'partner') {
+        if (userData.role === 'admin' || userData.userType === 'admin') {
+          localStorage.setItem('admin', JSON.stringify(userData));
+          localStorage.removeItem('user');
+          localStorage.removeItem('partner');
+          router.push('/admin/dashboard');
+        } else if (userData.role === 'partner' || userData.userType === 'partner') {
           localStorage.setItem('partner', JSON.stringify(userData));
           localStorage.removeItem('user');
+          localStorage.removeItem('admin');
           router.push('/homepartner');
-        } else if (userData.role === 'member') {
+        } else if (userData.role === 'member' || userData.userType === 'member') {
           localStorage.setItem('user', JSON.stringify(userData));
           localStorage.removeItem('partner');
+          localStorage.removeItem('admin');
           router.push('/');
         } else {
           // กรณี role อื่นๆ หรือไม่ระบุ
           localStorage.setItem('user', JSON.stringify(userData));
           localStorage.removeItem('partner');
+          localStorage.removeItem('admin');
           router.push('/');
         }
         

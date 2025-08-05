@@ -2,9 +2,10 @@
     <header class="w-full border-b border-[#e6e6e6] flex flex-col items-center relative z-20">
         <div class="w-full flex items-center justify-between px-6 py-3 gap-4">
             <!-- Logo -->
-            <div class="flex items-center cursor-pointer" @click="$router.push('/dashboardpartner')">
+            <div class="flex items-center cursor-pointer" @click="$router.push('/admin/dashboard')">
                 <div class="rounded-xl w-12 h-10 flex items-center justify-center">
-                    <img src="../assets/logorecycle.png" alt="logo" class="h-10" />
+                    <!-- <img src="../assets/logorecycle.png" alt="logo" class="h-10" /> -->
+                    <RecycleIcon class="w-full h-full p-1 object-cover" />
                 </div>
                 <span class="ml-2 text-lg font-bold text-[#184c36]">Admin Panel</span>
             </div>
@@ -49,26 +50,23 @@
             <nav v-if="showMobileMenu"
                 class="w-full bg-white px-6 py-4 sm:hidden shadow-md z-50 absolute top-full left-0">
                 <ul class="flex flex-col gap-4 text-base text-[#184c36] font-medium">
-                    <li :class="['menu-underline', $route.path === '/dashboardpartner' ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : '', 'cursor-pointer']"
-                        @click="navigateTo('/dashboardpartner')">หน้าหลัก</li>
-                    <li :class="['menu-underline', $route.path === '/admin/sales' ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : '', 'cursor-pointer']"
-                        @click="navigateTo('/admin/sales')">ขายสินค้า</li>
-                    <li :class="['menu-underline', $route.path === '/manageemployee' ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : '', 'cursor-pointer']"
-                        @click="navigateTo('/manageemployee')">จัดการพนักงาน</li>
-                    <li :class="['menu-underline', $route.path === '/memberofpartner' ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : '', 'cursor-pointer']"
-                        @click="navigateTo('/memberofpartner')">สมาชิก</li>
-                    <li :class="['menu-underline', $route.path === '/addproduct' ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : '', 'cursor-pointer']"
-                        @click="navigateTo('/addproduct')">จัดการสินค้า</li>
-                    <li :class="['menu-underline', $route.path === '/admin/report1' ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : '', 'cursor-pointer']"
-                        @click="navigateTo('/admin/report1')">รายงาน1</li>
-                    <li :class="['menu-underline', $route.path === '/admin/report2' ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : '', 'cursor-pointer']"
-                        @click="navigateTo('/admin/report2')">รายงาน2</li>
-                    <li :class="['menu-underline', $route.path === '/admin/payment' ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : '', 'cursor-pointer']"
-                        @click="navigateTo('/admin/payment')">ชำระเงิน</li>
-                    <li :class="['menu-underline', $route.path === '/profilepartner' ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : '', 'cursor-pointer']"
-                        @click="navigateTo('/profilepartner')">การตั้งค่าบัญชี</li>
-                    <li v-if="authStore.isAuthenticated" class="menu-underline cursor-pointer text-red-600 hover:text-red-800" @click="handleLogout">ออกจากระบบ</li>
-                    <li v-else class="menu-underline cursor-pointer text-[#184c36] hover:text-[#b6e388]" @click="router.push('/login')">เข้าสู่ระบบ</li>
+                    <li :class="['menu-underline', $route.path === '/admin/dashboard' ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : '', 'cursor-pointer']"
+                        @click="navigateTo('/admin/dashboard')">หน้าหลัก</li>
+                    <li :class="['menu-underline', $route.path === '/admin/partners' ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : '', 'cursor-pointer']"
+                        @click="navigateTo('/admin/partners')">จัดการร้านค้า</li>
+                    <li :class="['menu-underline', $route.path === '/admin/members' ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : '', 'cursor-pointer']"
+                        @click="navigateTo('/admin/members')">สมาชิกทั้งหมด</li>
+                    <li :class="['menu-underline', $route.path === '/admin/orders' ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : '', 'cursor-pointer']"
+                        @click="navigateTo('/admin/orders')">การจองคิวทั้งหมด</li>
+                    <li :class="['menu-underline', $route.path === '/admin/revenue' ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : '', 'cursor-pointer']"
+                        @click="navigateTo('/admin/revenue')">รายได้</li>
+                    <li :class="['menu-underline', $route.path === '/admin/categories' ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : '', 'cursor-pointer']"
+                        @click="navigateTo('/admin/categories')">จัดการหมวดหมู่</li>
+                    <li :class="['menu-underline', $route.path === '/admin/profile' ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : '', 'cursor-pointer']"
+                        @click="navigateTo('/admin/profile')">การตั้งค่าบัญชี</li>
+                    <li v-if="authStore.isAuthenticated"
+                        class="menu-underline cursor-pointer text-red-600 hover:text-red-800" @click="handleLogout">
+                        ออกจากระบบ</li>
                 </ul>
             </nav>
         </transition>
@@ -77,28 +75,25 @@
         <div class="w-full h-[1px] bg-[#e6e6e6] hidden sm:block"></div>
 
         <!-- เมนู (Desktop) -->
-        <nav class="w-full pl-0 sm:pl-20 py-3 justify-center sm:justify-start hidden sm:flex">
-            <ul class="flex gap-2 md:gap-6 text-xs lg:text-sm text-[#222] font-medium">
-                <li :class="['menu-underline', $route.path === '/dashboardpartner' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
-                    @click="navigateTo('/dashboardpartner')">หน้าหลัก</li>
-                <li :class="['menu-underline', $route.path === '/admin/sales' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
-                    @click="navigateTo('/admin/sales')">ขายสินค้า</li>
-                <li :class="['menu-underline', $route.path === '/manageemployee' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
-                    @click="navigateTo('/manageemployee')">จัดการพนักงาน</li>
-                <li :class="['menu-underline', $route.path === '/memberofpartner' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
-                    @click="navigateTo('/memberofpartner')">สมาชิก</li>
-                <li :class="['menu-underline', $route.path === '/addproduct' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
-                    @click="navigateTo('/addproduct')">จัดการสินค้า</li>
-                <li :class="['menu-underline', $route.path === '/admin/report1' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
-                    @click="navigateTo('/admin/report1')">รายงาน1</li>
-                <li :class="['menu-underline', $route.path === '/admin/report2' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
-                    @click="navigateTo('/admin/report2')">รายงาน2</li>
-                <li :class="['menu-underline', $route.path === '/admin/payment' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
-                    @click="navigateTo('/admin/payment')">ชำระเงิน</li>
-                <li :class="['menu-underline', $route.path === '/profilepartner' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
-                    @click="navigateTo('/profilepartner')">การตั้งค่าบัญชี</li>
-                <li v-if="authStore.isAuthenticated" class="menu-underline cursor-pointer text-red-600 hover:text-red-800" @click="handleLogout">ออกจากระบบ</li>
-                <li v-else class="menu-underline cursor-pointer text-[#184c36] hover:text-[#b6e388]" @click="router.push('/login')">เข้าสู่ระบบ</li>
+        <nav class="w-full pl-0 sm:pl-20 py-3 bg-[#2BAC75] justify-center sm:justify-start hidden sm:flex">
+            <ul class="flex gap-2 md:gap-6 text-xs lg:text-sm text-[#ffff] font-medium">
+                <li :class="['menu-underline', $route.path === '/admin/dashboard' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
+                    @click="navigateTo('/admin/dashboard')">หน้าหลัก</li>
+                <li :class="['menu-underline', $route.path === '/admin/partners' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
+                    @click="navigateTo('/admin/partners')">จัดการร้านค้า</li>
+                <li :class="['menu-underline', $route.path === '/admin/members' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
+                    @click="navigateTo('/admin/members')">สมาชิกทั้งหมด</li>
+                <li :class="['menu-underline', $route.path === '/admin/orders' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
+                    @click="navigateTo('/admin/orders')">การจองคิวทั้งหมด</li>
+                <li :class="['menu-underline', $route.path === '/admin/revenue' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
+                    @click="navigateTo('/admin/revenue')">รายได้</li>
+                <li :class="['menu-underline', $route.path === '/admin/categories' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
+                    @click="navigateTo('/admin/categories')">จัดการหมวดหมู่</li>
+                <li :class="['menu-underline', $route.path === '/admin/profile' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
+                    @click="navigateTo('/admin/profile')">การตั้งค่าบัญชี</li>
+                <li v-if="authStore.isAuthenticated"
+                    class="menu-underline cursor-pointer text-red-600 hover:text-red-800" @click="handleLogout">
+                    ออกจากระบบ</li>
             </ul>
         </nav>
     </header>
@@ -108,6 +103,8 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+import { RecycleIcon } from '../icons';
+import Swal from 'sweetalert2';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -118,9 +115,33 @@ function navigateTo(path) {
     showMobileMenu.value = false; // ปิด mobile menu เมื่อเลือกเมนู
 }
 
-function handleLogout() {
-    authStore.logout();
-    router.push('/login');
+async function handleLogout() {
+    const result = await Swal.fire({
+        title: 'ยืนยันการออกจากระบบ',
+        text: 'คุณต้องการออกจากระบบจริงหรือไม่?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'ออกจากระบบ',
+        cancelButtonText: 'ยกเลิก'
+    });
+
+    if (result.isConfirmed) {
+        authStore.logout();
+        // รอให้ authStore อัพเดทก่อน
+        await new Promise(resolve => setTimeout(resolve, 100));
+        // แสดง success message ก่อน แล้วค่อยรีเฟรช
+        await Swal.fire({
+            title: 'ออกจากระบบแล้ว!',
+            text: 'คุณได้ออกจากระบบเรียบร้อยแล้ว',
+            icon: 'success',
+            timer: 1500,
+            showConfirmButton: false
+        });
+        // รีเฟรชหน้าเพื่อให้แสดง landing page
+        window.location.reload();
+    }
 }
 </script>
 

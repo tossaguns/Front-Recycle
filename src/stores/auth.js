@@ -18,7 +18,8 @@ export const useAuthStore = defineStore("auth", () => {
 
     // ใช้ key แยกตาม role
     const getStorageKey = (role) => {
-        if (role === "partner" || role === "admin" || role === "shop") return "partner";
+        if (role === "admin") return "admin";
+        if (role === "partner" || role === "shop") return "partner";
         if (role === "member") return "user";
         if (role === "employee") return "employee";
         return null;
@@ -27,7 +28,10 @@ export const useAuthStore = defineStore("auth", () => {
     const initializeAuth = () => {
         let savedUser = null;
         let key = null;
-        if (localStorage.getItem("partner")) {
+        if (localStorage.getItem("admin")) {
+            savedUser = localStorage.getItem("admin");
+            key = "admin";
+        } else if (localStorage.getItem("partner")) {
             savedUser = localStorage.getItem("partner");
             key = "partner";
         } else if (localStorage.getItem("user")) {
@@ -115,11 +119,13 @@ export const useAuthStore = defineStore("auth", () => {
 
             // แยก routing ตาม role
             switch (userObj.role) {
+                case "admin":
+                    router.push("/admin/dashboard");
+                    break;
                 case "member":
                     router.push("/");
                     break;
                 case "partner":
-                case "admin":
                 case "shop":
                     router.push("/dashboardpartner");
                     break;
@@ -154,6 +160,7 @@ export const useAuthStore = defineStore("auth", () => {
         // ลบทุก key ที่เกี่ยวข้อง
         localStorage.removeItem("user");
         localStorage.removeItem("partner");
+        localStorage.removeItem("admin");
         localStorage.removeItem("employee");
         localStorage.removeItem("token");
         router.push("/");
@@ -167,6 +174,11 @@ export const useAuthStore = defineStore("auth", () => {
     // ฟังก์ชันตรวจสอบว่าเป็น partner, admin, หรือ shop
     function isPartnerOrAdmin() {
         return user.value.role === "partner" || user.value.role === "admin" || user.value.role === "shop";
+    }
+
+    // ฟังก์ชันตรวจสอบว่าเป็น admin
+    function isAdmin() {
+        return user.value.role === "admin";
     }
 
     // ฟังก์ชันตรวจสอบว่าเป็น member
@@ -188,6 +200,7 @@ export const useAuthStore = defineStore("auth", () => {
         initializeAuth,
         hasRole,
         isPartnerOrAdmin,
+        isAdmin,
         isMember,
         isEmployee,
     };
