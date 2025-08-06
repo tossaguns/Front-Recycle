@@ -130,21 +130,17 @@
                                             </span>
                                         </td>
                                         <td class="px-4 py-4">
-                                            <span v-if="item.change > 0"
+                                            <span v-if="item.change !== '-' && item.changeValue > 0"
                                                 class="inline-flex items-center gap-1 bg-[#e6f7e6] rounded-full px-2 py-1 text-green-600 font-bold text-sm">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
-                                                    viewBox="0 0 24 24">
-                                                    <path d="M5 12l5 5l9-9" stroke-linecap="round"
-                                                        stroke-linejoin="round" />
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                                                 </svg>
-                                                +{{ item.change }}
+                                                {{ item.change }}
                                             </span>
-                                            <span v-else-if="item.change < 0"
+                                            <span v-else-if="item.change !== '-' && item.changeValue < 0"
                                                 class="inline-flex items-center gap-1 bg-[#fff0f0] rounded-full px-2 py-1 text-red-500 font-bold text-sm">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
-                                                    viewBox="0 0 24 24">
-                                                    <path d="M19 12l-7 7l-5-5" stroke-linecap="round"
-                                                        stroke-linejoin="round" />
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                                                 </svg>
                                                 {{ item.change }}
                                             </span>
@@ -230,18 +226,38 @@ const { el: heroRightRef, isVisible: heroRightVisible } = useRevealOnScroll();
 // --- data ---
 const priceList = ref([]);
 const todayDate = ref('');
-
-// --- methods ---
-function goToLogin() {
-    router.push('/login');
-}
-
 function setTodayDate() {
   const d = new Date();
   const day = String(d.getDate()).padStart(2, '0');
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const year = d.getFullYear() + 543;
   todayDate.value = `${day}/${month}/${year}`;
+}
+
+// --- methods ---
+function normalizeName(name) {
+  if (!name) return '';
+  // เว้นวรรคหน้า +, %, หรือ ( ... )
+  name = name.replace(/([^\s+])\+/g, '$1 + ');
+  name = name.replace(/([^\s])%/g, '$1 %');
+  name = name.replace(/([^\s])\(/g, '$1 (');
+  name = name.replace(/\)([\p{L}0-9])/gu, ') $1');
+  name = name.replace(/([\p{L}])([0-9])/gu, '$1 $2');
+  name = name.replace(/([0-9])([\p{L}])/gu, '$1 $2');
+  // ลบ T ที่อยู่ท้ายข้อความ ยกเว้น "เหล็กบาง + สายรัดเหล็ก + เหล็กถัง 200 LIT"
+  if (name !== 'เหล็กบาง + สายรัดเหล็ก + เหล็กถัง 200 LIT') {
+    name = name.replace(/T$/, '');
+  }
+  if (name !== 'อลูมิเนียมติดเหล็กไม่มาก 30 %') {
+    name = name.replace(/%$/, '');
+  }
+  if (name !== 'ทองแดงเบอร์4') {
+    name = name.replace(/4$/, '');
+  }
+  return name.replace(/\s{2,}/g, ' ').trim();
+}
+function formatName(name) {
+  return normalizeName(name);
 }
 
 async function fetchBuyBackPrices() {
@@ -253,66 +269,94 @@ async function fetchBuyBackPrices() {
     // เตรียม prevPriceMap
     const prevMap = new Map();
     if (previous.length > 0) {
-      for (const row of previous[0]) {
-        if (row[0] && row[1]) prevMap.set(row[0], parseFloat((row[1] || '').replace('|', '').trim()));
-        if (row[2] && row[3]) prevMap.set(row[2], parseFloat((row[3] || '').replace('|', '').trim()));
+      for (const table of previous) {
+        if (Array.isArray(table)) {
+          for (const row of table) {
+            if (row[0] && row[1]) prevMap.set(normalizeName(row[0]), parseFloat((row[1] || '').replace('|', '').trim()));
+            if (row[2] && row[3]) prevMap.set(normalizeName(row[2]), parseFloat((row[3] || '').replace('|', '').trim()));
+          }
+        }
       }
     }
     let items = [];
     if (current.length > 0) {
-      for (const row of current[0]) {
-        // ฝั่งซ้าย
-        let leftName = row[0];
-        let leftPrice = row[1] || '';
-        if (leftPrice) leftPrice = leftPrice.replace('|', '').trim();
-        if (leftPrice) leftPrice = leftPrice.replace(')', '').trim();
-        
-        // ตรวจสอบและข้ามรายการที่ไม่ต้องการแสดง
-        if (!leftName || !leftPrice || 
-            leftName === 'กลุ่มโลหะมีค่า' || 
-            leftName === 'กลุ่มพลาสติก' || 
-            leftName === 'ู่มบ็ตต็ด' || 
-            leftName === 'งดรับ' ||
-            leftPrice === 'งดรับ') {
-          // ข้ามรายการนี้
-        } else {
-          let leftChange = '-';
-          const prev = prevMap.get(leftName);
-          const curr = parseFloat(leftPrice);
-          if (prev !== undefined && !isNaN(curr) && !isNaN(prev)) {
-            const d = +(curr - prev).toFixed(2);
-            leftChange = d === 0 ? '-' : (d > 0 ? '+' + d : d);
+      for (const table of current) {
+        if (Array.isArray(table)) {
+          for (const row of table) {
+            // ฝั่งซ้าย
+            let leftName = formatName(row[0]);
+            let leftPrice = row[1] || '';
+            if (leftPrice) leftPrice = leftPrice.replace('|', '').trim();
+            if (leftPrice) leftPrice = leftPrice.replace(')', '').trim();
+            // ตรวจสอบและข้ามรายการที่ไม่ต้องการแสดง
+            if (!leftName || !leftPrice || 
+                leftName === 'กลุ่มโลหะมีค่า' || 
+                leftName === 'กลุ่มพลาสติก' || 
+                leftName === 'ู่มบ็ตต็ด' || 
+                leftName === 'งดรับ' ||
+                leftPrice === 'งดรับ') {
+              // ข้ามรายการนี้
+            } else {
+              let leftChange = '-';
+              let leftChangeValue = 0;
+              const prev = prevMap.get(leftName);
+              const curr = parseFloat(leftPrice);
+              if (prev !== undefined && !isNaN(curr) && !isNaN(prev)) {
+                const d = +(curr - prev).toFixed(2);
+                leftChangeValue = d;
+                leftChange = d === 0 ? '-' : (d > 0 ? '+' + d : d.toString());
+              }
+              items.push({ 
+                type: leftName, 
+                unit: 'กิโล', 
+                price: leftPrice, 
+                change: leftChange,
+                changeValue: leftChangeValue,
+                hasChange: leftChange !== '-'
+              });
+            }
+            // ฝั่งขวา
+            let rightName = formatName(row[2]);
+            let rightPrice = row[3] || '';
+            if (rightPrice) rightPrice = rightPrice.replace('|', '').trim();
+            if (rightPrice) rightPrice = rightPrice.replace(')', '').trim();
+            if (!rightName || !rightPrice || 
+                rightName === 'กลุ่มโลหะมีค่า' || 
+                rightName === 'กลุ่มพลาสติก' || 
+                rightName === 'ู่มบ็ตต็ด' || 
+                rightName === 'งดรับ' ||
+                rightPrice === 'งดรับ') {
+              // ข้ามรายการนี้
+            } else {
+              let rightChange = '-';
+              let rightChangeValue = 0;
+              const prev = prevMap.get(rightName);
+              const curr = parseFloat(rightPrice);
+              if (prev !== undefined && !isNaN(curr) && !isNaN(prev)) {
+                const d = +(curr - prev).toFixed(2);
+                rightChangeValue = d;
+                rightChange = d === 0 ? '-' : (d > 0 ? '+' + d : d.toString());
+              }
+              items.push({ 
+                type: rightName, 
+                unit: 'กิโล', 
+                price: rightPrice, 
+                change: rightChange,
+                changeValue: rightChangeValue,
+                hasChange: rightChange !== '-'
+              });
+            }
           }
-          items.push({ type: leftName, unit: 'กิโล', price: leftPrice, change: leftChange });
-        }
-        
-        // ฝั่งขวา
-        let rightName = row[2];
-        let rightPrice = row[3] || '';
-        if (rightPrice) rightPrice = rightPrice.replace('|', '').trim();
-        if (rightPrice) rightPrice = rightPrice.replace(')', '').trim();
-        
-        // ตรวจสอบและข้ามรายการที่ไม่ต้องการแสดง
-        if (!rightName || !rightPrice || 
-            rightName === 'กลุ่มโลหะมีค่า' || 
-            rightName === 'กลุ่มพลาสติก' || 
-            rightName === 'ู่มบ็ตต็ด' || 
-            rightName === 'งดรับ' ||
-            rightPrice === 'งดรับ') {
-          // ข้ามรายการนี้
-        } else {
-          let rightChange = '-';
-          const prev = prevMap.get(rightName);
-          const curr = parseFloat(rightPrice);
-          if (prev !== undefined && !isNaN(curr) && !isNaN(prev)) {
-            const d = +(curr - prev).toFixed(2);
-            rightChange = d === 0 ? '-' : (d > 0 ? '+' + d : d);
-          }
-          items.push({ type: rightName, unit: 'กิโล', price: rightPrice, change: rightChange });
         }
       }
     }
-    priceList.value = items.slice(0, 7);
+    // เรียงลำดับ: รายการที่มีการเปลี่ยนแปลงขึ้นมาก่อน (เรียงตามค่าการเปลี่ยนแปลงจากมากไปน้อย)
+    // แล้วตามด้วยรายการที่ไม่มีเปลี่ยนแปลง
+    const changedItems = items.filter(item => item.hasChange).sort((a, b) => Math.abs(b.changeValue) - Math.abs(a.changeValue));
+    const unchangedItems = items.filter(item => !item.hasChange);
+    // รวมรายการ: รายการที่มีการเปลี่ยนแปลง + รายการที่ไม่มีเปลี่ยนแปลง (ให้ครบ 7 อัน)
+    const finalItems = [...changedItems, ...unchangedItems].slice(0, 7);
+    priceList.value = finalItems;
   } catch (err) {
     priceList.value = [];
   }
@@ -320,6 +364,10 @@ async function fetchBuyBackPrices() {
 
 function goToBuyBackPrice() {
   router.push({ path: '/buybackprice' });
+}
+
+function goToLogin() {
+  router.push('/login');
 }
 
 onMounted(() => {

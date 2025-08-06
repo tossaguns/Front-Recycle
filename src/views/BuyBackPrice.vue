@@ -6,14 +6,14 @@
         </h1>
         <div class="flex justify-center items-center w-full flex-1 mb-10">
             <div class="w-full max-w-[1450px]">
-                <div class="bg-gray-200 rounded-2xl shadow-xl overflow-hidden border border-gray-300">
-                    <div
-                        class="bg-[#e6f7e6] px-6 py-4 border-b border-gray-300 flex flex-col md:flex-row md:justify-between">
-                        <span class="font-bold text-[#184c36] text-lg block">ราคารับ - ซื้อ</span>
+                <!-- หมวดหมู่เหล็ก -->
+                <div class="bg-gray-200 rounded-2xl shadow-xl overflow-hidden border border-gray-300 mb-6">
+                    <div class="bg-[#e6f7e6] px-6 py-4 border-b border-gray-300 flex flex-col md:flex-row md:justify-between">
+                        <span class="font-bold text-[#184c36] text-lg block">หมวดหมู่เหล็ก</span>
                         <span class="text-xs text-[#7a7a7a]">ณ วันที่ {{ todayDate }}</span>
                     </div>
-                    <div class="overflow-x-auto w-full"> <!-- เพิ่ม div นี้ -->
-                        <table class="w-full min-w-[700px] border-collapse text-xs md:text-sm"> <!-- ปรับ min-w และ text-xs -->
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full min-w-[700px] border-collapse text-xs md:text-sm">
                             <thead>
                                 <tr>
                                     <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left w-[30%]">รายการ</th>
@@ -27,48 +27,437 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="(pair, idx) in pairedItems" :key="idx"
+                                <tr v-for="(pair, idx) in pairedItems.iron" :key="`iron-${idx}`"
                                     :class="`text-[#184c36] text-[10px] md:text-xs font-medium transition ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f7faf7]'}`">
-                                    <!-- ฝั่งซ้าย -->
                                     <td class="px-2 md:px-4 py-2 md:py-4 break-words">{{ formatName(pair[0]?.name) || '' }}</td>
-                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap"><span v-if="pair[0]">กิโล</span></td>
-                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap">
-                                        <span v-if="pair[0]"
-                                            class="inline-block bg-white rounded-full px-2 md:px-3 py-1 shadow text-[#184c36] font-bold">
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-center"><span v-if="pair[0]">กิโล</span></td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-end">
+                                        <span v-if="pair[0] && pair[0].price !== 'งดรับ' && pair[0].price !== null"
+                                            class="inline-block py-1 text-[#184c36] font-bold">
                                             {{ pair[0]?.price }}
                                         </span>
-                                    </td>
-                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap">
-                                        <span v-if="pair[0]"
-                                            class="inline-flex items-center gap-1 bg-[#e6f7e6] rounded-full px-2 py-1 text-gray-500 font-bold text-xs md:text-sm">
-                                            {{ pair[0].diff }}
+                                        <span v-else-if="pair[0] && pair[0].price === 'งดรับ'"
+                                            class="inline-block bg-red-100 rounded-full px-2 md:px-3 py-1 shadow text-red-600 font-bold">
+                                            งดรับ
                                         </span>
                                     </td>
-                                    <!-- ฝั่งขวา -->
-                                    <td class="px-2 md:px-4 py-2 md:py-4 border-l border-gray-300 break-words">{{ formatName(pair[1]?.name) || '' }}</td>
-                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap"><span v-if="pair[1]">กิโล</span></td>
                                     <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap">
-                                        <span v-if="pair[1]"
-                                            class="inline-block bg-white rounded-full px-2 md:px-3 py-1 shadow text-[#184c36] font-bold">
+                                        <span v-if="pair[0] && pair[0].price !== 'งดรับ' && pair[0].price !== null"
+                                            :class="[
+                                                'inline-flex items-center rounded-full px-2 md:px-3 py-1 shadow font-bold',
+                                                pair[0].change === 'up' ? 'bg-green-100 text-green-700' : pair[0].change === 'down' ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500'
+                                            ]">
+                                            <svg v-if="pair[0].change === 'up'" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                                            <svg v-else-if="pair[0].change === 'down'" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                                            <span>{{ pair[0].diff }}</span>
+                                        </span>
+                                    </td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 border-l border-gray-300 break-words">{{ formatName(pair[1]?.name) || '' }}</td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-center"><span v-if="pair[1]">กิโล</span></td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-end">
+                                        <span v-if="pair[1] && pair[1].price !== 'งดรับ' && pair[1].price !== null"
+                                            class="inline-block py-1 text-[#184c36] font-bold">
                                             {{ pair[1]?.price }}
                                         </span>
-                                    </td>
-                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap">
-                                        <span v-if="pair[1]"
-                                            class="inline-flex items-center gap-1 bg-[#e6f7e6] rounded-full px-2 py-1 text-gray-500 font-bold text-xs md:text-sm">
-                                            {{ pair[1].diff }}
+                                        <span v-else-if="pair[1] && pair[1].price === 'งดรับ'"
+                                            class="inline-block bg-red-100 rounded-full px-2 md:px-3 py-1 shadow text-red-600 font-bold">
+                                            งดรับ
                                         </span>
                                     </td>
-                                </tr>
-                                <tr v-if="pairedItems.length === 0">
-                                    <td colspan="8" class="text-center py-6 text-gray-400">ไม่มีข้อมูลราคา</td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap">
+                                        <span v-if="pair[1] && pair[1].price !== 'งดรับ' && pair[1].price !== null"
+                                            :class="[
+                                                'inline-flex items-center rounded-full px-2 md:px-3 py-1 shadow font-bold',
+                                                pair[1].change === 'up' ? 'bg-green-100 text-green-700' : pair[1].change === 'down' ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500'
+                                            ]">
+                                            <svg v-if="pair[1].change === 'up'" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                                            <svg v-else-if="pair[1].change === 'down'" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                                            <span>{{ pair[1].diff }}</span>
+                                        </span>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
-                    </div> <!-- ปิด div overflow-x-auto -->
-                    <div class="text-xs text-gray-500 mt-4 px-4 pb-6">
-                        หมายเหตุ: ราคาที่แจ้งอาจมีการเปลี่ยนแปลงอยู่ตลอด กรุณาตรวจสอบกับร้านค้าก่อนทำรายการทุกครั้ง
                     </div>
+                </div>
+
+                <!-- หมวดหมู่กระดาษ -->
+                <div class="bg-gray-200 rounded-2xl shadow-xl overflow-hidden border border-gray-300 mb-6">
+                    <div class="bg-[#e6f7e6] px-6 py-4 border-b border-gray-300 flex flex-col md:flex-row md:justify-between">
+                        <span class="font-bold text-[#184c36] text-lg block">หมวดหมู่กระดาษ</span>
+                        <span class="text-xs text-[#7a7a7a]">ณ วันที่ {{ todayDate }}</span>
+                    </div>
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full min-w-[700px] border-collapse text-xs md:text-sm">
+                            <thead>
+                                <tr>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left w-[30%]">รายการ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">หน่วยรับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">ราคารับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">การเปลี่ยนแปลง</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left border-l border-gray-300 w-[30%]">รายการ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">หน่วยรับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">ราคารับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">การเปลี่ยนแปลง</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(pair, idx) in pairedItems.paper" :key="`paper-${idx}`"
+                                    :class="`text-[#184c36] text-[10px] md:text-xs font-medium transition ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f7faf7]'}`">
+                                    <td class="px-2 md:px-4 py-2 md:py-4 break-words">{{ formatName(pair[0]?.name) || '' }}</td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-center"><span v-if="pair[0]">กิโล</span></td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-end">
+                                        <span v-if="pair[0] && pair[0].price !== 'งดรับ' && pair[0].price !== null"
+                                            class="inline-block py-1 text-[#184c36] font-bold">
+                                            {{ pair[0]?.price }}
+                                        </span>
+                                        <span v-else-if="pair[0] && pair[0].price === 'งดรับ'"
+                                            class="inline-block bg-red-100 rounded-full px-2 md:px-3 py-1 shadow text-red-600 font-bold">
+                                            งดรับ
+                                        </span>
+                                    </td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap">
+                                        <span v-if="pair[0] && pair[0].price !== 'งดรับ' && pair[0].price !== null"
+                                            :class="[
+                                                'inline-flex items-center rounded-full px-2 md:px-3 py-1 shadow font-bold',
+                                                pair[0].change === 'up' ? 'bg-green-100 text-green-700' : pair[0].change === 'down' ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500'
+                                            ]">
+                                            <svg v-if="pair[0].change === 'up'" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                                            <svg v-else-if="pair[0].change === 'down'" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                                            <span>{{ pair[0].diff }}</span>
+                                        </span>
+                                    </td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 border-l border-gray-300 break-words">{{ formatName(pair[1]?.name) || '' }}</td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-center"><span v-if="pair[1]">กิโล</span></td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-end">
+                                        <span v-if="pair[1] && pair[1].price !== 'งดรับ' && pair[1].price !== null"
+                                            class="inline-block py-1 text-[#184c36] font-bold">
+                                            {{ pair[1]?.price }}
+                                        </span>
+                                        <span v-else-if="pair[1] && pair[1].price === 'งดรับ'"
+                                            class="inline-block bg-red-100 rounded-full px-2 md:px-3 py-1 shadow text-red-600 font-bold">
+                                            งดรับ
+                                        </span>
+                                    </td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap">
+                                        <span v-if="pair[1] && pair[1].price !== 'งดรับ' && pair[1].price !== null"
+                                            :class="[
+                                                'inline-flex items-center rounded-full px-2 md:px-3 py-1 shadow font-bold',
+                                                pair[1].change === 'up' ? 'bg-green-100 text-green-700' : pair[1].change === 'down' ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500'
+                                            ]">
+                                            <svg v-if="pair[1].change === 'up'" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                                            <svg v-else-if="pair[1].change === 'down'" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                                            <span>{{ pair[1].diff }}</span>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- กลุ่มเบ็ดเตล็ด -->
+                <div class="bg-gray-200 rounded-2xl shadow-xl overflow-hidden border border-gray-300 mb-6">
+                    <div class="bg-[#e6f7e6] px-6 py-4 border-b border-gray-300 flex flex-col md:flex-row md:justify-between">
+                        <span class="font-bold text-[#184c36] text-lg block">กลุ่มเบ็ดเตล็ด</span>
+                        <span class="text-xs text-[#7a7a7a]">ณ วันที่ {{ todayDate }}</span>
+                    </div>
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full min-w-[700px] border-collapse text-xs md:text-sm">
+                            <thead>
+                                <tr>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left w-[30%]">รายการ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">หน่วยรับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">ราคารับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">การเปลี่ยนแปลง</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left border-l border-gray-300 w-[30%]">รายการ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">หน่วยรับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">ราคารับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">การเปลี่ยนแปลง</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(pair, idx) in pairedItems.milkBox" :key="`milkBox-${idx}`"
+                                    :class="`text-[#184c36] text-[10px] md:text-xs font-medium transition ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f7faf7]'}`">
+                                    <td class="px-2 md:px-4 py-2 md:py-4 break-words">{{ formatName(pair[0]?.name) || '' }}</td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-center"><span v-if="pair[0]">กิโล</span></td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-end">
+                                        <span v-if="pair[0] && pair[0].price !== 'งดรับ' && pair[0].price !== null"
+                                            class="inline-block py-1 text-[#184c36] font-bold">
+                                            {{ pair[0]?.price }}
+                                        </span>
+                                        <span v-else-if="pair[0] && pair[0].price === 'งดรับ'"
+                                            class="inline-block bg-red-100 rounded-full px-2 md:px-3 py-1 shadow text-red-600 font-bold">
+                                            งดรับ
+                                        </span>
+                                    </td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap">
+                                        <span v-if="pair[0] && pair[0].price !== 'งดรับ' && pair[0].price !== null"
+                                            :class="[
+                                                'inline-flex items-center rounded-full px-2 md:px-3 py-1 shadow font-bold',
+                                                pair[0].change === 'up' ? 'bg-green-100 text-green-700' : pair[0].change === 'down' ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500'
+                                            ]">
+                                            <svg v-if="pair[0].change === 'up'" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                                            <svg v-else-if="pair[0].change === 'down'" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                                            <span>{{ pair[0].diff }}</span>
+                                        </span>
+                                    </td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 border-l border-gray-300 break-words">{{ formatName(pair[1]?.name) || '' }}</td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-center"><span v-if="pair[1]">กิโล</span></td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-end">
+                                        <span v-if="pair[1] && pair[1].price !== 'งดรับ' && pair[1].price !== null"
+                                            class="inline-block py-1 text-[#184c36] font-bold">
+                                            {{ pair[1]?.price }}
+                                        </span>
+                                        <span v-else-if="pair[1] && pair[1].price === 'งดรับ'"
+                                            class="inline-block bg-red-100 rounded-full px-2 md:px-3 py-1 shadow text-red-600 font-bold">
+                                            งดรับ
+                                        </span>
+                                    </td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap">
+                                        <span v-if="pair[1] && pair[1].price !== 'งดรับ' && pair[1].price !== null"
+                                            :class="[
+                                                'inline-flex items-center rounded-full px-2 md:px-3 py-1 shadow font-bold',
+                                                pair[1].change === 'up' ? 'bg-green-100 text-green-700' : pair[1].change === 'down' ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500'
+                                            ]">
+                                            <svg v-if="pair[1].change === 'up'" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                                            <svg v-else-if="pair[1].change === 'down'" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                                            <span>{{ pair[1].diff }}</span>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- หมวดหมู่อลูมิเนียม แบตเตอรี่ และแก้ว -->
+                <div class="bg-gray-200 rounded-2xl shadow-xl overflow-hidden border border-gray-300 mb-6">
+                    <div class="bg-[#e6f7e6] px-6 py-4 border-b border-gray-300 flex flex-col md:flex-row md:justify-between">
+                        <span class="font-bold text-[#184c36] text-lg block">หมวดหมู่อลูมิเนียม แบตเตอรี่ และแก้ว</span>
+                        <span class="text-xs text-[#7a7a7a]">ณ วันที่ {{ todayDate }}</span>
+                    </div>
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full min-w-[700px] border-collapse text-xs md:text-sm">
+                            <thead>
+                                <tr>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left w-[30%]">รายการ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">หน่วยรับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">ราคารับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">การเปลี่ยนแปลง</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left border-l border-gray-300 w-[30%]">รายการ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">หน่วยรับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">ราคารับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">การเปลี่ยนแปลง</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(pair, idx) in pairedItems.aluminum" :key="`aluminum-${idx}`"
+                                    :class="`text-[#184c36] text-[10px] md:text-xs font-medium transition ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f7faf7]'}`">
+                                    <td class="px-2 md:px-4 py-2 md:py-4 break-words">{{ formatName(pair[0]?.name) || '' }}</td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-center"><span v-if="pair[0]">กิโล</span></td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-end">
+                                        <span v-if="pair[0] && pair[0].price !== 'งดรับ' && pair[0].price !== null"
+                                            class="inline-block py-1 text-[#184c36] font-bold">
+                                            {{ pair[0]?.price }}
+                                        </span>
+                                        <span v-else-if="pair[0] && pair[0].price === 'งดรับ'"
+                                            class="inline-block bg-red-100 rounded-full px-2 md:px-3 py-1 shadow text-red-600 font-bold">
+                                            งดรับ
+                                        </span>
+                                    </td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap">
+                                        <span v-if="pair[0] && pair[0].price !== 'งดรับ' && pair[0].price !== null"
+                                            :class="[
+                                                'inline-flex items-center rounded-full px-2 md:px-3 py-1 shadow font-bold',
+                                                pair[0].change === 'up' ? 'bg-green-100 text-green-700' : pair[0].change === 'down' ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500'
+                                            ]">
+                                            <svg v-if="pair[0].change === 'up'" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                                            <svg v-else-if="pair[0].change === 'down'" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                                            <span>{{ pair[0].diff }}</span>
+                                        </span>
+                                    </td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 border-l border-gray-300 break-words">{{ formatName(pair[1]?.name) || '' }}</td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-center"><span v-if="pair[1]">กิโล</span></td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-end">
+                                        <span v-if="pair[1] && pair[1].price !== 'งดรับ' && pair[1].price !== null"
+                                            class="inline-block py-1 text-[#184c36] font-bold">
+                                            {{ pair[1]?.price }}
+                                        </span>
+                                        <span v-else-if="pair[1] && pair[1].price === 'งดรับ'"
+                                            class="inline-block bg-red-100 rounded-full px-2 md:px-3 py-1 shadow text-red-600 font-bold">
+                                            งดรับ
+                                        </span>
+                                    </td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap">
+                                        <span v-if="pair[1] && pair[1].price !== 'งดรับ' && pair[1].price !== null"
+                                            :class="[
+                                                'inline-flex items-center rounded-full px-2 md:px-3 py-1 shadow font-bold',
+                                                pair[1].change === 'up' ? 'bg-green-100 text-green-700' : pair[1].change === 'down' ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500'
+                                            ]">
+                                            <svg v-if="pair[1].change === 'up'" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                                            <svg v-else-if="pair[1].change === 'down'" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                                            <span>{{ pair[1].diff }}</span>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- หมวดหมู่ทองแดงและอลูมิเนียม -->
+                <div class="bg-gray-200 rounded-2xl shadow-xl overflow-hidden border border-gray-300 mb-6">
+                    <div class="bg-[#e6f7e6] px-6 py-4 border-b border-gray-300 flex flex-col md:flex-row md:justify-between">
+                        <span class="font-bold text-[#184c36] text-lg block">หมวดหมู่ทองแดงและอลูมิเนียม</span>
+                        <span class="text-xs text-[#7a7a7a]">ณ วันที่ {{ todayDate }}</span>
+                    </div>
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full min-w-[700px] border-collapse text-xs md:text-sm">
+                            <thead>
+                                <tr>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left w-[30%]">รายการ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">หน่วยรับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">ราคารับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">การเปลี่ยนแปลง</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left border-l border-gray-300 w-[30%]">รายการ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">หน่วยรับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">ราคารับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">การเปลี่ยนแปลง</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(pair, idx) in pairedItems.copper" :key="`copper-${idx}`"
+                                    :class="`text-[#184c36] text-[10px] md:text-xs font-medium transition ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f7faf7]'}`">
+                                    <td class="px-2 md:px-4 py-2 md:py-4 break-words">{{ formatName(pair[0]?.name) || '' }}</td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-center"><span v-if="pair[0]">กิโล</span></td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-end">
+                                        <span v-if="pair[0] && pair[0].price !== 'งดรับ' && pair[0].price !== null"
+                                            class="inline-block py-1 text-[#184c36] font-bold">
+                                            {{ pair[0]?.price }}
+                                        </span>
+                                        <span v-else-if="pair[0] && pair[0].price === 'งดรับ'"
+                                            class="inline-block bg-red-100 rounded-full px-2 md:px-3 py-1 shadow text-red-600 font-bold">
+                                            งดรับ
+                                        </span>
+                                    </td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap">
+                                        <span v-if="pair[0] && pair[0].price !== 'งดรับ' && pair[0].price !== null"
+                                            :class="[
+                                                'inline-flex items-center rounded-full px-2 md:px-3 py-1 shadow font-bold',
+                                                pair[0].change === 'up' ? 'bg-green-100 text-green-700' : pair[0].change === 'down' ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500'
+                                            ]">
+                                            <svg v-if="pair[0].change === 'up'" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                                            <svg v-else-if="pair[0].change === 'down'" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                                            <span>{{ pair[0].diff }}</span>
+                                        </span>
+                                    </td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 border-l border-gray-300 break-words">{{ formatName(pair[1]?.name) || '' }}</td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-center"><span v-if="pair[1]">กิโล</span></td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-end">
+                                        <span v-if="pair[1] && pair[1].price !== 'งดรับ' && pair[1].price !== null"
+                                            class="inline-block py-1 text-[#184c36] font-bold">
+                                            {{ pair[1]?.price }}
+                                        </span>
+                                        <span v-else-if="pair[1] && pair[1].price === 'งดรับ'"
+                                            class="inline-block bg-red-100 rounded-full px-2 md:px-3 py-1 shadow text-red-600 font-bold">
+                                            งดรับ
+                                        </span>
+                                    </td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap">
+                                        <span v-if="pair[1] && pair[1].price !== 'งดรับ' && pair[1].price !== null"
+                                            :class="[
+                                                'inline-flex items-center rounded-full px-2 md:px-3 py-1 shadow font-bold',
+                                                pair[1].change === 'up' ? 'bg-green-100 text-green-700' : pair[1].change === 'down' ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500'
+                                            ]">
+                                            <svg v-if="pair[1].change === 'up'" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                                            <svg v-else-if="pair[1].change === 'down'" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                                            <span>{{ pair[1].diff }}</span>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- หมวดหมู่พลาสติก -->
+                <div class="bg-gray-200 rounded-2xl shadow-xl overflow-hidden border border-gray-300 mb-6">
+                    <div class="bg-[#e6f7e6] px-6 py-4 border-b border-gray-300 flex flex-col md:flex-row md:justify-between">
+                        <span class="font-bold text-[#184c36] text-lg block">หมวดหมู่พลาสติก</span>
+                        <span class="text-xs text-[#7a7a7a]">ณ วันที่ {{ todayDate }}</span>
+                    </div>
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full min-w-[700px] border-collapse text-xs md:text-sm">
+                            <thead>
+                                <tr>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left w-[30%]">รายการ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">หน่วยรับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">ราคารับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">การเปลี่ยนแปลง</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left border-l border-gray-300 w-[30%]">รายการ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">หน่วยรับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">ราคารับซื้อ</th>
+                                    <th class="bg-[#e6f7e6] text-[#1a3d1a] text-[10px] md:text-xs px-2 md:px-4 py-2 text-left whitespace-nowrap w-[5%]">การเปลี่ยนแปลง</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(pair, idx) in pairedItems.plastic" :key="`plastic-${idx}`"
+                                    :class="`text-[#184c36] text-[10px] md:text-xs font-medium transition ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f7faf7]'}`">
+                                    <td class="px-2 md:px-4 py-2 md:py-4 break-words">{{ formatName(pair[0]?.name) || '' }}</td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-center"><span v-if="pair[0]">กิโล</span></td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-end">
+                                        <span v-if="pair[0] && pair[0].price !== 'งดรับ' && pair[0].price !== null"
+                                            class="inline-block py-1 text-[#184c36] font-bold">
+                                            {{ pair[0]?.price }}
+                                        </span>
+                                        <span v-else-if="pair[0] && pair[0].price === 'งดรับ'"
+                                            class="inline-block bg-red-100 rounded-full px-2 md:px-3 py-1 shadow text-red-600 font-bold">
+                                            งดรับ
+                                        </span>
+                                    </td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap">
+                                        <span v-if="pair[0] && pair[0].price !== 'งดรับ' && pair[0].price !== null"
+                                            :class="[
+                                                'inline-flex items-center rounded-full px-2 md:px-3 py-1 shadow font-bold',
+                                                pair[0].change === 'up' ? 'bg-green-100 text-green-700' : pair[0].change === 'down' ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500'
+                                            ]">
+                                            <svg v-if="pair[0].change === 'up'" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                                            <svg v-else-if="pair[0].change === 'down'" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                                            <span>{{ pair[0].diff }}</span>
+                                        </span>
+                                    </td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 border-l border-gray-300 break-words">{{ formatName(pair[1]?.name) || '' }}</td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-center"><span v-if="pair[1]">กิโล</span></td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-end">
+                                        <span v-if="pair[1] && pair[1].price !== 'งดรับ' && pair[1].price !== null"
+                                            class="inline-block py-1 text-[#184c36] font-bold">
+                                            {{ pair[1]?.price }}
+                                        </span>
+                                        <span v-else-if="pair[1] && pair[1].price === 'งดรับ'"
+                                            class="inline-block bg-red-100 rounded-full px-2 md:px-3 py-1 shadow text-red-600 font-bold">
+                                            งดรับ
+                                        </span>
+                                    </td>
+                                    <td class="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap">
+                                        <span v-if="pair[1] && pair[1].price !== 'งดรับ' && pair[1].price !== null"
+                                            :class="[
+                                                'inline-flex items-center rounded-full px-2 md:px-3 py-1 shadow font-bold',
+                                                pair[1].change === 'up' ? 'bg-green-100 text-green-700' : pair[1].change === 'down' ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500'
+                                            ]">
+                                            <svg v-if="pair[1].change === 'up'" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                                            <svg v-else-if="pair[1].change === 'down'" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                                            <span>{{ pair[1].diff }}</span>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="text-xs text-gray-500 mt-4 px-4 pb-6">
+                    หมายเหตุ: ราคาที่แจ้งอาจมีการเปลี่ยนแปลงอยู่ตลอด กรุณาตรวจสอบกับร้านค้าก่อนทำรายการทุกครั้ง
                 </div>
             </div>
         </div>
@@ -86,9 +475,9 @@ export default {
     components: { Bar, Footer },
     data() {
         return {
-            tableRows: [],
-            todayDate: '',
+            tableData: [],
             prevPriceMap: new Map(),
+            todayDate: '',
         };
     },
     mounted() {
@@ -96,104 +485,45 @@ export default {
         this.setTodayDate();
     },
     computed: {
-        flatItems() {
-            // flatten เฉพาะ cell ที่มีข้อมูลจริง
-            const items = [];
-            for (const row of this.tableRows.slice(0, -1)) {
-                if (row[0] && row[1]) {
-                    items.push({ name: row[0], price: row[1] });
-                }
-                if (row[2] && row[3]) {
-                    items.push({ name: row[2], price: row[3] });
-                }
-            }
-            return items;
-        },
         pairedItems() {
-            // จับคู่ข้อมูลทีละ 2 รายการ พร้อม diff
-            const pairs = [];
-            const arr = this.flatItems;
-            for (let i = 0; i < arr.length; i += 2) {
-                // เพิ่ม diff (การเปลี่ยนแปลง) ให้แต่ละฝั่ง
-                let left = arr[i] ? { ...arr[i] } : null;
-                let right = arr[i + 1] ? { ...arr[i + 1] } : null;
-                if (left) {
-                    const prev = this.prevPriceMap.get(left.name);
-                    const curr = parseFloat(left.price);
-                    if (prev !== undefined && !isNaN(curr) && !isNaN(prev)) {
-                        const d = +(curr - prev).toFixed(2);
-                        left.diff = d === 0 ? '-' : (d > 0 ? '+' + d : d);
-                    } else {
-                        left.diff = '-';
-                    }
-                }
-                if (right) {
-                    const prev = this.prevPriceMap.get(right.name);
-                    const curr = parseFloat(right.price);
-                    if (prev !== undefined && !isNaN(curr) && !isNaN(prev)) {
-                        const d = +(curr - prev).toFixed(2);
-                        right.diff = d === 0 ? '-' : (d > 0 ? '+' + d : d);
-                    } else {
-                        right.diff = '-';
-                    }
-                }
-                pairs.push([left, right]);
+            const result = {
+                iron: [],
+                paper: [],
+                milkBox: [],
+                aluminum: [],
+                copper: [],
+                plastic: []
+            };
+
+            // หมวดหมู่เหล็ก (index 0)
+            if (this.tableData[0]) {
+                result.iron = this.createPairs(this.tableData[0], this.prevPriceMap);
             }
-            return pairs;
+            // หมวดหมู่กระดาษ (index 1)
+            if (this.tableData[1]) {
+                result.paper = this.createPairs(this.tableData[1], this.prevPriceMap);
+            }
+            // หมวดหมู่กลุ่มเบ็ดเตล็ด (index 2)
+            if (this.tableData[2]) {
+                result.milkBox = this.createPairs(this.tableData[2], this.prevPriceMap);
+            }
+            // หมวดหมู่อลูมิเนียม แบตเตอรี่ และแก้ว (index 3)
+            if (this.tableData[3]) {
+                result.aluminum = this.createPairs(this.tableData[3], this.prevPriceMap);
+            }
+            // หมวดหมู่ทองแดงและอลูมิเนียม (index 4)
+            if (this.tableData[4]) {
+                result.copper = this.createPairs(this.tableData[4], this.prevPriceMap);
+            }
+            // หมวดหมู่พลาสติก (index 5)
+            if (this.tableData[5]) {
+                result.plastic = this.createPairs(this.tableData[5], this.prevPriceMap);
+            }
+            return result;
         }
     },
     methods: {
-        async fetchPrices() {
-            try {
-                // ดึง current/previous จาก backend
-                const res = await axios.get(`${import.meta.env.VITE_API_URL}/scrape`);
-                const current = Array.isArray(res.data.current) ? res.data.current : (res.data.current?.table || []);
-                const previous = Array.isArray(res.data.previous) ? res.data.previous : (res.data.previous?.table || []);
-                // เตรียม prevPriceMap
-                const prevMap = new Map();
-                if (previous.length > 0) {
-                    for (const row of previous[0]) {
-                        if (row[0] && row[1]) prevMap.set(row[0], parseFloat((row[1] || '').replace('|', '').trim()));
-                        if (row[2] && row[3]) prevMap.set(row[2], parseFloat((row[3] || '').replace('|', '').trim()));
-                    }
-                }
-                this.prevPriceMap = prevMap;
-                // เตรียม tableRows จาก current
-                let tableRows = [];
-                if (current.length > 0) {
-                    for (const row of current[0]) {
-                        let r = [];
-                        for (let i = 0; i < 4; i++) {
-                            let val = row[i] || '';
-                            if (i === 1 || i === 3) val = val.replace(')', '').trim();
-                            if (i === 1 || i === 3) val = val.replace('|', '').trim();
-                            if ((i === 0 || i === 2) && (val === 'กลุ่มพลาสติก' || val === 'ู่มบ็ตต็ด' || val === 'งดรับ' || val === 'กลุ่มโลหะมีค่า')) val = null;
-                            r.push(val);
-                        }
-                        if (row[0] === 'งดรับ' || row[1] === 'งดรับ') {
-                            r[0] = null;
-                            r[1] = null;
-                        }
-                        if (row[2] === 'งดรับ' || row[3] === 'งดรับ') {
-                            r[2] = null;
-                            r[3] = null;
-                        }
-                        tableRows.push(r);
-                    }
-                }
-                this.tableRows = tableRows;
-            } catch (err) {
-                this.tableRows = [];
-            }
-        },
-        setTodayDate() {
-            const d = new Date();
-            const day = String(d.getDate()).padStart(2, '0');
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const year = d.getFullYear() + 543;
-            this.todayDate = `${day}/${month}/${year}`;
-        },
-        formatName(name) {
+        normalizeName(name) {
             if (!name) return '';
             // เว้นวรรคหน้า +, %, หรือ ( ... )
             name = name.replace(/([^\s+])\+/g, '$1 + ');
@@ -202,7 +532,109 @@ export default {
             name = name.replace(/\)([\p{L}0-9])/gu, ') $1');
             name = name.replace(/([\p{L}])([0-9])/gu, '$1 $2');
             name = name.replace(/([0-9])([\p{L}])/gu, '$1 $2');
+            
+            // ลบ T ที่อยู่ท้ายข้อความ ยกเว้น "เหล็กบาง+สายรัดเหล็ก+เหล็กถัง200LIT"
+            if (name !== 'เหล็กบาง + สายรัดเหล็ก + เหล็กถัง 200 LIT') {
+                name = name.replace(/T$/, '');
+            }
+            if (name !== 'อลูมิเนียมติดเหล็กไม่มาก 30 %') {
+                name = name.replace(/%$/, '');
+            }
+            if (name !== 'ทองแดงเบอร์4') {
+                name = name.replace(/4$/, '');
+            }
+            
             return name.replace(/\s{2,}/g, ' ').trim();
+        },
+        formatName(name) {
+            return this.normalizeName(name);
+        },
+        async fetchPrices() {
+            try {
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/scrape`);
+                this.tableData = res.data.current || [];
+                // สร้าง prevPriceMap จาก previous (ใช้ normalizeName)
+                const prev = res.data.previous || [];
+                const prevMap = new Map();
+                if (Array.isArray(prev)) {
+                    for (const table of prev) {
+                        if (Array.isArray(table)) {
+                            for (const row of table) {
+                                if (row[0] && row[1] && row[1] !== 'งดรับ' && row[1] !== 'ราคา/กก.' && row[1] !== 'ราคา/กก') {
+                                    prevMap.set(this.normalizeName(row[0]), parseFloat(row[1]));
+                                }
+                                if (row[2] && row[3] && row[3] !== 'งดรับ' && row[3] !== 'ราคา/กก.' && row[3] !== 'ราคา/กก') {
+                                    prevMap.set(this.normalizeName(row[2]), parseFloat(row[3]));
+                                }
+                            }
+                        }
+                    }
+                }
+                this.prevPriceMap = prevMap;
+                // ย้าย "ของแกะ/คอมแอร์มอเตอร์T" ไปยังกลุ่มเบ็ดเตล็ด
+                this.moveMotorToMisc();
+            } catch (err) {
+                console.error('Error fetching prices:', err);
+                this.tableData = [];
+            }
+        },
+        createPairs(categoryData, prevPriceMap) {
+            const pairs = [];
+            const items = categoryData.filter(item => 
+                item[0] && 
+                item[1] !== null && 
+                item[1] !== 'งดรับ' && 
+                item[1] !== 'ราคา/กก' && 
+                item[1] !== 'ราคา/กก.'
+            ).map(item => {
+                let change = 'none';
+                let diff = '-';
+                const normName = this.normalizeName(item[0]);
+                let prev = prevPriceMap.get(normName);
+                let curr = parseFloat(item[1]);
+                if (prev !== undefined && !isNaN(curr) && !isNaN(prev)) {
+                    const d = +(curr - prev).toFixed(2);
+                    if (curr > prev) change = 'up';
+                    else if (curr < prev) change = 'down';
+                    diff = d === 0 ? '-' : (d > 0 ? '+' + d : d.toString());
+                }
+                return {
+                    name: normName,
+                    price: item[1],
+                    change,
+                    diff
+                };
+            });
+            for (let i = 0; i < items.length; i += 2) {
+                const pair = [items[i] || null, items[i + 1] || null];
+                pairs.push(pair);
+            }
+            return pairs;
+        },
+        // ย้าย "ของแกะ/คอมแอร์มอเตอร์T" ไปยังกลุ่มเบ็ดเตล็ด
+        moveMotorToMisc() {
+            if (this.tableData[4] && this.tableData[2]) {
+                // หา "ของแกะ/คอมแอร์มอเตอร์T" ใน index 4
+                const motorIndex = this.tableData[4].findIndex(item => 
+                    item[0] && (item[0].includes('ของแกะ/คอมแอร์มอเตอร์T') || 
+                               item[0].includes('/คอมแอร์มอเตอร์Tของแกะ'))
+                );
+                
+                if (motorIndex !== -1) {
+                    // ย้ายข้อมูลไปยัง index 2 (กลุ่มเบ็ดเตล็ด)
+                    const motorItem = this.tableData[4][motorIndex];
+                    this.tableData[2].push(motorItem);
+                    // ลบออกจาก index 4
+                    this.tableData[4].splice(motorIndex, 1);
+                }
+            }
+        },
+        setTodayDate() {
+            const d = new Date();
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear() + 543;
+            this.todayDate = `${day}/${month}/${year}`;
         },
     },
 };

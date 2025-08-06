@@ -217,6 +217,18 @@ const priceList = ref([])
 const currentPage = ref(1)
 const itemsPerPage = 5
 
+// ฟังก์ชันลบ T ที่อยู่ท้ายข้อความ ยกเว้น "เหล็กบาง+สายรัดเหล็ก+เหล็กถัง200LIT"
+function formatItemName(name) {
+  if (!name) return '';
+  
+  // ลบ T ที่อยู่ท้ายข้อความ ยกเว้น "เหล็กบาง+สายรัดเหล็ก+เหล็กถัง200LIT"
+  if (name !== 'เหล็กบาง+สายรัดเหล็ก+เหล็กถัง200LIT') {
+    name = name.replace(/T$/, '');
+  }
+  
+  return name;
+}
+
 onMounted(async () => {
     // Set current date in Thai format
     const today = new Date()
@@ -246,38 +258,64 @@ async function fetchBuyBackPrices() {
         }
 
         let items = []
+        // วนลูปผ่านข้อมูลทั้งหมดใน current (extracted_tables.json)
         if (current.length > 0) {
-            for (const row of current[0]) {
-                // ฝั่งซ้าย
-                let leftName = row[0]
-                let leftPrice = row[1] || ''
-                if (leftPrice) leftPrice = leftPrice.replace('|', '').trim()
-                if (leftPrice) leftPrice = leftPrice.replace(')', '').trim()
-                let leftChange = '-'
-                if (leftName && leftPrice) {
-                    const prev = prevMap.get(leftName)
-                    const curr = parseFloat(leftPrice)
-                    if (prev !== undefined && !isNaN(curr) && !isNaN(prev)) {
-                        const d = +(curr - prev).toFixed(2)
-                        leftChange = d === 0 ? '-' : (d > 0 ? '+' + d : d)
-                    }
-                    items.push({ type: leftName, unit: 'กิโล', price: leftPrice, change: leftChange })
-                }
+            for (const tableIndex in current) {
+                const table = current[tableIndex]
+                if (Array.isArray(table)) {
+                    for (const row of table) {
+                        // ฝั่งซ้าย
+                        let leftName = formatItemName(row[0])
+                        let leftPrice = row[1] || ''
+                        if (leftPrice) leftPrice = leftPrice.replace('|', '').trim()
+                        if (leftPrice) leftPrice = leftPrice.replace(')', '').trim()
+                        
+                        // ตรวจสอบและข้ามรายการที่ไม่ต้องการแสดง
+                        if (leftName && leftPrice && 
+                            leftName !== 'กลุ่มโลหะมีค่า' && 
+                            leftName !== 'กลุ่มพลาสติก' && 
+                            leftName !== 'ู่มบ็ตต็ด' && 
+                            leftName !== 'งดรับ' &&
+                            leftPrice !== 'งดรับ' &&
+                            leftPrice !== 'ราคา/กก' &&
+                            leftPrice !== 'ราคา/กก.') {
+                            let leftChange = '-'
+                            const prev = prevMap.get(leftName)
+                            const curr = parseFloat(leftPrice)
+                            if (prev !== undefined && !isNaN(curr) && !isNaN(prev)) {
+                                const d = +(curr - prev).toFixed(2)
+                                leftChange = d === 0 ? '-' : (d > 0 ? '+' + d : d)
+                            }
+                            items.push({ type: leftName, unit: 'กิโล', price: leftPrice, change: leftChange })
+                        }
 
-                // ฝั่งขวา
-                let rightName = row[2]
-                let rightPrice = row[3] || ''
-                if (rightPrice) rightPrice = rightPrice.replace('|', '').trim()
-                if (rightPrice) rightPrice = rightPrice.replace(')', '').trim()
-                let rightChange = '-'
-                if (rightName && rightPrice) {
-                    const prev = prevMap.get(rightName)
-                    const curr = parseFloat(rightPrice)
-                    if (prev !== undefined && !isNaN(curr) && !isNaN(prev)) {
-                        const d = +(curr - prev).toFixed(2)
-                        rightChange = d === 0 ? '-' : (d > 0 ? '+' + d : d)
+                        // ฝั่งขวา (ถ้ามี)
+                        if (row[2] && row[3]) {
+                            let rightName = formatItemName(row[2])
+                            let rightPrice = row[3] || ''
+                            if (rightPrice) rightPrice = rightPrice.replace('|', '').trim()
+                            if (rightPrice) rightPrice = rightPrice.replace(')', '').trim()
+                            
+                            // ตรวจสอบและข้ามรายการที่ไม่ต้องการแสดง
+                            if (rightName && rightPrice && 
+                                rightName !== 'กลุ่มโลหะมีค่า' && 
+                                rightName !== 'กลุ่มพลาสติก' && 
+                                rightName !== 'ู่มบ็ตต็ด' && 
+                                rightName !== 'งดรับ' &&
+                                rightPrice !== 'งดรับ' &&
+                                rightPrice !== 'ราคา/กก' &&
+                                rightPrice !== 'ราคา/กก.') {
+                                let rightChange = '-'
+                                const prev = prevMap.get(rightName)
+                                const curr = parseFloat(rightPrice)
+                                if (prev !== undefined && !isNaN(curr) && !isNaN(prev)) {
+                                    const d = +(curr - prev).toFixed(2)
+                                    rightChange = d === 0 ? '-' : (d > 0 ? '+' + d : d)
+                                }
+                                items.push({ type: rightName, unit: 'กิโล', price: rightPrice, change: rightChange })
+                            }
+                        }
                     }
-                    items.push({ type: rightName, unit: 'กิโล', price: rightPrice, change: rightChange })
                 }
             }
         }

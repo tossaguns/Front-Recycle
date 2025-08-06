@@ -38,6 +38,7 @@ import Orders from "../views/Member/Orders.vue";
 // Admin
 import AdminDashboard from "../views/Admin/AdminDashboard.vue";
 import ManagePartner from "../views/Admin/ManagePartner.vue";
+import ManageMember from "../views/Admin/ManageMember.vue";
 
 const routes = [
   // Login and Register
@@ -114,6 +115,11 @@ const routes = [
   { 
     path: "/admin/partners", 
     component: ManagePartner,
+    meta: { requiresAuth: true, roles: ['admin'] }
+  },
+  { 
+    path: "/admin/members", 
+    component: ManageMember,
     meta: { requiresAuth: true, roles: ['admin'] }
   },
 
