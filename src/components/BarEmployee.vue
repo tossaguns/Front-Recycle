@@ -1,5 +1,5 @@
 <template>
-    <header class="w-full border-b border-[#e6e6e6] flex flex-col items-center relative z-20">
+    <header class="fixed top-0 left-0 w-full z-50 bg-white shadow-md border-b border-[#e6e6e6] flex flex-col items-center">
         <div class="w-full flex items-center justify-between px-6 py-3 gap-4">
             <!-- Logo -->
             <div class="flex items-center cursor-pointer" @click="$router.push('/dashboardpartner')">
