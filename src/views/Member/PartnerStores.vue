@@ -1,8 +1,8 @@
 <template>
-  <div class="bg-white flex flex-col">
-    <Bar v-if="showBarFooter" />
+  <Bar v-if="showBarFooter" />
+  <div class="bg-white flex flex-col pt-20">
 
-    <div class="bg-[#f7faf0]">
+    <div class="bg-[#f7faf0] mt-0 md:mt-2">
       <main class="flex-1 max-w-7xl mx-auto w-full px-8 py-8 relative flex flex-col justify-center ">
         <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-[#222] text-center my-6 sm:my-8 md:my-10">
           ร้านรับ - ซื้อสินค้ารีไซเคิล

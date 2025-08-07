@@ -164,10 +164,24 @@ const login = async () => {
       }
   } catch (error) {
     if (error.response) {
+      // จัดการ error ตาม status code
+      let icon = 'error';
+      let title = 'เข้าสู่ระบบไม่สำเร็จ';
+      let text = error.response.data.error || error.response.statusText;
+      
+      if (error.response.status === 403) {
+        icon = 'warning';
+        title = 'ไม่สามารถเข้าสู่ระบบได้';
+        text = error.response.data.error || 'บัญชีของคุณถูกระงับการใช้งาน กรุณาติดต่อผู้ดูแลระบบ';
+      } else if (error.response.status === 401) {
+        title = 'ข้อมูลไม่ถูกต้อง';
+        text = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง';
+      }
+      
       await Swal.fire({
-        icon: 'error',
-        title: 'เข้าสู่ระบบไม่สำเร็จ',
-        text: error.response.data.error || error.response.statusText,
+        icon: icon,
+        title: title,
+        text: text,
         confirmButtonText: 'ตกลง'
       });
     } else {

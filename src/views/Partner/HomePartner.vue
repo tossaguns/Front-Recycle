@@ -1,7 +1,7 @@
 <template>
     <Bar />
-    <div class="min-h-screen bg-gray-50 p-6">
-        <div class="max-w-7xl mx-auto">
+    <div class="min-h-screen bg-gray-50 pt-24 mt-0 md:mt-5">
+        <div class="max-w-7xl mx-auto p-2 md:p-6">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
                 <!-- Left Column: Market Price Table -->

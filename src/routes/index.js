@@ -39,6 +39,8 @@ import Orders from "../views/Member/Orders.vue";
 import AdminDashboard from "../views/Admin/AdminDashboard.vue";
 import ManagePartner from "../views/Admin/ManagePartner.vue";
 import ManageMember from "../views/Admin/ManageMember.vue";
+import OrderView from "../views/Admin/OrderView.vue";
+import ManageCategory from "../views/Admin/ManageCategory.vue";
 
 const routes = [
   // Login and Register
@@ -122,7 +124,16 @@ const routes = [
     component: ManageMember,
     meta: { requiresAuth: true, roles: ['admin'] }
   },
-
+  { 
+    path: "/admin/orders", 
+    component: OrderView,
+    meta: { requiresAuth: true, roles: ['admin'] }
+  },
+  { 
+    path: "/admin/categories", 
+    component: ManageCategory,
+    meta: { requiresAuth: true, roles: ['admin'] }
+  },
 ];
 
 const router = createRouter({

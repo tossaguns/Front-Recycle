@@ -1,7 +1,11 @@
 <template>
-  <div class="min-h-screen w-full flex flex-col bg-white">
-    <Bar />
-    <main class="flex-1 max-w-[1450px] mx-auto w-full px-8 py-10 relative flex flex-col justify-center">
+  <BarNoMenu 
+    :showBackNavigation="true"
+    pageTitle="สินค้ารีไซเคิล"
+    backRoute="/subcategory"
+  />
+  <div class="min-h-screen w-full flex flex-col bg-white pt-20">
+    <main class="flex-1 max-w-[1450px] mx-auto w-full px-8 py-10 relative flex flex-col justify-center mt-0 md:mt-5">
       <h1 class="text-2xl md:text-3xl font-bold mb-4 text-[#222]">สินค้ารีไซเคิล</h1>
 
       <!-- ชื่อหมวด -->
@@ -74,7 +78,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
-import Bar from '../../components/Bar.vue'
+import BarNoMenu from '../../components/BarNoMenu.vue'
 import Footer from '../../components/Footer.vue'
 
 const router = useRouter()

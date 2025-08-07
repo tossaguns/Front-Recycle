@@ -1,18 +1,11 @@
 <template>
-  <BarNoMenu />
-  <div class="min-h-screen flex flex-col bg-white">
-    <!-- Back Navigation Header -->
-    <div class="bg-[#106154] py-4 px-6 -mx-4 mb-6">
-      <div class="flex items-center">
-        <button @click="goBack" class="flex items-center text-white hover:text-gray-200 transition-colors">
-          <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-          </svg>
-          <span class="text-lg font-medium">กลับไปหน้าร้านค้า</span>
-        </button>
-      </div>
-    </div>
-    <main class="flex-1 max-w-5xl mx-auto w-full px-4 py-10 flex flex-col gap-8 relative">
+  <BarNoMenu 
+    :showBackNavigation="true"
+    pageTitle="จองคิวขายสินค้ารีไซเคิล"
+    backRoute="/partnerstores"
+  />
+  <div class="min-h-screen flex flex-col bg-white pt-20">
+    <main class="flex-1 max-w-5xl mx-auto w-full px-4 py-10 flex flex-col gap-8 relative mt-0 md:mt-5">
       <h1 class="text-2xl md:text-3xl font-bold mb-6 text-[#222]">จองคิวขายสินค้ารีไซเคิล</h1>
       <!-- User Info -->
       <div class="flex items-center gap-4 mb-6">

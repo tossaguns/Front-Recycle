@@ -1,18 +1,12 @@
 <template>
-    <div class="min-h-screen flex flex-col bg-white">
-        <BarNoMenu />
-        <div class="min-h-screen bg-gray-50">
-            <!-- Back Navigation Header -->
-            <div class="bg-[#106154] py-4 px-6">
-                <div class="flex items-center">
-                    <button @click="router.back()" class="flex items-center text-white hover:text-gray-200 transition-colors">
-                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                        </svg>
-                        <span class="text-lg font-medium">รายการจองคิวของฉัน</span>
-                    </button>
-                </div>
-            </div>
+    <BarNoMenu 
+        :showBackNavigation="true"
+        pageTitle="รายการจองคิวของฉัน"
+        backRoute="/profilemember"
+    />
+
+    <div class="min-h-screen flex flex-col bg-white pt-20">
+        <div class="min-h-screen bg-gray-50 mt-5 md:mt-7">
 
             <!-- Header Section -->
             <div class="bg-white shadow-sm border-b border-[#e6e6e6]">

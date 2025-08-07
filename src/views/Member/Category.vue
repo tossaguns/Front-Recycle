@@ -1,7 +1,7 @@
 <template>
-  <div class="flex flex-col bg-white">
-    <Bar v-if="showBarFooter" />
-    <main class="flex-1  mx-auto w-full px-10 py-10 relative">
+  <Bar v-if="showBarFooter" />
+  <div class="flex flex-col bg-white pt-20">
+    <main class="flex-1 mx-auto w-full px-10 py-10 relative">
       <h1 class="text-3xl md:text-5xl font-bold mb-7 text-[#222]">หมวดหมู่สินค้ารีไซเคิล</h1>
       <p class="mb-12 text-[#666]">สัมผัสเนื้อหาหมวดหมู่ประเภทของรีไซเคิล คุณสามารถกดดูรายละเอียดเพิ่มเติมได้ที่นี่</p>
       <div class="relative flex items-center">

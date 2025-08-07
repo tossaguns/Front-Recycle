@@ -1,18 +1,12 @@
 <template>
-    <BarNoMenu />
-    <div class="min-h-screen bg-gray-50">
-        <!-- Back Navigation Header -->
-        <div class="bg-[#106154] py-4 px-6">
-            <div class="flex items-center">
-                <button @click="goBackToHomePartner" class="flex items-center text-white hover:text-gray-200 transition-colors">
-                    <ChevronLeftIcon class="w-6 h-6 mr-2" />
-                    <span class="text-lg font-medium">กิจกรรม</span>
-                </button>
-            </div>
-        </div>
-
+    <BarNoMenu 
+        :showBackNavigation="true"
+        pageTitle="กิจกรรม"
+        backRoute="/homepartner"
+    />
+    <div class="min-h-screen bg-gray-50 pt-20">
         <!-- Main Content -->
-        <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <div class="container mx-auto px-4 py-8 max-w-7xl mt-5">
             <!-- Header Section -->
             <div class="flex items-center justify-between mb-8">
                 <div>
@@ -133,7 +127,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import BarNoMenu from '../../components/BarNoMenu.vue';
-import { ChevronLeftIcon } from '../../icons';
+
 
 const router = useRouter();
 const currentDate = ref('');
@@ -147,7 +141,5 @@ onMounted(() => {
     currentDate.value = `${day}/${month}/${year}`;
 });
 
-function goBackToHomePartner() {
-    router.push('/homepartner');
-}
+
 </script>

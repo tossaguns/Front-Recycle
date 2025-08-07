@@ -62,8 +62,6 @@
                         @click="navigateTo('/admin/revenue')">รายได้</li>
                     <li :class="['menu-underline', $route.path === '/admin/categories' ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : '', 'cursor-pointer']"
                         @click="navigateTo('/admin/categories')">จัดการหมวดหมู่</li>
-                    <li :class="['menu-underline', $route.path === '/admin/profile' ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : '', 'cursor-pointer']"
-                        @click="navigateTo('/admin/profile')">การตั้งค่าบัญชี</li>
                     <li v-if="authStore.isAuthenticated"
                         class="menu-underline cursor-pointer text-red-600 hover:text-red-800" @click="handleLogout">
                         ออกจากระบบ</li>
@@ -89,8 +87,6 @@
                     @click="navigateTo('/admin/revenue')">รายได้</li>
                 <li :class="['menu-underline', $route.path === '/admin/categories' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
                     @click="navigateTo('/admin/categories')">จัดการหมวดหมู่</li>
-                <li :class="['menu-underline', $route.path === '/admin/profile' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
-                    @click="navigateTo('/admin/profile')">การตั้งค่าบัญชี</li>
                 <li v-if="authStore.isAuthenticated"
                     class="menu-underline cursor-pointer text-red-600 hover:text-red-800" @click="handleLogout">
                     ออกจากระบบ</li>

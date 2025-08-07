@@ -1,7 +1,7 @@
 <template>
     <Bar />
-    <div class="flex flex-col items-center min-h-screen bg-[#f7faf7]">
-        <h1 class="text-3xl md:text-4xl font-bold text-[#184c36] mt-10 mb-6 text-center">
+    <div class="flex flex-col items-center min-h-screen bg-[#f7faf7] pt-20">
+        <h1 class="text-3xl md:text-4xl font-bold text-[#184c36] mb-6 text-center mt-0 md:mt-10">
             ตารางราคาสินค้ารีไซเคิล (BuyBack Price Table)
         </h1>
         <div class="flex justify-center items-center w-full flex-1 mb-10">

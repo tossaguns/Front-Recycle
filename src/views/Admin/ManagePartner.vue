@@ -1,8 +1,8 @@
 <template>
-    <div class="min-h-screen bg-gradient-to-br from-[#e6f7e6] via-white to-[#b6e388]">
-        <BarAdmin />
+    <BarAdmin />
+    <div class="min-h-screen bg-gradient-to-br from-[#e6f7e6] via-white to-[#b6e388] pt-20">
         <!-- Main Content -->
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-20">
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-0 md:mt-5">
             <!-- Header Section -->
             <div class="mb-8">
                 <h1 class="text-3xl font-bold text-[#184c36] mb-2">จัดการร้านค้า</h1>
@@ -141,7 +141,7 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-[#f0f0f0]">
-                            <tr v-for="partner in filteredPartners" :key="partner._id"
+                            <tr v-for="partner in paginatedPartners" :key="partner._id"
                                 class="hover:bg-gray-50 transition-colors">
                                 <td class="px-6 py-4 text-xs lg:text-sm">
                                     <div>
@@ -224,24 +224,36 @@
                 </div>
             </div>
 
-            <!-- Pagination -->
-            <div v-if="totalPages > 1" class="mt-8 flex items-center justify-between">
-                <div class="text-sm text-[#666]">
-                    แสดง {{ (currentPage - 1) * itemsPerPage + 1 }} ถึง {{ Math.min(currentPage * itemsPerPage,
-                    totalItems) }} จาก
-                    {{ totalItems }} รายการ
+            <!-- Pagination Controls -->
+            <div v-if="totalPages > 1 || filteredPartners.length > 0" class="flex flex-col md:flex-row justify-between items-center gap-2 my-4 py-2 px-7">
+                <div class="flex items-center gap-2">
+                    <span>แสดง:</span>
+                    <select v-model="pageSize" class="border rounded px-2 py-1 focus:ring-2 focus:ring-[#2BAC75] focus:border-[#2BAC75]">
+                        <option v-for="opt in pageSizeOptions" :key="opt" :value="opt">{{ opt }}</option>
+                    </select>
+                    <span>รายการต่อหน้า</span>
                 </div>
-                <div class="flex space-x-2">
-                    <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1"
-                        class="px-3 py-2 border border-[#dcdcdc] rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50">
-                        ก่อนหน้า
+                <div class="flex items-center gap-2">
+                    <button
+                        class="w-9 h-9 flex items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-[#e6f7e6] transition disabled:opacity-50"
+                        :disabled="currentPage === 1"
+                        @click="goToPage(currentPage - 1)"
+                        aria-label="ก่อนหน้า"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
                     </button>
-                    <span class="px-3 py-2 text-sm text-[#184c36]">
-                        หน้า {{ currentPage }} จาก {{ totalPages }}
-                    </span>
-                    <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages"
-                        class="px-3 py-2 border border-[#dcdcdc] rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50">
-                        ถัดไป
+                    <span class="mx-2 text-sm text-[#184c36] font-medium">หน้า {{ currentPage }} / {{ totalPages }}</span>
+                    <button
+                        class="w-9 h-9 flex items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-[#e6f7e6] transition disabled:opacity-50"
+                        :disabled="currentPage === totalPages || totalPages === 0"
+                        @click="goToPage(currentPage + 1)"
+                        aria-label="ถัดไป"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
                     </button>
                 </div>
             </div>
@@ -480,7 +492,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../../stores/auth';
 import BarAdmin from '../../components/BarAdmin.vue';
@@ -496,9 +508,29 @@ const stats = ref({});
 const searchQuery = ref('');
 const statusFilter = ref('');
 const sortBy = ref('createdAt');
+// Pagination states
 const currentPage = ref(1);
-const itemsPerPage = ref(10);
-const totalItems = ref(0);
+const pageSizeOptions = [5, 10, 20];
+const pageSize = ref(5);
+
+const paginatedPartners = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  const end = start + pageSize.value;
+  return filteredPartners.value.slice(start, end);
+});
+
+const totalPages = computed(() => Math.ceil(filteredPartners.value.length / pageSize.value));
+
+function goToPage(page) {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
+}
+
+watch(pageSize, () => {
+  currentPage.value = 1;
+});
+
 const showDetailsModal = ref(false);
 const selectedPartner = ref(null);
 const showImageModal = ref(false);
@@ -546,10 +578,6 @@ const filteredPartners = computed(() => {
     return filtered;
 });
 
-const totalPages = computed(() => {
-    return Math.ceil(totalItems.value / itemsPerPage.value);
-});
-
 const hasImages = computed(() => {
     if (!selectedPartner.value) return false;
     return selectedPartner.value.idCardImage ||
@@ -589,7 +617,7 @@ const loadPartners = async () => {
 
         if (response.data.success) {
             partners.value = response.data.data;
-            totalItems.value = partners.value.length;
+            // totalItems.value = partners.value.length; // This line is no longer needed
 
             // Calculate stats
             stats.value = {
@@ -704,12 +732,6 @@ const rejectPartner = async (partnerId) => {
 const viewPartnerDetails = (partner) => {
     selectedPartner.value = partner;
     showDetailsModal.value = true;
-};
-
-const changePage = (page) => {
-    if (page >= 1 && page <= totalPages.value) {
-        currentPage.value = page;
-    }
 };
 
 // Image Modal Functions

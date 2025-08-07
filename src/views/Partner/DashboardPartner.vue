@@ -1,18 +1,12 @@
 <template>
-    <BarNoMenu />
-    <div class="min-h-screen bg-gray-50">
-        <!-- Back Navigation Header -->
-        <div class="bg-[#106154] py-4 px-6">
-            <div class="flex items-center">
-                <button @click="goBackToHomePartner" class="flex items-center text-white hover:text-gray-200 transition-colors">
-                    <ChevronLeftIcon class="w-6 h-6 mr-2" />
-                    <span class="text-lg font-medium">แดชบอร์ดพาร์ทเนอร์</span>
-                </button>
-            </div>
-        </div>
-
+    <BarNoMenu 
+        :showBackNavigation="true"
+        pageTitle="แดชบอร์ดพาร์ทเนอร์"
+        backRoute="/homepartner"
+    />
+    <div class="min-h-screen bg-gray-50 pt-20">
         <!-- Header Section -->
-        <div class="bg-white shadow-sm border-b border-[#e6e6e6]">
+        <div class="bg-white shadow-sm border-b border-[#e6e6e6] mt-10">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                 <div class="flex items-center justify-between">
                     <div>
@@ -154,16 +148,13 @@
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '../../stores/auth';
 import BarNoMenu from '../../components/BarNoMenu.vue';
-import { ChevronLeftIcon } from '../../icons';
+
 import { useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
 const router = useRouter();
 
-// Navigation function
-const goBackToHomePartner = () => {
-    router.push('/homepartner');
-};
+
 
 // Data สำหรับ partner
 const customerCount = ref(156);

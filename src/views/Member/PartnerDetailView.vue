@@ -1,10 +1,13 @@
 <template>
-    <div class="min-h-screen flex flex-col bg-[#fffbe9]">
-        <!-- Bar/Header -->
-        <Bar />
+    <BarNoMenu 
+        :showBackNavigation="true"
+        pageTitle="รายละเอียดร้านค้า"
+        backRoute="/partnerstores"
+    />
+    <div class="min-h-screen flex flex-col bg-[#fffbe9] pt-20">
 
         <!-- Main Content -->
-        <div class="flex-1 flex flex-col items-center justify-start py-8 relative px-8">
+        <div class="flex-1 flex flex-col items-center justify-start py-8 relative px-8 mt-5 md:mt-10">
             <div class="w-full max-w-6xl flex flex-col md:flex-row gap-8 relative z-10" v-if="store">
                 <!-- Left: Store Info -->
                 <div class="flex-1 flex flex-col items-center md:items-start">
@@ -86,7 +89,7 @@
 <script setup>
 import { onMounted, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import Bar from '../../components/Bar.vue';
+import BarNoMenu from '../../components/BarNoMenu.vue';
 import Footer from '../../components/Footer.vue';
 import axios from 'axios';
 

@@ -1,17 +1,12 @@
 <template>
-  <BarNoMenu />
-  <div class="min-h-screen bg-gray-50">
-    <!-- Back Navigation Header -->
-    <div class="bg-[#106154] py-4 px-6">
-      <div class="flex items-center">
-        <button @click="goBackToHomePartner" class="flex items-center text-white hover:text-gray-200 transition-colors">
-          <ChevronLeftIcon class="w-6 h-6 mr-2" />
-          <span class="text-lg font-medium">สมาชิก</span>
-        </button>
-      </div>
-    </div>
+  <BarNoMenu 
+        :showBackNavigation="true"
+        pageTitle="สมาชิก"
+        backRoute="/homepartner"
+  />
+  <div class="min-h-screen bg-gray-50 pt-20 px-3">
     
-    <div class="max-w-7xl mx-auto py-8">
+    <div class="max-w-7xl mx-auto py-8 mt-5">
       <!-- ปุ่มเพิ่มสมาชิกใหม่ -->
       <div class="flex justify-end mb-4 mr-4">
         <button @click="toggleAddForm"

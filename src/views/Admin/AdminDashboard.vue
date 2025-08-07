@@ -1,10 +1,8 @@
 <template>
-    <div class="min-h-screen bg-gradient-to-br from-[#f0f9ff] to-[#e0f2fe]">
-        <!-- Admin Navigation Bar -->
-        <BarAdmin />
-
+    <BarAdmin />
+    <div class="min-h-screen bg-gradient-to-br from-[#e6f7e6] via-white to-[#b6e388] pt-20">
         <!-- Main Content -->
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-0 md:mt-5">
             <!-- Welcome Section -->
             <div class="mb-8">
                 <h1 class="text-3xl font-bold text-[#184c36] mb-2">ยินดีต้อนรับสู่ Admin Dashboard</h1>

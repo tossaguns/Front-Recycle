@@ -1,7 +1,8 @@
 <template>
-    <div class="min-h-screen bg-gradient-to-br from-[#e6f7e6] via-white to-[#b6e388]">
-        <BarAdmin />
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-20">
+    <BarAdmin />
+    <div class="min-h-screen bg-gradient-to-br from-[#e6f7e6] via-white to-[#b6e388] pt-20">
+        
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-0 md:mt-5">
             <div class="mb-8">
                 <h1 class="text-3xl font-bold text-[#184c36] mb-2">จัดการสมาชิก</h1>
                 <p class="text-[#666] text-lg">ดูและจัดการข้อมูลสมาชิกทั้งหมด</p>
@@ -23,10 +24,37 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-[#f0f0f0]">
-                            <tr v-for="member in members" :key="member._id" class="hover:bg-gray-50 transition-colors">
+                            <tr v-for="member in paginatedMembers" :key="member._id" class="hover:bg-gray-50 transition-colors">
                                 <td class="px-6 py-4 text-xs lg:text-sm">
-                                    <div>
-                                        <p class="font-semibold text-[#184c36]">{{ member.fullName }}</p>
+                                    <div class="flex items-center gap-3">
+                                        <!-- รูปโปรไฟล์เล็ก -->
+                                        <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 border-2 border-[#e6f7e6] flex-shrink-0 relative">
+                                            <img 
+                                                v-if="member.profile_img" 
+                                                :src="member.profile_img" 
+                                                :alt="member.fullName"
+                                                class="w-full h-full object-cover"
+                                                @error="handleTableImageError"
+                                            />
+                                            <div 
+                                                v-if="!member.profile_img || member.profile_img === ''"
+                                                class="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#2BAC75] to-[#184c36] text-white text-sm font-bold"
+                                            >
+                                                {{ member.fullName ? member.fullName.charAt(0).toUpperCase() : '?' }}
+                                            </div>
+                                            <!-- Fallback สำหรับรูปที่โหลดไม่ได้ในตาราง -->
+                                            <div 
+                                                v-if="member.profile_img"
+                                                class="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#2BAC75] to-[#184c36] text-white text-sm font-bold absolute inset-0 hidden"
+                                                style="display: none;"
+                                            >
+                                                {{ member.fullName ? member.fullName.charAt(0).toUpperCase() : '?' }}
+                                            </div>
+                                        </div>
+                                        <!-- ข้อมูลชื่อ -->
+                                        <div>
+                                            <p class="font-semibold text-[#184c36]">{{ member.fullName }}</p>
+                                        </div>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-xs lg:text-sm">
@@ -75,6 +103,39 @@
                         </tbody>
                     </table>
                 </div>
+                <!-- Pagination Controls -->
+                <div class="flex flex-col md:flex-row justify-between items-center gap-2 my-4 py-2 px-7">
+                    <div class="flex items-center gap-2">
+                        <span>แสดง:</span>
+                        <select v-model="pageSize" class="border rounded px-2 py-1 focus:ring-2 focus:ring-[#2BAC75] focus:border-[#2BAC75]">
+                            <option v-for="opt in pageSizeOptions" :key="opt" :value="opt">{{ opt }}</option>
+                        </select>
+                        <span>รายการต่อหน้า</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button
+                            class="w-9 h-9 flex items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-[#e6f7e6] transition disabled:opacity-50"
+                            :disabled="currentPage === 1"
+                            @click="goToPage(currentPage - 1)"
+                            aria-label="ก่อนหน้า"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <span class="mx-2 text-sm text-[#184c36] font-medium">หน้า {{ currentPage }} / {{ totalPages }}</span>
+                        <button
+                            class="w-9 h-9 flex items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-[#e6f7e6] transition disabled:opacity-50"
+                            :disabled="currentPage === totalPages"
+                            @click="goToPage(currentPage + 1)"
+                            aria-label="ถัดไป"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
                 <div v-if="members.length === 0" class="text-center py-12">
                     <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -102,6 +163,50 @@
                             </button>
                         </div>
                         <div v-if="selectedMember">
+                            <!-- รูปโปรไฟล์และข้อมูลพื้นฐาน -->
+                            <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 mb-6">
+                                <!-- รูปโปรไฟล์ขนาดใหญ่ -->
+                                <div class="flex justify-center sm:justify-start">
+                                    <div class="w-32 h-32 rounded-full overflow-hidden bg-gray-200 border-6 border-[#e6f7e6] shadow-xl relative">
+                                        <img 
+                                            v-if="selectedMember.profile_img" 
+                                            :src="selectedMember.profile_img" 
+                                            :alt="selectedMember.fullName"
+                                            class="w-full h-full object-cover"
+                                            @error="handleImageError"
+                                        />
+                                        <div 
+                                            v-if="!selectedMember.profile_img || selectedMember.profile_img === ''"
+                                            class="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#2BAC75] to-[#184c36] text-white text-4xl font-bold"
+                                        >
+                                            {{ selectedMember.fullName ? selectedMember.fullName.charAt(0).toUpperCase() : '?' }}
+                                        </div>
+                                        <!-- Fallback สำหรับรูปที่โหลดไม่ได้ -->
+                                        <div 
+                                            v-if="selectedMember.profile_img"
+                                            class="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#2BAC75] to-[#184c36] text-white text-4xl font-bold absolute inset-0 hidden"
+                                            style="display: none;"
+                                        >
+                                            {{ selectedMember.fullName ? selectedMember.fullName.charAt(0).toUpperCase() : '?' }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- ข้อมูลพื้นฐาน -->
+                                <div class="text-center sm:text-left">
+                                    <h2 class="text-3xl font-bold text-[#184c36] mb-2">{{ selectedMember.fullName }}</h2>
+                                    <p class="text-[#666] text-lg mb-3">{{ selectedMember.email }}</p>
+                                    <div class="flex flex-col sm:flex-row gap-3 justify-center sm:justify-start">
+                                        <span :class="[
+                                            'px-3 py-1 rounded-full text-sm font-medium',
+                                            selectedMember.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                        ]">
+                                            {{ selectedMember.status === 'active' ? 'ใช้งาน' : 'ปิดใช้งาน' }}
+                                        </span>
+                                        <span class="text-sm text-gray-500">สมัครเมื่อ {{ formatDate(selectedMember.createdAt) }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- ข้อมูลส่วนตัว -->
                             <div class="mb-6">
                                 <h4 class="font-semibold text-[#2BAC75] mb-3 flex items-center gap-2">
@@ -116,7 +221,6 @@
                                     <div><span class="font-bold text-[#184c36]">อีเมล:</span> {{ selectedMember.email }}</div>
                                     <div><span class="font-bold text-[#184c36]">เบอร์โทร:</span> {{ selectedMember.personalPhone }}</div>
                                     <div><span class="font-bold text-[#184c36]">วันที่สมัคร:</span> {{ formatDate(selectedMember.createdAt) }}</div>
-                                    <div class="md:col-span-2"><span class="font-bold text-[#184c36]">ที่อยู่หลัก:</span> {{ selectedMember.personalAddress }}</div>
                                 </div>
                             </div>
                             <!-- ที่อยู่ทั้งหมด -->
@@ -151,7 +255,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import BarAdmin from '../../components/BarAdmin.vue';
 import axios from 'axios';
 import { useAuthStore } from '../../stores/auth';
@@ -180,6 +284,22 @@ const formatDate = (dateString) => {
 const showDetailsModal = ref(false);
 const selectedMember = ref(null);
 const memberAddresses = ref([]);
+
+const handleImageError = (event) => {
+    // ซ่อนรูปภาพและแสดง fallback
+    const img = event.target;
+    const fallback = img.parentElement.querySelector('.absolute');
+    if (img) img.style.display = 'none';
+    if (fallback) fallback.style.display = 'flex';
+};
+
+const handleTableImageError = (event) => {
+    // ซ่อนรูปภาพในตารางและแสดง fallback
+    const img = event.target;
+    const fallback = img.parentElement.querySelector('.absolute');
+    if (img) img.style.display = 'none';
+    if (fallback) fallback.style.display = 'flex';
+};
 
 const viewMemberDetails = async (member) => {
     try {
@@ -274,8 +394,37 @@ const loadMembers = async () => {
     }
 };
 
+// Pagination states
+const currentPage = ref(1);
+const pageSizeOptions = [5, 10, 20];
+const pageSize = ref(5);
+
+const paginatedMembers = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  const end = start + pageSize.value;
+  return members.value.slice(start, end);
+});
+
+const totalPages = computed(() => Math.ceil(members.value.length / pageSize.value));
+
+function goToPage(page) {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
+}
+
+watch(pageSize, () => {
+  currentPage.value = 1;
+});
+
 onMounted(() => {
     window.addEventListener('resize', handleResize);
     loadMembers();
 });
 </script>
+
+<style scoped>
+.border-6 {
+    border-width: 6px;
+}
+</style>

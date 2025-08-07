@@ -1,17 +1,8 @@
 <template>
-    <BarNoMenu />
-    <div class="min-h-screen bg-gray-50 pb-5">
-        <!-- Back Navigation Header -->
-        <div class="bg-[#106154] py-4 px-6 mb-5">
-            <div class="flex items-center">
-                <button @click="goBackToHomePartner" class="flex items-center text-white hover:text-gray-200 transition-colors">
-                    <ChevronLeftIcon class="w-6 h-6 mr-2" />
-                    <span class="text-lg font-medium">เพิ่มสินค้าใหม่</span>
-                </button>
-            </div>
-        </div>
-        
-        <div class="max-w-full mx-10 bg-white rounded-xl shadow border border-[#e6e6e6] p-8">
+    <BarNoMenu :showBackNavigation="true" pageTitle="จัดการสินค้า" backRoute="/homepartner" />
+    <div class="min-h-screen bg-gray-50 pb-5 pt-24">
+
+        <div class="max-w-full mx-5 md:mx-10 bg-white rounded-xl shadow border border-[#e6e6e6] p-3 md:p-8 mt-10">
             <h2 class="text-2xl font-bold text-[#184c36] mb-8">เพิ่มสินค้าใหม่</h2>
             <!-- 1+2. เลือก/สร้างประเภทหลัก + ประเภทย่อย (แนวนอน) -->
             <div class="flex flex-col md:flex-row gap-8 mb-8">
@@ -137,7 +128,15 @@
             <div class="mt-8">
                 <button
                     class="bg-[#184c36] hover:bg-green-700 text-white px-8 py-2 rounded shadow-sm disabled:opacity-50 transition"
-                    :disabled="!canSave" @click="handleCreateProduct">บันทึก</button>
+                    :disabled="!canSave || loadingProduct" @click="handleCreateProduct">
+                    <span v-if="loadingProduct"><svg class="animate-spin h-4 w-4 inline-block mr-1"
+                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M19.5 12c0 6.075-4.925 11-11 11S2.5 18.075 2.5 12 7.425 1 13.5 1"></path>
+                        </svg> กำลังบันทึก...</span>
+                    <span v-else>บันทึก</span>
+                </button>
             </div>
 
             <!-- Modal: สร้างประเภทหลัก -->
@@ -180,7 +179,15 @@
                         <button class="px-4 py-2 text-[#184c36]" @click="showCategoryModal = false">ยกเลิก</button>
                         <button class="bg-[#184c36] hover:bg-green-700 text-white px-4 py-2 rounded shadow-sm"
                             @click="handleCreateCategory"
-                            :disabled="categoryNameExists || !newCategory.name">บันทึก</button>
+                            :disabled="categoryNameExists || !newCategory.name || loadingCategory">
+                            <span v-if="loadingCategory"><svg class="animate-spin h-4 w-4 inline-block mr-1"
+                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                    stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M19.5 12c0 6.075-4.925 11-11 11S2.5 18.075 2.5 12 7.425 1 13.5 1"></path>
+                                </svg> กำลังบันทึก...</span>
+                            <span v-else>บันทึก</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -225,14 +232,22 @@
                         <button class="px-4 py-2 text-[#184c36]" @click="showSubCategoryModal = false">ยกเลิก</button>
                         <button class="bg-[#184c36] hover:bg-green-700 text-white px-4 py-2 rounded shadow-sm"
                             @click="handleCreateSubCategory"
-                            :disabled="subCategoryNameExists || !newSubCategory.name">บันทึก</button>
+                            :disabled="subCategoryNameExists || !newSubCategory.name || loadingSubCategory">
+                            <span v-if="loadingSubCategory"><svg class="animate-spin h-4 w-4 inline-block mr-1"
+                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                    stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M19.5 12c0 6.075-4.925 11-11 11S2.5 18.075 2.5 12 7.425 1 13.5 1"></path>
+                                </svg> กำลังบันทึก...</span>
+                            <span v-else>บันทึก</span>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- ตารางแสดงสินค้า -->
-        <div class="mx-10 mt-12 bg-white rounded-xl shadow border border-[#e6e6e6] p-8">
+        <div class="mx-5 md:mx-10 mt-12 bg-white rounded-xl shadow border border-[#e6e6e6] p-3 md:p-8">
             <h2 class="text-xl font-bold text-[#184c36] mb-4">สินค้าของคุณ</h2>
             <div class="flex flex-col md:flex-row md:items-end gap-4 mb-6">
                 <div class="flex-1">
@@ -254,7 +269,7 @@
                         class="border border-[#e6e6e6] rounded px-3 py-2 w-full focus:ring-2 focus:ring-green-200 focus:border-green-400 transition">
                         <option value="">ทั้งหมด</option>
                         <option v-for="sub in subcategoriesFilteredByCategory" :key="sub.id" :value="sub.id">{{ sub.name
-                        }}</option>
+                            }}</option>
                     </select>
                 </div>
             </div>
@@ -278,9 +293,12 @@
                                 || '-' }}</td>
                             <td class="px-4 py-3 border-b border-[#e6e6e6] min-w-[140px]">
                                 <div class="flex justify-center items-center gap-3">
-                                    <button class="text-blue-600 hover:underline" title="ข้อมูล" @click="handleViewProduct(prod)">🛈</button>
-                                    <button class="text-yellow-600 hover:underline" title="แก้ไข" @click="handleEditProduct(prod)">✏️</button>
-                                    <button class="text-red-600 hover:underline" title="ลบ" @click="handleDeleteProduct(prod.id)">🗑️</button>
+                                    <button class="text-blue-600 hover:underline" title="ข้อมูล"
+                                        @click="handleViewProduct(prod)">🛈</button>
+                                    <button class="text-yellow-600 hover:underline" title="แก้ไข"
+                                        @click="handleEditProduct(prod)">✏️</button>
+                                    <button class="text-red-600 hover:underline" title="ลบ"
+                                        @click="handleDeleteProduct(prod.id)">🗑️</button>
                                 </div>
                             </td>
                         </tr>
@@ -307,7 +325,9 @@
             <div class="bg-white rounded-xl shadow border border-[#e6e6e6] p-6 w-full max-w-md">
                 <h3 class="font-bold mb-4 text-[#184c36] text-xl">ข้อมูลสินค้า</h3>
                 <div class="mb-2 flex flex-col items-center">
-                    <img v-if="viewingProduct.image || '/src/assets/NoPicture.webp'" :src="viewingProduct.image || '/src/assets/NoPicture.webp'" :alt="viewingProduct.name" class="w-32 h-32 object-contain border rounded mb-2" />
+                    <img v-if="viewingProduct.image || '/src/assets/NoPicture.webp'"
+                        :src="viewingProduct.image || '/src/assets/NoPicture.webp'" :alt="viewingProduct.name"
+                        class="w-32 h-32 object-contain border rounded mb-2" />
                     <div class="text-lg font-semibold text-[#184c36] mb-1">{{ viewingProduct.name }}</div>
                     <div class="text-sm text-gray-600 mb-1">
                         ประเภทหลัก: {{ getCategoryName(viewingProduct.categoryId) }}
@@ -318,7 +338,8 @@
                     <div class="text-sm text-gray-600 mb-1">ราคา: {{ viewingProduct.pricePerKg }} บาท/กก.</div>
                     <div class="text-sm text-gray-600 mb-1">จำนวน: {{ viewingProduct.quantity }} กก.</div>
                 </div>
-                <button class="mt-4 px-6 py-2 bg-[#184c36] hover:bg-green-700 text-white rounded shadow" @click="closeViewProduct">ปิด</button>
+                <button class="mt-4 px-6 py-2 bg-[#184c36] hover:bg-green-700 text-white rounded shadow"
+                    @click="closeViewProduct">ปิด</button>
             </div>
         </div>
 
@@ -328,7 +349,8 @@
                 <h3 class="font-bold mb-4 text-[#184c36] text-xl">แก้ไขสินค้า</h3>
                 <div class="mb-3">
                     <label class="block font-semibold mb-1 text-[#184c36]">ชื่อสินค้า</label>
-                    <input v-model="editForm.name" class="border rounded px-3 py-2 w-full bg-gray-100 text-gray-500" readonly disabled />
+                    <input v-model="editForm.name" class="border rounded px-3 py-2 w-full bg-gray-100 text-gray-500"
+                        readonly disabled />
                 </div>
                 <div class="mb-3">
                     <label class="block font-semibold mb-1 text-[#184c36]">ราคาต่อกิโลกรัม (บาท)</label>
@@ -340,11 +362,14 @@
                 </div>
                 <div class="mb-3">
                     <label class="block font-semibold mb-1 text-[#184c36]">รูปภาพสินค้าเดิม</label>
-                    <img v-if="editingProduct && editingProduct.image" :src="editingProduct.image" alt="รูปสินค้าเดิม" class="w-24 h-24 object-contain border rounded mb-2" />
+                    <img v-if="editingProduct && editingProduct.image" :src="editingProduct.image" alt="รูปสินค้าเดิม"
+                        class="w-24 h-24 object-contain border rounded mb-2" />
                     <label for="editProductImageInput" class="upload-button">
                         <span class="upload-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                             </svg>
                         </span>
                         <span class="upload-text">เลือกรูปภาพใหม่</span>
@@ -354,12 +379,14 @@
                             @change="onEditProductImageChange" />
                     </label>
                     <div class="text-xs text-gray-500 mt-1">
-                      ถ้าไม่เลือกรูปใหม่ ระบบจะใช้รูปเดิม
+                        ถ้าไม่เลือกรูปใหม่ ระบบจะใช้รูปเดิม
                     </div>
-                    <div v-if="editProductImageFileName" class="mt-2 p-2 bg-green-50 border border-green-200 rounded-lg">
+                    <div v-if="editProductImageFileName"
+                        class="mt-2 p-2 bg-green-50 border border-green-200 rounded-lg">
                         <div class="flex items-center gap-2 text-sm text-green-700">
                             <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
                             <span class="truncate">{{ editProductImageFileName }}</span>
                         </div>
@@ -367,7 +394,8 @@
                 </div>
                 <div class="flex justify-end gap-2 mt-4">
                     <button class="px-4 py-2 text-[#184c36]" @click="closeEditProduct">ยกเลิก</button>
-                    <button class="bg-[#184c36] hover:bg-green-700 text-white px-4 py-2 rounded shadow-sm" @click="handleUpdateProduct">บันทึก</button>
+                    <button class="bg-[#184c36] hover:bg-green-700 text-white px-4 py-2 rounded shadow-sm"
+                        @click="handleUpdateProduct">บันทึก</button>
                 </div>
             </div>
         </div>
@@ -464,11 +492,11 @@ const filteredSubCategories = computed(() => {
 });
 // สำหรับ dropdown
 const filteredProducts = computed(() => {
-  return productsAll.value.filter(prod =>
-    prod.categoryId === selectedCategoryId.value &&
-    prod.subCategoryId === selectedSubCategoryId.value &&
-    (!productSearch.value || prod.name.toLowerCase().includes(productSearch.value.toLowerCase()))
-  );
+    return productsAll.value.filter(prod =>
+        prod.categoryId === selectedCategoryId.value &&
+        prod.subCategoryId === selectedSubCategoryId.value &&
+        (!productSearch.value || prod.name.toLowerCase().includes(productSearch.value.toLowerCase()))
+    );
 });
 // สำหรับตาราง
 const filteredProductsTable = computed(() => {
@@ -562,83 +590,98 @@ const canSave = computed(() => {
     );
 });
 
+// Loading states สำหรับการสร้างข้อมูล
+const loadingCategory = ref(false);
+const loadingSubCategory = ref(false);
+const loadingProduct = ref(false);
+
 // Handler สำหรับสร้างใหม่ (mock)
 async function handleCreateCategory() {
     if (categoryNameExists.value || !newCategory.value.name) return;
+    loadingCategory.value = true;
     const formData = new FormData();
     formData.append('name', newCategory.value.name);
     if (newCategory.value.image) formData.append('image', newCategory.value.image);
-
-    await axios.post(`${import.meta.env.VITE_API_URL}/categories`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-    });
-    showCategoryModal.value = false;
-    newCategory.value = { name: '', image: null };
-    categoryImageFileName.value = '';
-    // reload categories
-    const catRes = await axios.get(`${import.meta.env.VITE_API_URL}/categories`);
-    categories.value = (catRes.data || []).map(cat => ({
-        id: cat._id, name: cat.name, image: cat.image || null
-    }));
+    try {
+        await axios.post(`${import.meta.env.VITE_API_URL}/categories`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        showCategoryModal.value = false;
+        newCategory.value = { name: '', image: null };
+        categoryImageFileName.value = '';
+        // reload categories
+        const catRes = await axios.get(`${import.meta.env.VITE_API_URL}/categories`);
+        categories.value = (catRes.data || []).map(cat => ({
+            id: cat._id, name: cat.name, image: cat.image || null
+        }));
+    } finally {
+        loadingCategory.value = false;
+    }
 }
 
 async function handleCreateSubCategory() {
     if (subCategoryNameExists.value || !newSubCategory.value.name) return;
+    loadingSubCategory.value = true;
     const formData = new FormData();
     formData.append('name', newSubCategory.value.name);
     formData.append('categoryId', selectedCategoryId.value);
     if (newSubCategory.value.image) formData.append('image', newSubCategory.value.image);
-
-    await axios.post(`${import.meta.env.VITE_API_URL}/categories/subcategories`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-    });
-    showSubCategoryModal.value = false;
-    newSubCategory.value = { name: '', image: null };
-    subCategoryImageFileName.value = '';
-    // reload subcategories
-    const subRes = await axios.get(`${import.meta.env.VITE_API_URL}/categories/subcategories/all`);
-    subcategories.value = (subRes.data || []).map(sub => ({
-        id: sub._id, name: sub.name, categoryId: sub.categoryId, image: sub.image || null
-    }));
+    try {
+        await axios.post(`${import.meta.env.VITE_API_URL}/categories/subcategories`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        showSubCategoryModal.value = false;
+        newSubCategory.value = { name: '', image: null };
+        subCategoryImageFileName.value = '';
+        // reload subcategories
+        const subRes = await axios.get(`${import.meta.env.VITE_API_URL}/categories/subcategories/all`);
+        subcategories.value = (subRes.data || []).map(sub => ({
+            id: sub._id, name: sub.name, categoryId: sub.categoryId, image: sub.image || null
+        }));
+    } finally {
+        loadingSubCategory.value = false;
+    }
 }
 
 async function handleCreateProduct() {
-  if (!productSearch.value) return;
-  // ไม่ต้องสนใจ selectedProductId.value หรือ id เดิม
-  const formData = new FormData();
-  formData.append('name', productSearch.value);
-  formData.append('category_id', selectedCategoryId.value);
-  formData.append('subCategoryId', selectedSubCategoryId.value);
-  formData.append('price_per_kg', pricePerKg.value);
-  formData.append('maxAmount', quantity.value);
-  formData.append('shopId', partnerId.value);
-  if (newProduct.value.image) formData.append('image', newProduct.value.image);
-  try {
-    await axios.post(`${import.meta.env.VITE_API_URL}/products`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-    await reloadProducts();
-    currentPage.value = 1;
-    newProduct.value = { name: '', image: null };
-    productImageFileName.value = '';
-    pricePerKg.value = '';
-    quantity.value = '';
-    productSearch.value = '';
-    selectedProductId.value = '';
-    await Swal.fire({
-      icon: 'success',
-      title: 'สำเร็จ',
-      text: 'บันทึกสินค้าสำเร็จ',
-      confirmButtonText: 'ตกลง'
-    });
-  } catch (error) {
-    await Swal.fire({
-      icon: 'error',
-      title: 'เกิดข้อผิดพลาด',
-      text: error?.response?.data?.error || error.message,
-      confirmButtonText: 'ตกลง'
-    });
-  }
+    if (!productSearch.value) return;
+    loadingProduct.value = true;
+    const formData = new FormData();
+    formData.append('name', productSearch.value);
+    formData.append('category_id', selectedCategoryId.value);
+    formData.append('subCategoryId', selectedSubCategoryId.value);
+    formData.append('price_per_kg', pricePerKg.value);
+    formData.append('maxAmount', quantity.value);
+    formData.append('shopId', partnerId.value);
+    if (newProduct.value.image) formData.append('image', newProduct.value.image);
+    try {
+        await axios.post(`${import.meta.env.VITE_API_URL}/products`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        await reloadProducts();
+        currentPage.value = 1;
+        newProduct.value = { name: '', image: null };
+        productImageFileName.value = '';
+        pricePerKg.value = '';
+        quantity.value = '';
+        productSearch.value = '';
+        selectedProductId.value = '';
+        await Swal.fire({
+            icon: 'success',
+            title: 'สำเร็จ',
+            text: 'บันทึกสินค้าสำเร็จ',
+            confirmButtonText: 'ตกลง'
+        });
+    } catch (error) {
+        await Swal.fire({
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: error?.response?.data?.error || error.message,
+            confirmButtonText: 'ตกลง'
+        });
+    } finally {
+        loadingProduct.value = false;
+    }
 }
 
 // ฟังก์ชันล้างค่าแต่ละช่อง
@@ -681,36 +724,36 @@ const subcategoriesFilteredByCategory = computed(() => {
 
 // ใน handleCreateProduct, handleDeleteProduct ให้เรียก await reloadProducts() แทนการดึง products.value ตรง ๆ
 async function reloadProducts() {
-  const prodRes = await axios.get(`${import.meta.env.VITE_API_URL}/products`);
-  productsAll.value = (prodRes.data.products || []).map(prod => ({
-    id: prod._id,
-    name: prod.name,
-    pricePerKg: prod.price_per_kg,
-    quantity: prod.maxAmount,
-    categoryId: prod.category_id,
-    subCategoryId: prod.subCategoryId,
-    image: prod.image || '/src/assets/NoPicture.webp',
-    shopId: prod.shopId
-  }));
-  products.value = productsAll.value.filter(
-    prod => (prod.shopId?._id || prod.shopId) === partnerId.value
-  );
+    const prodRes = await axios.get(`${import.meta.env.VITE_API_URL}/products`);
+    productsAll.value = (prodRes.data.products || []).map(prod => ({
+        id: prod._id,
+        name: prod.name,
+        pricePerKg: prod.price_per_kg,
+        quantity: prod.maxAmount,
+        categoryId: prod.category_id,
+        subCategoryId: prod.subCategoryId,
+        image: prod.image || '/src/assets/NoPicture.webp',
+        shopId: prod.shopId
+    }));
+    products.value = productsAll.value.filter(
+        prod => (prod.shopId?._id || prod.shopId) === partnerId.value
+    );
 }
 
 const currentPage = ref(1);
 const pageSize = 10;
 const pageCount = computed(() => Math.ceil(filteredProductsTable.value.length / pageSize));
 const paginatedProducts = computed(() =>
-  filteredProductsTable.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize)
+    filteredProductsTable.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize)
 );
 function goToPage(page) {
-  if (page >= 1 && page <= pageCount.value) {
-    currentPage.value = page;
-    setTimeout(() => {
-      const table = document.querySelector('table');
-      if (table) table.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 0);
-  }
+    if (page >= 1 && page <= pageCount.value) {
+        currentPage.value = page;
+        setTimeout(() => {
+            const table = document.querySelector('table');
+            if (table) table.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 0);
+    }
 }
 
 const viewingProduct = ref(null); // สำหรับ modal ดูข้อมูล
@@ -718,81 +761,81 @@ const editingProduct = ref(null); // สำหรับ modal แก้ไข
 const editForm = ref({ name: '', pricePerKg: '', quantity: '', image: null });
 const editProductImageFileName = ref('');
 function onEditProductImageChange(e) {
-  const file = e.target.files[0];
-  if (file) {
-    editForm.value.image = file;
-    editProductImageFileName.value = file.name;
-  }
+    const file = e.target.files[0];
+    if (file) {
+        editForm.value.image = file;
+        editProductImageFileName.value = file.name;
+    }
 }
 
 function handleViewProduct(prod) {
-  // ค้นหาสินค้าจาก productsAll ด้วย id เพื่อให้ได้ object ที่ map image แล้ว
-  const found = productsAll.value.find(p => p.id === prod.id);
-  viewingProduct.value = found || prod;
-  console.log(viewingProduct.value);
+    // ค้นหาสินค้าจาก productsAll ด้วย id เพื่อให้ได้ object ที่ map image แล้ว
+    const found = productsAll.value.find(p => p.id === prod.id);
+    viewingProduct.value = found || prod;
+    console.log(viewingProduct.value);
 }
 function closeViewProduct() {
-  viewingProduct.value = null;
+    viewingProduct.value = null;
 }
 function handleEditProduct(prod) {
-  editingProduct.value = prod;
-  editForm.value = {
-    name: prod.name,
-    pricePerKg: prod.pricePerKg,
-    quantity: prod.quantity,
-    image: null // ไม่โชว์รูปเดิม ให้เลือกใหม่เท่านั้น
-  };
+    editingProduct.value = prod;
+    editForm.value = {
+        name: prod.name,
+        pricePerKg: prod.pricePerKg,
+        quantity: prod.quantity,
+        image: null // ไม่โชว์รูปเดิม ให้เลือกใหม่เท่านั้น
+    };
 }
 function closeEditProduct() {
-  editingProduct.value = null;
+    editingProduct.value = null;
 }
 async function handleUpdateProduct() {
-  if (!editingProduct.value) return;
-  const formData = new FormData();
-  formData.append('name', editForm.value.name);
-  formData.append('price_per_kg', editForm.value.pricePerKg);
-  formData.append('maxAmount', editForm.value.quantity);
-  if (editForm.value.image) formData.append('image', editForm.value.image);
-  // ส่ง category_id, subCategoryId, shopId เดิมกลับไปด้วย
-  formData.append('category_id', editingProduct.value.categoryId);
-  formData.append('subCategoryId', editingProduct.value.subCategoryId);
-  formData.append('shopId', editingProduct.value.shopId);
-  try {
-    await axios.put(`${import.meta.env.VITE_API_URL}/products/${editingProduct.value.id}`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-    await reloadProducts();
-    currentPage.value = 1;
-    editingProduct.value = null;
-    Swal.fire('สำเร็จ', 'แก้ไขสินค้าเรียบร้อยแล้ว', 'success');
-  } catch (error) {
-    Swal.fire('เกิดข้อผิดพลาด', error?.response?.data?.error || error.message, 'error');
-  }
+    if (!editingProduct.value) return;
+    const formData = new FormData();
+    formData.append('name', editForm.value.name);
+    formData.append('price_per_kg', editForm.value.pricePerKg);
+    formData.append('maxAmount', editForm.value.quantity);
+    if (editForm.value.image) formData.append('image', editForm.value.image);
+    // ส่ง category_id, subCategoryId, shopId เดิมกลับไปด้วย
+    formData.append('category_id', editingProduct.value.categoryId);
+    formData.append('subCategoryId', editingProduct.value.subCategoryId);
+    formData.append('shopId', editingProduct.value.shopId);
+    try {
+        await axios.put(`${import.meta.env.VITE_API_URL}/products/${editingProduct.value.id}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        await reloadProducts();
+        currentPage.value = 1;
+        editingProduct.value = null;
+        Swal.fire('สำเร็จ', 'แก้ไขสินค้าเรียบร้อยแล้ว', 'success');
+    } catch (error) {
+        Swal.fire('เกิดข้อผิดพลาด', error?.response?.data?.error || error.message, 'error');
+    }
 }
 async function handleDeleteProduct(prodId) {
-  const result = await Swal.fire({
-    title: 'ยืนยันการลบสินค้า?',
-    text: 'คุณต้องการลบสินค้านี้หรือไม่',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'ลบ',
-    cancelButtonText: 'ยกเลิก'
-  });
-  if (result.isConfirmed) {
-    await axios.delete(`${import.meta.env.VITE_API_URL}/products/${prodId}`);
-    await reloadProducts();
-    currentPage.value = 1;
-    Swal.fire('ลบสำเร็จ', 'ลบสินค้าเรียบร้อยแล้ว', 'success');
-  }
+    const result = await Swal.fire({
+        title: 'ยืนยันการลบสินค้า?',
+        text: 'คุณต้องการลบสินค้านี้หรือไม่',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'ลบ',
+        cancelButtonText: 'ยกเลิก'
+    });
+    if (result.isConfirmed) {
+        await axios.delete(`${import.meta.env.VITE_API_URL}/products/${prodId}`);
+        await reloadProducts();
+        currentPage.value = 1;
+        Swal.fire('ลบสำเร็จ', 'ลบสินค้าเรียบร้อยแล้ว', 'success');
+    }
 }
 
 function getCategoryName(id) {
-  const cat = categories.value.find(c => c.id === id);
-  return cat ? cat.name : '-';
+    const cat = categories.value.find(c => c.id === id);
+    return cat ? cat.name : '-';
 }
 function getSubCategoryName(id) {
-  const sub = subcategories.value.find(s => s.id === id);
-  return sub ? sub.name : '-';
+    const sub = subcategories.value.find(s => s.id === id);
+    return sub ? sub.name : '-';
 }
 </script>
 
