@@ -32,133 +32,143 @@
 
             <!-- Orders Table -->
             <div class="bg-white rounded-xl shadow-lg border border-[#e6e6e6] overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gradient-to-r from-[#2BAC75] to-[#184c36] text-white">
-                            <tr>
-                                <th class="px-6 py-4 text-left text-xs lg:text-sm font-semibold">Order ID</th>
-                                <th class="px-6 py-4 text-left text-xs lg:text-sm font-semibold">สถานะ</th>
-                                <th class="px-6 py-4 text-left text-xs lg:text-sm font-semibold">ผู้จอง</th>
-                                <th class="px-6 py-4 text-left text-xs lg:text-sm font-semibold hidden md:table-cell">
-                                    ร้านค้า</th>
-                                <th class="px-6 py-4 text-left text-xs lg:text-sm font-semibold hidden lg:table-cell">
-                                    จำนวนสินค้า</th>
-                                <th class="px-6 py-4 text-left text-xs lg:text-sm font-semibold hidden lg:table-cell">
-                                    ยอดรวม</th>
-                                <th class="px-6 py-4 text-left text-xs lg:text-sm font-semibold hidden lg:table-cell">
-                                    วันที่สั่งซื้อ</th>
-                                <th class="px-6 py-4 text-center text-xs lg:text-sm font-semibold">การดำเนินการ</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-[#f0f0f0]">
-                            <tr v-for="order in paginatedOrders" :key="order._id"
-                                class="hover:bg-gray-50 transition-colors">
-                                <td class="px-6 py-4 text-xs lg:text-sm">
-                                    <div class="font-mono font-semibold text-[#184c36]">{{ order.orderId ||
-                                        order._id.slice(-8) }}</div>
-                                </td>
-                                <td class="px-0 md:px-6 py-4 text-xs lg:text-sm">
-                                    <span :class="[
-                                        'px-3 py-1 rounded-full text-xs font-medium',
-                                        getStatusClass(order.status)
-                                    ]">
-                                        {{ getStatusText(order.status) }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-xs lg:text-sm">
-                                    <div class="flex items-center gap-3">
-                                        <!-- รูปโปรไฟล์เล็ก -->
-                                        <div
-                                            class="w-8 h-8 rounded-full overflow-hidden bg-gray-200 border border-[#e6f7e6] flex-shrink-0 relative">
-                                            <img v-if="order.member_id.profile_img" :src="order.member_id.profile_img"
-                                                :alt="order.member_id.fullName" class="w-full h-full object-cover"
-                                                @error="handleTableImageError" />
-                                            <div v-else
-                                                class="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#2BAC75] to-[#184c36] text-white text-xs font-bold">
-                                                {{ order.customer?.fullName ?
-                                                    order.customer.fullName.charAt(0).toUpperCase() : '?' }}
+                <div v-if="loading" class="flex flex-col items-center justify-center py-16">
+                    <svg class="animate-spin h-10 w-10 text-[#2BAC75]" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                    </svg>
+                    <span class="mt-4 text-[#2BAC75] text-lg font-semibold">กำลังโหลดข้อมูล...</span>
+                </div>
+                <div v-else>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gradient-to-r from-[#2BAC75] to-[#184c36] text-white">
+                                <tr>
+                                    <th class="px-6 py-4 text-left text-xs lg:text-sm font-semibold">Order ID</th>
+                                    <th class="px-6 py-4 text-left text-xs lg:text-sm font-semibold">สถานะ</th>
+                                    <th class="px-6 py-4 text-left text-xs lg:text-sm font-semibold">ผู้จอง</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs lg:text-sm font-semibold hidden md:table-cell">
+                                        ร้านค้า</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs lg:text-sm font-semibold hidden lg:table-cell">
+                                        จำนวนสินค้า</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs lg:text-sm font-semibold hidden lg:table-cell">
+                                        ยอดรวม</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs lg:text-sm font-semibold hidden lg:table-cell">
+                                        วันที่สั่งซื้อ</th>
+                                    <th class="px-6 py-4 text-center text-xs lg:text-sm font-semibold">การดำเนินการ</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#f0f0f0]">
+                                <tr v-for="order in paginatedOrders" :key="order._id"
+                                    class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 text-xs lg:text-sm">
+                                        <div class="font-mono font-semibold text-[#184c36]">{{ order.orderId ||
+                                            order._id.slice(-8) }}</div>
+                                    </td>
+                                    <td class="px-0 md:px-6 py-4 text-xs lg:text-sm">
+                                        <span :class="[
+                                            'px-3 py-1 rounded-full text-xs font-medium',
+                                            getStatusClass(order.status)
+                                        ]">
+                                            {{ getStatusText(order.status) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-xs lg:text-sm">
+                                        <div class="flex items-center gap-3">
+                                            <!-- รูปโปรไฟล์เล็ก -->
+                                            <div
+                                                class="w-8 h-8 rounded-full overflow-hidden bg-gray-200 border border-[#e6f7e6] flex-shrink-0 relative">
+                                                <img v-if="order.member_id.profile_img"
+                                                    :src="order.member_id.profile_img" :alt="order.member_id.fullName"
+                                                    class="w-full h-full object-cover" @error="handleTableImageError" />
+                                                <div v-else
+                                                    class="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#2BAC75] to-[#184c36] text-white text-xs font-bold">
+                                                    {{ order.customer?.fullName ?
+                                                        order.customer.fullName.charAt(0).toUpperCase() : '?' }}
+                                                </div>
+                                            </div>
+                                            <!-- ข้อมูลชื่อ -->
+                                            <div>
+                                                <p class="font-semibold text-[#184c36]">{{ order.member_id.fullName ||
+                                                    'ไม่ระบุ' }}</p>
+                                                <p class="text-xs text-gray-500">{{ order.member_id.personalPhone ||
+                                                    'ไม่ระบุ' }}</p>
                                             </div>
                                         </div>
-                                        <!-- ข้อมูลชื่อ -->
-                                        <div>
-                                            <p class="font-semibold text-[#184c36]">{{ order.member_id.fullName ||
-                                                'ไม่ระบุ' }}</p>
-                                            <p class="text-xs text-gray-500">{{ order.member_id.personalPhone ||
-                                                'ไม่ระบุ' }}</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 text-xs lg:text-sm hidden md:table-cell">
-                                    <div class="flex items-center gap-3">
-                                        <!-- รูปร้านค้าเล็ก -->
-                                        <div
-                                            class="w-8 h-8 rounded-full overflow-hidden bg-gray-200 border border-[#e6f7e6] flex-shrink-0 relative">
-                                            <img v-if="order.store_id.companyLogo" :src="order.store_id.companyLogo"
-                                                :alt="order.store_id.companyName" class="w-full h-full object-cover"
-                                                @error="handleTableImageError" />
-                                            <div v-else
-                                                class="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#2BAC75] to-[#184c36] text-white text-xs font-bold">
-                                                {{ order.store_id.companyName ?
-                                                    order.store_id.companyName.charAt(0).toUpperCase() : '?' }}
+                                    </td>
+                                    <td class="px-6 py-4 text-xs lg:text-sm hidden md:table-cell">
+                                        <div class="flex items-center gap-3">
+                                            <!-- รูปร้านค้าเล็ก -->
+                                            <div
+                                                class="w-8 h-8 rounded-full overflow-hidden bg-gray-200 border border-[#e6f7e6] flex-shrink-0 relative">
+                                                <img v-if="order.store_id.companyLogo" :src="order.store_id.companyLogo"
+                                                    :alt="order.store_id.companyName" class="w-full h-full object-cover"
+                                                    @error="handleTableImageError" />
+                                                <div v-else
+                                                    class="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#2BAC75] to-[#184c36] text-white text-xs font-bold">
+                                                    {{ order.store_id.companyName ?
+                                                        order.store_id.companyName.charAt(0).toUpperCase() : '?' }}
+                                                </div>
+                                            </div>
+                                            <!-- ข้อมูลร้านค้า -->
+                                            <div>
+                                                <p class="font-semibold text-[#184c36]">{{ order.store_id.companyName ||
+                                                    'ไม่ระบุ' }}</p>
+                                                <p class="text-xs text-gray-500">{{ order.store_id.companyPhone ||
+                                                    'ไม่ระบุ'
+                                                    }}</p>
                                             </div>
                                         </div>
-                                        <!-- ข้อมูลร้านค้า -->
-                                        <div>
-                                            <p class="font-semibold text-[#184c36]">{{ order.store_id.companyName ||
-                                                'ไม่ระบุ' }}</p>
-                                            <p class="text-xs text-gray-500">{{ order.store_id.companyPhone || 'ไม่ระบุ'
-                                            }}</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 text-xs lg:text-sm hidden lg:table-cell">
-                                    <span class="font-semibold text-[#184c36]">{{ order.order_items?.length || 0 }}
-                                        รายการ</span>
-                                </td>
-                                <td class="px-6 py-4 text-xs lg:text-sm hidden lg:table-cell">
-                                    <span class="font-semibold text-[#184c36]">฿{{ formatNumber(order.total_price || 0)
-                                    }}</span>
-                                </td>
-                                <td class="px-6 py-4 hidden lg:table-cell text-xs lg:text-sm">
-                                    <p class="text-xs lg:text-sm text-[#666]">{{ formatDate(order.createdAt) }}</p>
-                                </td>
-                                <td class="px-6 py-4 text-xs lg:text-sm">
-                                    <button @click="viewOrderDetails(order)"
-                                        :class="isSmallScreen ? 'p-2 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded-lg transition-colors flex items-center justify-center' : 'px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded-lg transition-colors'"
-                                        aria-label="ดูรายละเอียด" title="ดูรายละเอียด">
-                                        <template v-if="!isSmallScreen">
-                                            ดูรายละเอียด
-                                        </template>
-                                        <template v-else>
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                stroke="currentColor" class="w-5 h-5">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
-                                        </template>
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                    </td>
+                                    <td class="px-6 py-4 text-xs lg:text-sm hidden lg:table-cell">
+                                        <span class="font-semibold text-[#184c36]">{{ order.order_items?.length || 0 }}
+                                            รายการ</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-xs lg:text-sm hidden lg:table-cell">
+                                        <span class="font-semibold text-[#184c36]">฿{{ formatNumber(order.total_price ||
+                                            0)
+                                            }}</span>
+                                    </td>
+                                    <td class="px-6 py-4 hidden lg:table-cell text-xs lg:text-sm">
+                                        <p class="text-xs lg:text-sm text-[#666]">{{ formatDate(order.createdAt) }}</p>
+                                    </td>
+                                    <td class="px-6 py-4 text-xs lg:text-sm">
+                                        <button @click="viewOrderDetails(order)"
+                                            :class="isSmallScreen ? 'p-2 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded-lg transition-colors flex items-center justify-center' : 'px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded-lg transition-colors'"
+                                            aria-label="ดูรายละเอียด" title="ดูรายละเอียด">
+                                            <template v-if="!isSmallScreen">
+                                                ดูรายละเอียด
+                                            </template>
+                                            <template v-else>
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                    stroke="currentColor" class="w-5 h-5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                            </template>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 <!-- Pagination -->
                 <div v-if="totalPages > 1" class="flex justify-center items-center gap-2 my-4">
-                    <button
-                        class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
-                        :disabled="currentPage === 1"
-                        @click="goToPage(currentPage - 1)"
-                    >ก่อนหน้า</button>
+                    <button class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                        :disabled="currentPage === 1" @click="goToPage(currentPage - 1)">ก่อนหน้า</button>
                     <span>หน้า {{ currentPage }} / {{ totalPages }}</span>
-                    <button
-                        class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
-                        :disabled="currentPage === totalPages"
-                        @click="goToPage(currentPage + 1)"
-                    >ถัดไป</button>
+                    <button class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                        :disabled="currentPage === totalPages" @click="goToPage(currentPage + 1)">ถัดไป</button>
                 </div>
-                <div v-if="filteredOrders.length === 0" class="text-center py-12">
+                <div v-if="filteredOrders.length === 0 && !loading" class="text-center py-12">
                     <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -302,56 +312,154 @@
                                     รายการสินค้า
                                 </h4>
                                 <div class="bg-white border border-[#e6e6e6] rounded-lg overflow-hidden">
-                                    <table class="w-full">
-                                        <thead class="bg-gray-50">
-                                            <tr>
-                                                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">สินค้า
-                                                </th>
-                                                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">ราคา
-                                                </th>
-                                                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">จำนวน
-                                                </th>
-                                                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">รวม
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-gray-200">
-                                            <tr v-for="item in selectedOrder.order_items" :key="item._id"
-                                                class="hover:bg-gray-50">
-                                                <td class="px-4 py-3">
-                                                    <div class="flex items-center gap-3">
-                                                        <div
-                                                            class="w-12 h-12 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
-                                                            <img v-if="item.product_id?.image"
-                                                                :src="item.product_id.image"
-                                                                :alt="item.product_id?.name"
-                                                                class="w-full h-full object-cover"
-                                                                @error="handleImageError" />
-                                                            <div v-else
-                                                                class="w-full h-full flex items-center justify-center bg-gray-300 text-gray-500 text-xs">
-                                                                ไม่มีรูป
+                                    <div v-if="loading" class="flex flex-col items-center justify-center py-16">
+                                        <svg class="animate-spin h-10 w-10 text-[#2BAC75]" fill="none"
+                                            viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                                stroke-width="4" />
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                                        </svg>
+                                        <span
+                                            class="mt-4 text-[#2BAC75] text-lg font-semibold">กำลังโหลดข้อมูล...</span>
+                                    </div>
+                                    <div v-else>
+                                        <!-- Table view for md and up -->
+                                        <div class="hidden sm:block">
+                                            <table class="w-full">
+                                                <thead class="bg-gray-50">
+                                                    <tr>
+                                                        <th
+                                                            class="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                                                            สินค้า
+                                                        </th>
+                                                        <th
+                                                            class="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                                                            ราคา</th>
+                                                        <th
+                                                            class="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                                                            จำนวน</th>
+                                                        <th
+                                                            class="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                                                            รวม</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="divide-y divide-gray-200">
+                                                    <tr v-for="item in selectedOrder.order_items" :key="item._id"
+                                                        class="hover:bg-gray-50">
+                                                        <td class="px-4 py-3">
+                                                            <div class="flex items-center gap-3">
+                                                                <div
+                                                                    class="w-12 h-12 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
+                                                                    <img v-if="item.product_id?.productId?.image"
+                                                                        :src="item.product_id.productId.image"
+                                                                        :alt="item.product_id.productId.name"
+                                                                        class="w-full h-full object-cover"
+                                                                        @error="handleImageError" />
+                                                                    <div v-else
+                                                                        class="w-full h-full flex items-center justify-center bg-gray-300 text-gray-500 text-xs">
+                                                                        ไม่มีรูป
+                                                                    </div>
+                                                                </div>
+                                                                <div>
+                                                                    <p class="font-medium text-[#184c36]">
+                                                                        {{ item.product_id?.productId?.name || 'ไม่ระบุ'
+                                                                        }}
+                                                                    </p>
+                                                                    <p class="text-sm text-gray-500">
+                                                                        {{ item.product_id?.productId?.description ||
+                                                                            'ไม่มีคำอธิบาย' }}
+                                                                    </p>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        <div>
-                                                            <p class="font-medium text-[#184c36]">{{
-                                                                item.product_id?.name ||
-                                                                'ไม่ระบุ' }}</p>
-                                                            <p class="text-sm text-gray-500">{{
-                                                                item.product_id?.description ||
-                                                                'ไม่มีคำอธิบาย' }}</p>
+                                                        </td>
+                                                        <td class="px-4 py-3 text-sm text-[#184c36]">
+                                                            ฿{{ formatNumber(item.unit_price || 0) }}
+                                                        </td>
+                                                        <td class="px-4 py-3 text-sm text-[#184c36]">
+                                                            {{ item.amount || 0 }}
+                                                        </td>
+                                                        <td class="px-4 py-3 text-sm font-semibold text-[#184c36]">
+                                                            ฿{{ formatNumber((item.unit_price || 0) * (item.amount ||
+                                                                0)) }}
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <!-- Card view for mobile -->
+                                        <div class="sm:hidden space-y-4">
+                                            <div v-for="item in selectedOrder.order_items" :key="item._id"
+                                                class="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+                                                <div class="flex items-start gap-4">
+                                                    <!-- รูปภาพสินค้า -->
+                                                    <div
+                                                        class="w-16 h-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
+                                                        <img v-if="item.product_id?.productId?.image"
+                                                            :src="item.product_id.productId.image"
+                                                            :alt="item.product_id.productId.name"
+                                                            class="w-full h-full object-cover"
+                                                            @error="handleImageError" />
+                                                        <div v-else
+                                                            class="w-full h-full flex items-center justify-center bg-gray-300 text-gray-500 text-xs">
+                                                            ไม่มีรูป
                                                         </div>
                                                     </div>
-                                                </td>
-                                                <td class="px-4 py-3 text-sm text-[#184c36]">฿{{ formatNumber(item.price
-                                                    || 0) }}
-                                                </td>
-                                                <td class="px-4 py-3 text-sm text-[#184c36]">{{ item.quantity || 0 }}
-                                                </td>
-                                                <td class="px-4 py-3 text-sm font-semibold text-[#184c36]">฿{{
-                                                    formatNumber((item.price || 0) * (item.quantity || 0)) }}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+
+                                                    <!-- รายละเอียดสินค้า -->
+                                                    <div class="flex-1">
+                                                        <p class="font-medium text-[#184c36]">
+                                                            {{ item.product_id?.productId?.name || 'ไม่ระบุ' }}
+                                                        </p>
+                                                        <p class="text-sm text-gray-500 mb-2">
+                                                            {{ item.product_id?.productId?.description ||
+                                                            'ไม่มีคำอธิบาย' }}
+                                                        </p>
+
+                                                        <!-- ตารางราคา จำนวน รวม -->
+                                                        <div class="overflow-x-auto">
+                                                            <table class="w-full text-sm mt-2 border border-gray-200">
+                                                                <thead class="bg-gray-100 text-gray-600">
+                                                                    <tr>
+                                                                        <th
+                                                                            class="px-2 py-1 border border-gray-200 text-left">
+                                                                            ราคา
+                                                                        </th>
+                                                                        <th
+                                                                            class="px-2 py-1 border border-gray-200 text-left">
+                                                                            จำนวน
+                                                                        </th>
+                                                                        <th
+                                                                            class="px-2 py-1 border border-gray-200 text-left">
+                                                                            รวม
+                                                                        </th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td
+                                                                            class="px-2 py-1 border border-gray-200 text-[#184c36]">
+                                                                            ฿{{ formatNumber(item.unit_price || 0) }}
+                                                                        </td>
+                                                                        <td
+                                                                            class="px-2 py-1 border border-gray-200 text-[#184c36]">
+                                                                            {{ item.amount || 0 }}
+                                                                        </td>
+                                                                        <td
+                                                                            class="px-2 py-1 border border-gray-200 text-[#184c36] font-semibold">
+                                                                            ฿{{ formatNumber((item.unit_price || 0) *
+                                                                            (item.amount
+                                                                            || 0)) }}
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <!-- Order Images Section -->
@@ -382,7 +490,7 @@
                                     <div class="text-right space-y-1">
                                         <p class="text-sm text-gray-600">ค่ารับของ: ฿{{
                                             formatNumber(selectedOrder.pickup_fee || 0)
-                                        }}</p>
+                                            }}</p>
                                         <p class="text-sm text-gray-600">ยอดรวม: ฿{{
                                             formatNumber(selectedOrder.total_price || 0) }}
                                         </p>
@@ -413,6 +521,7 @@ import Swal from 'sweetalert2';
 const orders = ref([]);
 const isSmallScreen = ref(window.innerWidth <= 1193);
 const authStore = useAuthStore();
+const loading = ref(false);
 
 // Filter states
 const searchQuery = ref('');
@@ -427,17 +536,17 @@ const currentPage = ref(1);
 const pageSize = 5;
 
 const paginatedOrders = computed(() => {
-  const start = (currentPage.value - 1) * pageSize;
-  const end = start + pageSize;
-  return filteredOrders.value.slice(start, end);
+    const start = (currentPage.value - 1) * pageSize;
+    const end = start + pageSize;
+    return filteredOrders.value.slice(start, end);
 });
 
 const totalPages = computed(() => Math.ceil(filteredOrders.value.length / pageSize));
 
 function goToPage(page) {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page;
-  }
+    if (page >= 1 && page <= totalPages.value) {
+        currentPage.value = page;
+    }
 }
 
 const handleResize = () => {
@@ -511,6 +620,7 @@ const handleTableImageError = (event) => {
 };
 
 const viewOrderDetails = async (order) => {
+    loading.value = true;
     try {
         const token = authStore.token;
         if (!token) throw new Error('ไม่พบ Token');
@@ -518,9 +628,8 @@ const viewOrderDetails = async (order) => {
 
         // ดึงข้อมูลออเดอร์แบบละเอียด
         const response = await axios.get(`${import.meta.env.VITE_API_URL}/orders/${order._id}`);
-        console.log(response.data);
+        console.log('Order Details:', response.data);
         selectedOrder.value = response.data.data;
-        console.log(selectedOrder.value.store_id.companyLogo);
         showDetailsModal.value = true;
     } catch (error) {
         Swal.fire({
@@ -529,10 +638,13 @@ const viewOrderDetails = async (order) => {
             text: 'ไม่สามารถโหลดรายละเอียดออเดอร์ได้',
             confirmButtonText: 'ตกลง'
         });
+    } finally {
+        loading.value = false; // โหลดเสร็จ
     }
 };
 
 const loadOrders = async () => {
+    loading.value = true;
     try {
         const token = authStore.token;
         if (!token) throw new Error('ไม่พบ Token');
@@ -555,6 +667,8 @@ const loadOrders = async () => {
             text: 'ไม่สามารถโหลดข้อมูลออเดอร์ได้',
             confirmButtonText: 'ตกลง'
         });
+    } finally {
+        loading.value = false; // โหลดเสร็จ
     }
 };
 
@@ -579,8 +693,6 @@ const filteredOrders = computed(() => {
     if (statusFilter.value) {
         filtered = filtered.filter(order => order.status === statusFilter.value);
     }
-
-
 
     return filtered;
 });

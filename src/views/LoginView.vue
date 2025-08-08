@@ -123,52 +123,50 @@ const login = async () => {
     const userData = response.data.user;
     const token = response.data.token;
 
-    console.log('Login response:', { userData, hasToken: !!token });
+    if (response.data.success) {
+      await Swal.fire({
+        icon: 'success',
+        title: 'เข้าสู่ระบบสำเร็จ',
+        showConfirmButton: false,
+        timer: 1200
+      });
+      // ส่ง token ไปด้วย
+      authStore.login({ ...userData, token });
 
-          if (response.data.success) {
-        await Swal.fire({
-          icon: 'success',
-          title: 'เข้าสู่ระบบสำเร็จ',
-          showConfirmButton: false,
-          timer: 1200
-        });
-        // ส่ง token ไปด้วย
-        authStore.login({ ...userData, token });
-        
-        // จัดการ localStorage และ navigation ตาม role
-        if (userData.role === 'admin' || userData.userType === 'admin') {
-          localStorage.setItem('admin', JSON.stringify(userData));
-          localStorage.removeItem('user');
-          localStorage.removeItem('partner');
-          router.push('/admin/dashboard');
-        } else if (userData.role === 'partner' || userData.userType === 'partner') {
-          localStorage.setItem('partner', JSON.stringify(userData));
-          localStorage.removeItem('user');
-          localStorage.removeItem('admin');
-          router.push('/homepartner');
-        } else if (userData.role === 'member' || userData.userType === 'member') {
-          localStorage.setItem('user', JSON.stringify(userData));
-          localStorage.removeItem('partner');
-          localStorage.removeItem('admin');
-          router.push('/');
-        } else {
-          // กรณี role อื่นๆ หรือไม่ระบุ
-          localStorage.setItem('user', JSON.stringify(userData));
-          localStorage.removeItem('partner');
-          localStorage.removeItem('admin');
-          router.push('/');
-        }
-        
-        username.value = ''
-        password.value = ''
+      // จัดการ localStorage และ navigation ตาม role
+      if (userData.role === 'admin' || userData.userType === 'admin') {
+        localStorage.setItem('admin', JSON.stringify(userData));
+        localStorage.removeItem('user');
+        localStorage.removeItem('partner');
+        router.push('/admin/dashboard');
+      } else if (userData.role === 'partner' || userData.userType === 'partner') {
+        localStorage.setItem('partner', JSON.stringify(userData));
+        localStorage.removeItem('user');
+        localStorage.removeItem('admin');
+        router.push('/homepartner');
+      } else if (userData.role === 'member' || userData.userType === 'member') {
+        localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.removeItem('partner');
+        localStorage.removeItem('admin');
+        router.push('/');
+      } else {
+        // กรณี role อื่นๆ หรือไม่ระบุ
+        localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.removeItem('partner');
+        localStorage.removeItem('admin');
+        router.push('/');
       }
+
+      username.value = ''
+      password.value = ''
+    }
   } catch (error) {
     if (error.response) {
       // จัดการ error ตาม status code
       let icon = 'error';
       let title = 'เข้าสู่ระบบไม่สำเร็จ';
       let text = error.response.data.error || error.response.statusText;
-      
+
       if (error.response.status === 403) {
         icon = 'warning';
         title = 'ไม่สามารถเข้าสู่ระบบได้';
@@ -177,7 +175,7 @@ const login = async () => {
         title = 'ข้อมูลไม่ถูกต้อง';
         text = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง';
       }
-      
+
       await Swal.fire({
         icon: icon,
         title: title,

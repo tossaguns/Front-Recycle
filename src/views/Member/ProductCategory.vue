@@ -40,7 +40,7 @@
               <div class="text-[#222] text-sm font-semibold mb-1">{{ item.name }}</div>
             </div>
             <div class="flex justify-end m-2">
-              <button
+              <button @click="goToPartnerStores(item)"
                 class="w-2/3 sm:w-3/5 bg-lime-600 hover:bg-[#184c36] text-white rounded-full px-3 py-1 text-xs font-semibold shadow transition flex items-center justify-center gap-1">
                 จองคิว
                 <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -134,6 +134,11 @@ function goToPage(page) {
 
 const goToSubCategory = () => {
   router.push('/subcategory')
+}
+
+function goToPartnerStores(product) {
+  // ส่ง id สินค้าไปหน้า PartnerStores
+  router.push({ path: '/partnerstores', query: { productId: product._id } });
 }
 
 // โหลดข้อมูลสินค้า

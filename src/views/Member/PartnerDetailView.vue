@@ -1,9 +1,5 @@
 <template>
-    <BarNoMenu 
-        :showBackNavigation="true"
-        pageTitle="รายละเอียดร้านค้า"
-        backRoute="/partnerstores"
-    />
+    <BarNoMenu :showBackNavigation="true" pageTitle="รายละเอียดร้านค้า" backRoute="/partnerstores" />
     <div class="min-h-screen flex flex-col bg-[#fffbe9] pt-20">
 
         <!-- Main Content -->
@@ -19,7 +15,8 @@
                             <img :src="store?.img || '/src/assets/NoPicture.webp'"
                                 class="w-10 h-10 rounded-full object-cover border-2 border-[#b6e388]" />
                             <div class="flex flex-col">
-                                <span class="font-semibold text-base">{{ store?.fullName || profile?.fullName || '-' }}</span>
+                                <span class="font-semibold text-base">{{ store?.fullName || profile?.fullName || '-'
+                                    }}</span>
                                 <span class="text-xs text-gray-500">{{ companyFullAddress }}</span>
                             </div>
                         </div>
@@ -39,10 +36,10 @@
                         :class="filteredProducts && filteredProducts.length > 4 ? 'overflow-y-auto max-h-80' : ''">
                         <div v-for="item in filteredProducts" :key="item._id"
                             class="flex items-center bg-white rounded-xl shadow p-2 md:p-3 gap-3 border border-[#e6e6e6]">
-                            <img :src="item.image || item.img || '/src/assets/NoPicture.webp'"
-                                class="w-16 h-16 rounded-lg object-cover border" :alt="item.name" />
+                            <img :src="item.productId?.image || item.productId?.img || '/src/assets/NoPicture.webp'"
+                                class="w-16 h-16 rounded-lg object-cover border" :alt="item.productId?.name" />
                             <div class="flex-1 flex flex-col justify-center">
-                                <div class="font-semibold text-base text-[#222]">{{ item.name }}</div>
+                                <div class="font-semibold text-base text-[#222]">{{ item.productId?.name }}</div>
                                 <div class="text-xs text-gray-400">ราคา {{ item.price_per_kg || '-' }} บาท/กก.</div>
                             </div>
                             <div>
@@ -100,7 +97,7 @@ const products = ref([]);
 const searchProduct = ref('');
 const filteredProducts = computed(() =>
     products.value.filter(
-        p => p.name && p.name.toLowerCase().includes(searchProduct.value.toLowerCase())
+        p => p.productId?.name && p.productId?.name.toLowerCase().includes(searchProduct.value.toLowerCase())
     )
 );
 
@@ -121,11 +118,13 @@ onMounted(async () => {
 
     // ดึงสินค้าทั้งหมดแล้ว filter เฉพาะที่ shopId === partner._id
     try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/products`);
-        if (res.data && Array.isArray(res.data.products)) {
-            products.value = res.data.products.filter(
-                p => String(p.shopId) === String(partner._id)
-            );
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/product-partners/shop/${partner._id}`);
+        if (Array.isArray(res.data)) {
+            products.value = res.data;
+        } else if (res.data && Array.isArray(res.data.products)) {
+            products.value = res.data.products;
+        } else {
+            products.value = [];
         }
     } catch (e) {
         products.value = [];

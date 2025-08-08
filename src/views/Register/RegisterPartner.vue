@@ -890,7 +890,6 @@ const fetchProvincesAmphureTambon = async () => {
         // เรียงลำดับจังหวัดตามตัวอักษร ก-ฮ
         provinces.value = response.data.sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'));
 
-        console.log('province :', provinces.value)
     } catch (error) {
         console.error('Error fetching provinces: ', error);
     }
@@ -1005,10 +1004,8 @@ const checkDocuments = () => {
 const handleIdCardSelect = (event) => {
     form.idCardImage = ''; // ล้าง URL เดิม
     const file = event.target.files[0];
-    console.log('iden file', file)
     if (file) {
         tempFiles.idCard = file;
-        console.log('tem iden file ', tempFiles.idCard)
         idCardFileName.value = file.name;
     }
     event.target.value = ''; // รีเซ็ต input file
@@ -1087,7 +1084,6 @@ const uploadFile = async (file) => {
                 'Content-Type': 'multipart/form-data'
             }
         });
-        console.log('upload res', response)
         return response.data.files[0].url;
     } catch (error) {
         console.error('Error uploading file:', error);
@@ -1098,8 +1094,6 @@ const uploadFile = async (file) => {
 // เมธอดสำหรับอัพโหลดไฟล์ทั้งหมด
 const uploadAllFiles = async () => {
     const uploadPromises = [];
-
-    console.log('tem upload', tempFiles)
 
     // รูปบัตรประชาชน
     if (tempFiles.idCard) {

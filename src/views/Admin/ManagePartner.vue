@@ -125,96 +125,108 @@
 
             <!-- Partners Table -->
             <div class="bg-white rounded-xl shadow-lg border border-[#e6e6e6] overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gradient-to-r from-[#2BAC75] to-[#184c36] text-white">
-                            <tr>
-                                <th class="px-6 py-4 text-left text-xs lg:text-sm font-semibold">ร้านค้า</th>
-                                <th class="px-6 py-4 text-left text-xs lg:text-sm font-semibold">ผู้ติดต่อ</th>
-                                <th class="px-6 py-4 text-left text-xs lg:text-sm font-semibold hidden md:table-cell">
-                                    เบอร์โทร</th>
-                                <th class="px-6 py-4 text-left text-xs lg:text-sm font-semibold w-32 min-w-32 max-w-32"
-                                    style="width:8rem;min-width:8rem;max-width:8rem;">สถานะ</th>
-                                <th class="px-6 py-4 text-left text-xs lg:text-sm font-semibold hidden lg:table-cell">
-                                    วันที่สมัคร</th>
-                                <th class="px-6 py-4 text-center text-xs lg:text-sm font-semibold">การดำเนินการ</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-[#f0f0f0]">
-                            <tr v-for="partner in paginatedPartners" :key="partner._id"
-                                class="hover:bg-gray-50 transition-colors">
-                                <td class="px-6 py-4 text-xs lg:text-sm">
-                                    <div>
-                                        <p class="font-semibold text-[#184c36]">{{ partner.companyName }}</p>
-                                        <p class="text-xs lg:text-sm text-[#666]">{{ partner.companyEmail }}</p>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 text-xs lg:text-sm">
-                                    <div>
-                                        <p class="font-medium text-[#184c36]">{{ partner.fullName }}</p>
-                                        <p class="text-xs lg:text-sm text-[#666]">{{ partner.personalEmail }}</p>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 text-xs lg:text-sm hidden md:table-cell">
-                                    <p class="text-[#184c36]">{{ partner.personalPhone }}</p>
-                                </td>
-                                <td class="px-6 py-4 text-xs lg:text-sm w-32 min-w-32 max-w-32"
-                                    style="width:8rem;min-width:8rem;max-width:8rem;">
-                                    <span :class="[
-                                        'px-3 py-1 rounded-full text-xs font-medium',
-                                        partner.status === 'ยืนยันแล้ว' ? 'bg-green-100 text-green-800' :
-                                            partner.status === 'รอยืนยัน' ? 'bg-yellow-100 text-yellow-800' :
-                                                'bg-red-100 text-red-800'
-                                    ]">
-                                        {{ partner.status }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 hidden lg:table-cell text-xs lg:text-sm">
-                                    <p class="text-xs lg:text-sm text-[#666]">{{ formatDate(partner.createdAt,
-                                        !isSmallScreen) }}</p>
-                                </td>
-                                <td class="px-6 py-4 text-xs lg:text-sm">
-                                    <div class="flex items-center justify-center space-x-2">
-                                        <!-- View Details Button -->
-                                        <button @click="viewPartnerDetails(partner)"
-                                            :class="isSmallScreen ? 'p-2 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded-lg transition-colors flex items-center justify-center' : 'px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded-lg transition-colors'"
-                                            aria-label="ดูรายละเอียด" title="ดูรายละเอียด">
-                                            <template v-if="!isSmallScreen">
-                                                ดูรายละเอียด
-                                            </template>
-                                            <template v-else>
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                    stroke="currentColor" class="w-5 h-5">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                </svg>
-                                            </template>
-                                        </button>
+                <div v-if="loading" class="flex flex-col items-center justify-center py-16">
+                    <svg class="animate-spin h-10 w-10 text-[#2BAC75]" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                    </svg>
+                    <span class="mt-4 text-[#2BAC75] text-lg font-semibold">กำลังโหลดข้อมูล...</span>
+                </div>
+                <div v-else>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gradient-to-r from-[#2BAC75] to-[#184c36] text-white">
+                                <tr>
+                                    <th class="px-6 py-4 text-left text-xs lg:text-sm font-semibold">ร้านค้า</th>
+                                    <th class="px-6 py-4 text-left text-xs lg:text-sm font-semibold">ผู้ติดต่อ</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs lg:text-sm font-semibold hidden md:table-cell">
+                                        เบอร์โทร</th>
+                                    <th class="px-6 py-4 text-left text-xs lg:text-sm font-semibold w-32 min-w-32 max-w-32"
+                                        style="width:8rem;min-width:8rem;max-width:8rem;">สถานะ</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs lg:text-sm font-semibold hidden lg:table-cell">
+                                        วันที่สมัคร</th>
+                                    <th class="px-6 py-4 text-center text-xs lg:text-sm font-semibold">การดำเนินการ</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#f0f0f0]">
+                                <tr v-for="partner in paginatedPartners" :key="partner._id"
+                                    class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 text-xs lg:text-sm">
+                                        <div>
+                                            <p class="font-semibold text-[#184c36]">{{ partner.companyName }}</p>
+                                            <p class="text-xs lg:text-sm text-[#666]">{{ partner.companyEmail }}</p>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-xs lg:text-sm">
+                                        <div>
+                                            <p class="font-medium text-[#184c36]">{{ partner.fullName }}</p>
+                                            <p class="text-xs lg:text-sm text-[#666]">{{ partner.personalEmail }}</p>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-xs lg:text-sm hidden md:table-cell">
+                                        <p class="text-[#184c36]">{{ partner.personalPhone }}</p>
+                                    </td>
+                                    <td class="px-6 py-4 text-xs lg:text-sm w-32 min-w-32 max-w-32"
+                                        style="width:8rem;min-width:8rem;max-width:8rem;">
+                                        <span :class="[
+                                            'px-3 py-1 rounded-full text-xs font-medium',
+                                            partner.status === 'ยืนยันแล้ว' ? 'bg-green-100 text-green-800' :
+                                                partner.status === 'รอยืนยัน' ? 'bg-yellow-100 text-yellow-800' :
+                                                    'bg-red-100 text-red-800'
+                                        ]">
+                                            {{ partner.status }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 hidden lg:table-cell text-xs lg:text-sm">
+                                        <p class="text-xs lg:text-sm text-[#666]">{{ formatDate(partner.createdAt,
+                                            !isSmallScreen) }}</p>
+                                    </td>
+                                    <td class="px-6 py-4 text-xs lg:text-sm">
+                                        <div class="flex items-center justify-center space-x-2">
+                                            <!-- View Details Button -->
+                                            <button @click="viewPartnerDetails(partner)"
+                                                :class="isSmallScreen ? 'p-2 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded-lg transition-colors flex items-center justify-center' : 'px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded-lg transition-colors'"
+                                                aria-label="ดูรายละเอียด" title="ดูรายละเอียด">
+                                                <template v-if="!isSmallScreen">
+                                                    ดูรายละเอียด
+                                                </template>
+                                                <template v-else>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                    </svg>
+                                                </template>
+                                            </button>
 
-                                        <!-- Approve Button (only for pending) -->
-                                        <button v-if="partner.status === 'รอยืนยัน'"
-                                            @click="approvePartner(partner._id)"
-                                            class="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-xs rounded-lg transition-colors">
-                                            อนุมัติ
-                                        </button>
+                                            <!-- Approve Button (only for pending) -->
+                                            <button v-if="partner.status === 'รอยืนยัน'"
+                                                @click="approvePartner(partner._id)"
+                                                class="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-xs rounded-lg transition-colors">
+                                                อนุมัติ
+                                            </button>
 
-                                        <!-- Reject Button (only for pending) -->
-                                        <button v-if="partner.status === 'รอยืนยัน'" @click="rejectPartner(partner._id)"
-                                            class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded-lg transition-colors">
-                                            ปฏิเสธ
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                            <!-- Reject Button (only for pending) -->
+                                            <button v-if="partner.status === 'รอยืนยัน'"
+                                                @click="rejectPartner(partner._id)"
+                                                class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded-lg transition-colors">
+                                                ปฏิเสธ
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <!-- Empty State -->
-                <div v-if="filteredPartners.length === 0" class="text-center py-12">
+                <div v-if="filteredPartners.length === 0 && !loading" class="text-center py-12">
                     <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -225,10 +237,12 @@
             </div>
 
             <!-- Pagination Controls -->
-            <div v-if="totalPages > 1 || filteredPartners.length > 0" class="flex flex-col md:flex-row justify-between items-center gap-2 my-4 py-2 px-7">
+            <div v-if="totalPages > 1 || filteredPartners.length > 0"
+                class="flex flex-col md:flex-row justify-between items-center gap-2 my-4 py-2 px-7">
                 <div class="flex items-center gap-2">
                     <span>แสดง:</span>
-                    <select v-model="pageSize" class="border rounded px-2 py-1 focus:ring-2 focus:ring-[#2BAC75] focus:border-[#2BAC75]">
+                    <select v-model="pageSize"
+                        class="border rounded px-2 py-1 focus:ring-2 focus:ring-[#2BAC75] focus:border-[#2BAC75]">
                         <option v-for="opt in pageSizeOptions" :key="opt" :value="opt">{{ opt }}</option>
                     </select>
                     <span>รายการต่อหน้า</span>
@@ -236,22 +250,20 @@
                 <div class="flex items-center gap-2">
                     <button
                         class="w-9 h-9 flex items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-[#e6f7e6] transition disabled:opacity-50"
-                        :disabled="currentPage === 1"
-                        @click="goToPage(currentPage - 1)"
-                        aria-label="ก่อนหน้า"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5">
+                        :disabled="currentPage === 1" @click="goToPage(currentPage - 1)" aria-label="ก่อนหน้า">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
                     </button>
-                    <span class="mx-2 text-sm text-[#184c36] font-medium">หน้า {{ currentPage }} / {{ totalPages }}</span>
+                    <span class="mx-2 text-sm text-[#184c36] font-medium">หน้า {{ currentPage }} / {{ totalPages
+                        }}</span>
                     <button
                         class="w-9 h-9 flex items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-[#e6f7e6] transition disabled:opacity-50"
-                        :disabled="currentPage === totalPages || totalPages === 0"
-                        @click="goToPage(currentPage + 1)"
-                        aria-label="ถัดไป"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5">
+                        :disabled="currentPage === totalPages || totalPages === 0" @click="goToPage(currentPage + 1)"
+                        aria-label="ถัดไป">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                         </svg>
                     </button>
@@ -267,13 +279,15 @@
                         <h3 class="text-xl font-bold text-[#184c36] flex items-center gap-2">
                             <!-- Shop icon -->
                             <svg class="w-7 h-7 text-[#2BAC75]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7V6a2 2 0 012-2h14a2 2 0 012 2v1M3 7h18M3 7l1.34 9.37A2 2 0 006.32 18h11.36a2 2 0 001.98-1.63L21 7M8 21h8" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 7V6a2 2 0 012-2h14a2 2 0 012 2v1M3 7h18M3 7l1.34 9.37A2 2 0 006.32 18h11.36a2 2 0 001.98-1.63L21 7M8 21h8" />
                             </svg>
                             รายละเอียดร้านค้า
                         </h3>
                         <button @click="showDetailsModal = false" class="text-gray-400 hover:text-gray-600">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
                     </div>
@@ -285,17 +299,27 @@
                         <div>
                             <h4 class="font-semibold text-[#2BAC75] mb-3 flex items-center gap-2">
                                 <!-- Building icon -->
-                                <svg class="w-5 h-5 text-[#2BAC75]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21V7a2 2 0 012-2h14a2 2 0 012 2v14M9 21V9h6v12" />
+                                <svg class="w-5 h-5 text-[#2BAC75]" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 21V7a2 2 0 012-2h14a2 2 0 012 2v14M9 21V9h6v12" />
                                 </svg>
                                 ข้อมูลบริษัท
                             </h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                <div><span class="font-bold text-[#184c36]">ชื่อบริษัท:</span> {{ selectedPartner.companyName }}</div>
-                                <div><span class="font-bold text-[#184c36]">เลขประจำตัวผู้เสียภาษี:</span> {{ selectedPartner.companyTaxId }}</div>
-                                <div class="md:col-span-2"><span class="font-bold text-[#184c36]">ที่อยู่บริษัท:</span> {{ selectedPartner.companyAddress }}</div>
-                                <div><span class="font-bold text-[#184c36]">เบอร์โทรบริษัท:</span> {{ selectedPartner.companyPhone }}</div>
-                                <div><span class="font-bold text-[#184c36]">อีเมลบริษัท:</span> {{ selectedPartner.companyEmail }}</div>
+                                <div><span class="font-bold text-[#184c36]">ชื่อบริษัท:</span> {{
+                                    selectedPartner.companyName }}
+                                </div>
+                                <div><span class="font-bold text-[#184c36]">เลขประจำตัวผู้เสียภาษี:</span> {{
+                                    selectedPartner.companyTaxId }}</div>
+                                <div class="md:col-span-2"><span class="font-bold text-[#184c36]">ที่อยู่บริษัท:</span>
+                                    {{
+                                    selectedPartner.companyAddress }}</div>
+                                <div><span class="font-bold text-[#184c36]">เบอร์โทรบริษัท:</span> {{
+                                    selectedPartner.companyPhone }}</div>
+                                <div><span class="font-bold text-[#184c36]">อีเมลบริษัท:</span> {{
+                                    selectedPartner.companyEmail
+                                    }}</div>
                             </div>
                         </div>
 
@@ -305,18 +329,30 @@
                         <div>
                             <h4 class="font-semibold text-[#2BAC75] mb-3 flex items-center gap-2">
                                 <!-- User icon -->
-                                <svg class="w-5 h-5 text-[#2BAC75]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                <svg class="w-5 h-5 text-[#2BAC75]" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                 </svg>
                                 ข้อมูลผู้ติดต่อ
                             </h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                <div><span class="font-bold text-[#184c36]">ชื่อ-นามสกุล:</span> {{ selectedPartner.fullName }}</div>
-                                <div><span class="font-bold text-[#184c36]">เลขบัตรประชาชน:</span> {{ selectedPartner.personalId }}</div>
-                                <div><span class="font-bold text-[#184c36]">เบอร์โทร:</span> {{ selectedPartner.personalPhone }}</div>
-                                <div><span class="font-bold text-[#184c36]">อีเมล:</span> {{ selectedPartner.personalEmail }}</div>
-                                <div class="md:col-span-2"><span class="font-bold text-[#184c36]">ที่อยู่:</span> {{ selectedPartner.personalAddress }}</div>
+                                <div><span class="font-bold text-[#184c36]">ชื่อ-นามสกุล:</span> {{
+                                    selectedPartner.fullName }}
+                                </div>
+                                <div><span class="font-bold text-[#184c36]">เลขบัตรประชาชน:</span> {{
+                                    selectedPartner.personalId
+                                    }}</div>
+                                <div><span class="font-bold text-[#184c36]">เบอร์โทร:</span> {{
+                                    selectedPartner.personalPhone }}
+                                </div>
+                                <div><span class="font-bold text-[#184c36]">อีเมล:</span> {{
+                                    selectedPartner.personalEmail }}
+                                </div>
+                                <div class="md:col-span-2"><span class="font-bold text-[#184c36]">ที่อยู่:</span> {{
+                                    selectedPartner.personalAddress }}</div>
                             </div>
                         </div>
 
@@ -325,9 +361,12 @@
                         <!-- รูปภาพประกอบ -->
                         <div v-if="hasImages">
                             <h4 class="font-semibold text-[#2BAC75] mb-3 flex items-center gap-2">
-                                <svg class="w-5 h-5 text-[#2BAC75]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                <svg class="w-5 h-5 text-[#2BAC75]" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                 </svg>
                                 รูปภาพประกอบ
                             </h4>
@@ -402,19 +441,21 @@
                                     </div>
                                     <div class="mt-2 text-center">
                                         <p class="text-xs text-[#666] font-medium">{{ doc.name || `เอกสาร ${index + 1}`
-                                            }}</p>
+                                        }}</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="border-b-2 border-[#e6e6e6] mb-6"></div>
-                        
+
                         <!-- สถานะการสมัคร -->
                         <div>
                             <h4 class="font-semibold text-[#2BAC75] mb-3 flex items-center gap-2">
-                                <svg class="w-5 h-5 text-[#2BAC75]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                <svg class="w-5 h-5 text-[#2BAC75]" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
                                 </svg>
                                 สถานะการสมัคร
                             </h4>
@@ -422,8 +463,8 @@
                                 <span :class="[
                                     'px-4 py-2 rounded-lg text-sm font-medium',
                                     selectedPartner.status === 'ยืนยันแล้ว' ? 'bg-green-100 text-green-800' :
-                                    selectedPartner.status === 'รอยืนยัน' ? 'bg-yellow-100 text-yellow-800' :
-                                    'bg-red-100 text-red-800'
+                                        selectedPartner.status === 'รอยืนยัน' ? 'bg-yellow-100 text-yellow-800' :
+                                            'bg-red-100 text-red-800'
                                 ]">
                                     {{ selectedPartner.status }}
                                 </span>
@@ -512,23 +553,24 @@ const sortBy = ref('createdAt');
 const currentPage = ref(1);
 const pageSizeOptions = [5, 10, 20];
 const pageSize = ref(5);
+const loading = ref(false);
 
 const paginatedPartners = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value;
-  const end = start + pageSize.value;
-  return filteredPartners.value.slice(start, end);
+    const start = (currentPage.value - 1) * pageSize.value;
+    const end = start + pageSize.value;
+    return filteredPartners.value.slice(start, end);
 });
 
 const totalPages = computed(() => Math.ceil(filteredPartners.value.length / pageSize.value));
 
 function goToPage(page) {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page;
-  }
+    if (page >= 1 && page <= totalPages.value) {
+        currentPage.value = page;
+    }
 }
 
 watch(pageSize, () => {
-  currentPage.value = 1;
+    currentPage.value = 1;
 });
 
 const showDetailsModal = ref(false);
@@ -605,6 +647,7 @@ const formatDate = (dateString, showTime = true) => {
 };
 
 const loadPartners = async () => {
+    loading.value = true;
     try {
         const token = authStore.token;
         if (!token) {
@@ -642,6 +685,8 @@ const loadPartners = async () => {
             text: 'ไม่สามารถโหลดข้อมูลร้านค้าได้',
             confirmButtonText: 'ตกลง'
         });
+    } finally {
+        loading.value = false; // โหลดเสร็จ
     }
 };
 

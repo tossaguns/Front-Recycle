@@ -169,6 +169,7 @@ const showBarFooter = props.showBarFooter;
 
 const router = useRouter();
 const route = useRoute();
+const productId = computed(() => route.query.productId);
 const stores = ref([]);
 const provinces = ref([]);
 const districts = ref([]);
@@ -310,7 +311,7 @@ const onDistrictChange = () => {
 };
 
 // ฟังก์ชันล้างการค้นหา
-const clearFilters = () => {
+const clearFilters = async () => {
   selectedProvince.value = '';
   selectedDistrict.value = '';
   selectedSubdistrict.value = '';
@@ -318,6 +319,25 @@ const clearFilters = () => {
   districts.value = [];
   subdistricts.value = [];
   currentPage.value = 1;
+  router.replace({ path: '/partnerstores' });
+
+  try {
+    const res = await axios.get(`${import.meta.env.VITE_API_URL}/partners`);
+    const arr = Array.isArray(res.data.data) ? res.data.data : [];
+    stores.value = arr.map(s => ({
+      ...s,
+      name: s.companyName,
+      province: s.companyProvince,
+      district: s.companyDistrict,
+      subdistrict: s.companySubdistrict,
+      img: s.shopImages || defaultImg
+    }));
+    const provinceSet = new Set(stores.value.map(s => s.province).filter(Boolean));
+    provinces.value = Array.from(provinceSet).sort((a, b) => a.localeCompare(b, 'th'));
+  } catch (e) {
+    stores.value = [];
+    provinces.value = [];
+  }
 };
 
 function selectPartner(store) {
@@ -363,6 +383,19 @@ onMounted(async () => {
       subdistrict: s.companySubdistrict,
       img: s.shopImages || defaultImg
     }));
+
+    if (productId.value) {
+      // ดึงร้านที่รับซื้อสินค้านี้
+      const prodRes = await axios.get(`${import.meta.env.VITE_API_URL}/product-partners/${productId.value}`);
+      console.log('prodRes', prodRes.data);
+      // prodRes.data อาจเป็น array ของ product-partner ที่มี shopId
+      const shopIds = Array.isArray(prodRes.data)
+  ? prodRes.data.map(p => (typeof p.shopId === 'object' ? p.shopId._id : p.shopId))
+  : (prodRes.data.products || []).map(p => (typeof p.shopId === 'object' ? p.shopId._id : p.shopId));
+      // filter เฉพาะร้านที่รับซื้อสินค้านี้
+      stores.value = stores.value.filter(s => shopIds.includes(s._id));
+    }
+
     // สร้าง list จังหวัดจากข้อมูลร้าน
     const provinceSet = new Set(stores.value.map(s => s.province).filter(Boolean));
     provinces.value = Array.from(provinceSet).sort((a, b) => a.localeCompare(b, 'th'));

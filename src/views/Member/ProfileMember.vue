@@ -495,6 +495,13 @@ async function saveEdit() {
     });
     return;
   }
+  const loadingSwal = Swal.fire({
+    title: 'กำลังบันทึก...',
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
   try {
     // 1. ถ้ามีไฟล์รูปใหม่ ให้ส่งไปอัปโหลดก่อน
     if (profileImageFile.value) {
@@ -518,6 +525,7 @@ async function saveEdit() {
       `${import.meta.env.VITE_API_URL}/members/update-profile/${userId.value}`,
       profileData
     );
+    Swal.close();
     if (response.status === 200) {
       await Swal.fire({
         icon: 'success',
@@ -571,7 +579,6 @@ const loadMemberAddresses = async () => {
 };
 
 const resetAddressForm = () => {
-  console.log('Resetting address form...');
   Object.assign(addressForm, {
     address_name: '',
     address: '',
@@ -586,7 +593,6 @@ const resetAddressForm = () => {
   });
   addressDistricts.value = [];
   addressSubdistricts.value = [];
-  console.log('Address form reset complete');
 };
 
 const openAddAddressModal = () => {
@@ -601,7 +607,6 @@ const openAddAddressModal = () => {
 };
 
 const editAddress = async (address) => {
-  console.log('Editing address:', address);
   
   // รีเซ็ตฟอร์มก่อน
   resetAddressForm();
@@ -619,8 +624,6 @@ const editAddress = async (address) => {
     subdistrict_id: address.subdistrict_id,
     is_default: address.is_default
   });
-  
-  console.log('Address form set:', addressForm);
   
   // เปิด modal ก่อน
   showEditAddressModal.value = true;

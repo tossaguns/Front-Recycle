@@ -93,36 +93,77 @@
               class="rounded-full border border-[#b6e388] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white"
               placeholder="0891234567" />
           </div> -->
-          <div class="flex flex-col gap-4">
-            <label class="font-medium text-[#184c36]">เลือกประเภทสินค้า</label>
-            <select v-model="selectedCategory" @change="handleCategoryChange"
-              class="rounded-full border border-[#b6e388] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white">
-              <option value="">เลือกประเภทสินค้า</option>
-              <option v-for="cat in partnerCategories" :key="cat._id" :value="cat._id">
-                {{ cat.name }}
-              </option>
-            </select>
-          </div>
-          <div class="flex flex-col gap-4">
-            <label class="font-medium text-[#184c36]">เลือกประเภทย่อย</label>
-            <select v-model="selectedSubCategory" :disabled="!selectedCategory"
-              class="rounded-full border border-[#b6e388] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white">
-              <option value="">เลือกประเภทย่อย</option>
-              <option v-for="sub in filteredSubCategories" :key="sub._id" :value="sub._id">
-                {{ sub.name }}
-              </option>
-            </select>
-          </div>
-          <div class="flex flex-col gap-4">
-            <label class="font-medium text-[#184c36]">เลือกสินค้า</label>
-            <select v-model="selectedProduct" :disabled="!selectedSubCategory"
-              class="rounded-full border border-[#b6e388] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white">
-              <option value="">เลือกสินค้า</option>
-              <option v-for="prod in filteredProducts" :key="prod._id" :value="prod._id">
-                {{ prod.name }}
-              </option>
-            </select>
-          </div>
+          <!-- เลือกประเภทสินค้า -->
+<div class="flex flex-col gap-4">
+  <label class="font-medium text-[#184c36]">เลือกประเภทสินค้า</label>
+  <div class="relative mb-2">
+    <input v-model="categorySearch" @focus="categoryDropdownOpen = true"
+      @input="categoryDropdownOpen = true" @blur="categoryDropdownOpen = false"
+      placeholder="ค้นหาหรือเลือกประเภทสินค้า"
+      class="border border-[#b6e388] rounded px-3 py-2 w-full pr-8 focus:ring-2 focus:ring-[#b6e388] focus:border-[#b6e388] transition" />
+    <button v-if="selectedCategory" @click="clearCategory" type="button"
+      class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 text-lg focus:outline-none">
+      ❌
+    </button>
+    <ul v-if="categoryDropdownOpen"
+      class="absolute z-10 bg-white border border-[#b6e388] rounded w-full max-h-40 overflow-auto mt-1 shadow">
+      <li v-for="cat in filteredCategoriesSearch" :key="cat._id"
+        class="px-3 py-2 hover:bg-green-100 cursor-pointer text-[#184c36]"
+        @mousedown.prevent="selectCategory(cat)">
+        {{ cat.name }}
+      </li>
+      <li v-if="filteredCategoriesSearch.length === 0" class="px-3 py-2 text-gray-400">ไม่พบข้อมูล</li>
+    </ul>
+  </div>
+</div>
+
+<!-- เลือกประเภทย่อย -->
+<div class="flex flex-col gap-4" v-if="selectedCategory">
+  <label class="font-medium text-[#184c36]">เลือกประเภทย่อย</label>
+  <div class="relative mb-2">
+    <input v-model="subCategorySearch" @focus="subCategoryDropdownOpen = true"
+      @input="subCategoryDropdownOpen = true" @blur="subCategoryDropdownOpen = false"
+      placeholder="ค้นหาหรือเลือกประเภทย่อย"
+      class="border border-[#b6e388] rounded px-3 py-2 w-full pr-8 focus:ring-2 focus:ring-[#b6e388] focus:border-[#b6e388] transition" />
+    <button v-if="selectedSubCategory" @click="clearSubCategory" type="button"
+      class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 text-lg focus:outline-none">
+      ❌
+    </button>
+    <ul v-if="subCategoryDropdownOpen"
+      class="absolute z-10 bg-white border border-[#b6e388] rounded w-full max-h-40 overflow-auto mt-1 shadow">
+      <li v-for="sub in filteredSubCategoriesSearch" :key="sub._id"
+        class="px-3 py-2 hover:bg-green-100 cursor-pointer text-[#184c36]"
+        @mousedown.prevent="selectSubCategory(sub)">
+        {{ sub.name }}
+      </li>
+      <li v-if="filteredSubCategoriesSearch.length === 0" class="px-3 py-2 text-gray-400">ไม่พบข้อมูล</li>
+    </ul>
+  </div>
+</div>
+
+<!-- เลือกสินค้า -->
+<div class="flex flex-col gap-4" v-if="selectedCategory && selectedSubCategory">
+  <label class="font-medium text-[#184c36]">เลือกสินค้า</label>
+  <div class="relative mb-2">
+    <input v-model="productSearch" @focus="productDropdownOpen = true"
+      @input="productDropdownOpen = true" @blur="productDropdownOpen = false"
+      placeholder="ค้นหาหรือเลือกสินค้า"
+      class="border border-[#b6e388] rounded px-3 py-2 w-full pr-8 focus:ring-2 focus:ring-[#b6e388] focus:border-[#b6e388] transition" />
+    <button v-if="selectedProduct" @click="clearProduct" type="button"
+      class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 text-lg focus:outline-none">
+      ❌
+    </button>
+    <ul v-if="productDropdownOpen"
+      class="absolute z-10 bg-white border border-[#b6e388] rounded w-full max-h-40 overflow-auto mt-1 shadow">
+      <li v-for="prod in filteredProductsSearch" :key="prod._id"
+        class="px-3 py-2 hover:bg-green-100 cursor-pointer text-[#184c36]"
+        @mousedown.prevent="selectProduct(prod)">
+        {{ prod.name }}
+      </li>
+      <li v-if="filteredProductsSearch.length === 0" class="px-3 py-2 text-gray-400">ไม่พบข้อมูล</li>
+    </ul>
+  </div>
+</div>
 
           <!-- จำนวนกิโลกรัม: แสดงเลย -->
           <div class="flex flex-col gap-4">
@@ -483,14 +524,21 @@ const allProducts = ref([]); // โหลดจาก backend
 const allCategories = ref([]); // โหลดจาก backend
 const allSubcategories = ref([]); // โหลดจาก backend
 
+const categorySearch = ref('');
+const subCategorySearch = ref('');
+const productSearch = ref('');
+const categoryDropdownOpen = ref(false);
+const subCategoryDropdownOpen = ref(false);
+const productDropdownOpen = ref(false);
+
 // โหลดข้อมูลทั้งหมดครั้งเดียว
 onMounted(async () => {
-  const [productsRes, categoriesRes, subcategoriesRes] = await Promise.all([
-    axios.get(`${import.meta.env.VITE_API_URL}/products`),
+  const [productsPartnerRes, categoriesRes, subcategoriesRes] = await Promise.all([
+    axios.get(`${import.meta.env.VITE_API_URL}/product-partners/shop/${partnerId.value}`),
     axios.get(`${import.meta.env.VITE_API_URL}/categories`),
     axios.get(`${import.meta.env.VITE_API_URL}/categories/subcategories/all`)
   ]);
-  allProducts.value = productsRes.data.products || [];
+  allProducts.value = productsPartnerRes.data || [];
   allCategories.value = categoriesRes.data.categories || categoriesRes.data || [];
   allSubcategories.value = subcategoriesRes.data.subcategories || subcategoriesRes.data || [];
   // ... (โหลด member/partner data อื่นๆ ตามเดิม)
@@ -503,20 +551,20 @@ onMounted(async () => {
   }
 });
 
-// กรองเฉพาะสินค้าของร้านนี้
-const partnerProducts = computed(() =>
-  allProducts.value.filter(p => (p.shopId?._id || p.shopId) === partnerId.value)
-);
+// // กรองเฉพาะสินค้าของร้านนี้
+// const partnerProducts = computed(() =>
+//   allProducts.value.filter(p => (p.shopId?._id || p.shopId) === partnerId.value)
+// );
 // กรอง categories เฉพาะที่มีใน partnerProducts
 const partnerCategoryIds = computed(() =>
-  [...new Set(partnerProducts.value.map(p => (p.category_id?._id || p.category_id)))]
+  [...new Set(allProducts.value.map(p => (p.productId?.category_id?._id || p.productId?.category_id || p.category_id?._id || p.category_id)))]
 );
 const partnerCategories = computed(() =>
   allCategories.value.filter(c => partnerCategoryIds.value.includes(c._id))
 );
 // กรอง subcategories เฉพาะที่มีใน partnerProducts
 const partnerSubCategoryIds = computed(() =>
-  [...new Set(partnerProducts.value.map(p => (p.subCategoryId?._id || p.subCategoryId)).filter(Boolean))]
+  [...new Set(allProducts.value.map(p => (p.productId?.subCategoryId?._id || p.productId?.subCategoryId || p.subCategoryId?._id || p.subCategoryId)).filter(Boolean))]
 );
 const partnerSubCategories = computed(() =>
   allSubcategories.value.filter(s => partnerSubCategoryIds.value.includes(s._id))
@@ -533,7 +581,33 @@ const filteredSubCategories = computed(() =>
 );
 // กรอง products ตาม subcategory ที่เลือก
 const filteredProducts = computed(() =>
-  partnerProducts.value.filter(p => (p.subCategoryId?._id || p.subCategoryId) === selectedSubCategory.value)
+  allProducts.value
+    .filter(p =>
+      (p.productId?.subCategoryId?._id || p.productId?.subCategoryId || p.subCategoryId?._id || p.subCategoryId) === selectedSubCategory.value
+    )
+    .map(p => ({
+      ...p,
+      name: p.productId?.name || p.name || '-', // ให้มี field name สำหรับแสดงใน dropdown
+      _id: p._id // ใช้ _id ของ product-partner
+    }))
+);
+
+const filteredCategoriesSearch = computed(() =>
+  partnerCategories.value.filter(cat =>
+    cat.name.toLowerCase().includes(categorySearch.value.toLowerCase())
+  )
+);
+
+const filteredSubCategoriesSearch = computed(() =>
+  filteredSubCategories.value.filter(sub =>
+    sub.name.toLowerCase().includes(subCategorySearch.value.toLowerCase())
+  )
+);
+
+const filteredProductsSearch = computed(() =>
+  filteredProducts.value.filter(prod =>
+    prod.name.toLowerCase().includes(productSearch.value.toLowerCase())
+  )
 );
 
 // ข้อมูล member
@@ -915,6 +989,46 @@ function handleAmountInput() {
   }
 }
 
+function selectCategory(cat) {
+  selectedCategory.value = cat._id;
+  categorySearch.value = cat.name;
+  categoryDropdownOpen.value = false;
+  selectedSubCategory.value = '';
+  subCategorySearch.value = '';
+  selectedProduct.value = '';
+  productSearch.value = '';
+}
+function selectSubCategory(sub) {
+  selectedSubCategory.value = sub._id;
+  subCategorySearch.value = sub.name;
+  subCategoryDropdownOpen.value = false;
+  selectedProduct.value = '';
+  productSearch.value = '';
+}
+function selectProduct(prod) {
+  selectedProduct.value = prod._id;
+  productSearch.value = prod.name;
+  productDropdownOpen.value = false;
+}
+function clearCategory() {
+  selectedCategory.value = '';
+  categorySearch.value = '';
+  selectedSubCategory.value = '';
+  subCategorySearch.value = '';
+  selectedProduct.value = '';
+  productSearch.value = '';
+}
+function clearSubCategory() {
+  selectedSubCategory.value = '';
+  subCategorySearch.value = '';
+  selectedProduct.value = '';
+  productSearch.value = '';
+}
+function clearProduct() {
+  selectedProduct.value = '';
+  productSearch.value = '';
+}
+
 // เพิ่มสินค้าลงในรายการ
 const addItem = async () => {
   if (!selectedProduct.value || !sellAmount.value) {
@@ -942,7 +1056,7 @@ const addItem = async () => {
       unit_price: product.price_per_kg,
       subtotal: sellAmount.value * product.price_per_kg,
       notes: '',
-      product_name: product.name
+      product_name: product.productId?.name || '-',
     });
   }
 
