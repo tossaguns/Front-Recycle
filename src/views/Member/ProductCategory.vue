@@ -1,9 +1,5 @@
 <template>
-  <BarNoMenu 
-    :showBackNavigation="true"
-    pageTitle="สินค้ารีไซเคิล"
-    backRoute="/subcategory"
-  />
+  <BarNoMenu :showBackNavigation="true" pageTitle="สินค้ารีไซเคิล" backRoute="/subcategory" />
   <div class="min-h-screen w-full flex flex-col bg-white pt-20">
     <main class="flex-1 max-w-[1450px] mx-auto w-full px-8 py-10 relative flex flex-col justify-center mt-0 md:mt-5">
       <h1 class="text-2xl md:text-3xl font-bold mb-4 text-[#222]">สินค้ารีไซเคิล</h1>
@@ -12,8 +8,7 @@
       <div class="mb-6 flex flex-wrap items-center gap-2">
         <span v-if="subCategoryName"
           class="bg-[#b6e388] text-[#184c36] rounded-full px-5 py-2 text-base font-semibold shadow cursor-pointer hover:underline"
-          @click="goToSubCategory"
-        >
+          @click="goToSubCategory">
           {{ subCategoryName }}
         </span>
       </div>
@@ -26,11 +21,27 @@
           class="bg-[#b6e388] hover:bg-[#d6f5a6] text-[#184c36] rounded-full px-6 py-2 text-base font-semibold shadow transition">ค้นหา</button>
       </form>
 
+      <div v-if="isLoading" class="flex flex-col items-center justify-center py-10 sm:py-16">
+        <svg class="animate-spin h-8 w-8 sm:h-10 sm:w-10 text-[#2BAC75]" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+        </svg>
+        <span class="mt-2 sm:mt-4 text-[#2BAC75] text-sm sm:text-lg font-semibold">กำลังโหลดข้อมูล...</span>
+      </div>
+
       <!-- สินค้า -->
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
-        <template v-if="loading">
+        <!-- <template v-if="loading">
           <div class="col-span-full text-center text-gray-400 py-8">กำลังโหลดสินค้า...</div>
-        </template>
+        </template> -->
+
+        <div v-if="loading" class="flex flex-col items-center justify-center py-10 sm:py-16 w-screen">
+          <svg class="animate-spin h-8 w-8 sm:h-10 sm:w-10 text-[#2BAC75]" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+          </svg>
+          <span class="mt-2 sm:mt-4 text-[#2BAC75] text-sm sm:text-lg font-semibold">กำลังโหลดข้อมูล...</span>
+        </div>
 
         <template v-else-if="pagedProducts.length">
           <div v-for="(item, index) in pagedProducts" :key="item._id || index"

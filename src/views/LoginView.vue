@@ -56,7 +56,8 @@
               <span class="label-text">รหัสผ่าน / Password</span>
             </div>
             <input v-model="password" type="password" placeholder="รหัสผ่าน / Password"
-              class="input input-bordered w-full focus:border-[#b6e388] focus:ring focus:ring-[#b6e388] focus:ring-opacity-50" />
+              class="input input-bordered w-full focus:border-[#b6e388] focus:ring focus:ring-[#b6e388] focus:ring-opacity-50" 
+              @keyup.enter="login"/>
           </label>
           <!-- ปุ่มเข้าสู่ระบบแบบ glassmorphism เหมือนแก้ว (div) -->
           <div

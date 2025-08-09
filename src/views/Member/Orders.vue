@@ -249,7 +249,7 @@
                                                 selectedOrder?._id?.slice(-8) }}
                                             </h2>
                                             <p class="text-[#666]">วันที่จองคิว: {{
-                                                formatThaiDate(selectedOrder.createdAt) }}
+                                                formatThaiDate(selectedOrder.booking_datetime) }}
                                             </p>
                                         </div>
                                         <div class="flex items-center gap-3">

@@ -12,7 +12,7 @@
         <div class="flex flex-col items-center mb-6 sm:mb-8 md:mb-10">
           <div class="flex flex-col gap-3 sm:gap-4 w-full max-w-xs sm:max-w-md md:max-w-xl">
             <span class="text-sm sm:text-base">เลือกพื้นที่ที่ต้องการค้นหาร้าน</span>
-            
+
             <!-- จังหวัด/อำเภอ/ตำบล -->
             <div class="bg-[#f7faf0] rounded-xl p-3 mb-6">
               <div class="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
@@ -28,8 +28,7 @@
                 <!-- อำเภอ -->
                 <div class="flex flex-col gap-1">
                   <label class="font-medium text-[#184c36] text-sm">อำเภอ</label>
-                  <select v-model="selectedDistrict" @change="onDistrictChange"
-                    :disabled="!selectedProvince"
+                  <select v-model="selectedDistrict" @change="onDistrictChange" :disabled="!selectedProvince"
                     class="rounded-full border border-[#b6e388] px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white w-full disabled:opacity-50 disabled:cursor-not-allowed">
                     <option value="">เลือกอำเภอ</option>
                     <option v-for="district in districts" :key="district" :value="district">{{ district }}</option>
@@ -38,16 +37,16 @@
                 <!-- ตำบล -->
                 <div class="flex flex-col gap-1">
                   <label class="font-medium text-[#184c36] text-sm">ตำบล</label>
-                  <select v-model="selectedSubdistrict"
-                    :disabled="!selectedDistrict"
+                  <select v-model="selectedSubdistrict" :disabled="!selectedDistrict"
                     class="rounded-full border border-[#b6e388] px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white w-full disabled:opacity-50 disabled:cursor-not-allowed">
                     <option value="">เลือกตำบล</option>
-                    <option v-for="subdistrict in subdistricts" :key="subdistrict" :value="subdistrict">{{ subdistrict }}</option>
+                    <option v-for="subdistrict in subdistricts" :key="subdistrict" :value="subdistrict">{{ subdistrict
+                      }}</option>
                   </select>
                 </div>
               </div>
             </div>
-            
+
             <!-- ค้นหาชื่อร้าน -->
             <form @submit.prevent class="flex flex-1 gap-1 sm:gap-2">
               <div class="relative w-full">
@@ -65,7 +64,7 @@
                 ค้นหา
               </button>
             </form>
-            
+
             <!-- ปุ่มล้างการค้นหา -->
             <button @click="clearFilters"
               class="bg-gray-500 hover:bg-gray-600 text-white rounded-full px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-semibold shadow transition">
@@ -96,60 +95,70 @@
           </p>
         </div>
 
-        <!-- ร้านค้า -->
-        <div v-if="pagedStores.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-8">
-          <div v-for="(store, idx) in pagedStores" :key="store._id || idx"
-            class="flex flex-col items-center store-card">
-            <img :src="store.img || defaultImg" alt="store"
-              class="rounded-xl w-full aspect-square object-cover mb-4" />
-            <div class="text-lg font-semibold text-black mb-1">{{ store.name || 'ชื่อร้าน' }}</div>
-            <div class="text-gray-600 text-sm mb-2 text-center">
-              <div>{{ store.province || 'แสดงชื่อจังหวัด' }}</div>
-              <div v-if="store.district" class="text-xs">{{ store.district }}</div>
-              <div v-if="store.subdistrict" class="text-xs">{{ store.subdistrict }}</div>
-            </div>
-            <!-- <button
+        <div v-if="isLoading" class="flex flex-col items-center justify-center py-10 sm:py-16">
+          <svg class="animate-spin h-8 w-8 sm:h-10 sm:w-10 text-[#2BAC75]" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+          </svg>
+          <span class="mt-2 sm:mt-4 text-[#2BAC75] text-sm sm:text-lg font-semibold">กำลังโหลดข้อมูล...</span>
+        </div>
+        <div v-else class="">
+          <!-- ร้านค้า -->
+          <div v-if="pagedStores.length > 0"
+            class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-8">
+            <div v-for="(store, idx) in pagedStores" :key="store._id || idx"
+              class="flex flex-col items-center store-card">
+              <img :src="store.img || defaultImg" alt="store"
+                class="rounded-xl w-full aspect-square object-cover mb-4" />
+              <div class="text-lg font-semibold text-black mb-1">{{ store.name || 'ชื่อร้าน' }}</div>
+              <div class="text-gray-600 text-sm mb-2 text-center">
+                <div>{{ store.province || 'แสดงชื่อจังหวัด' }}</div>
+                <div v-if="store.district" class="text-xs">{{ store.district }}</div>
+                <div v-if="store.subdistrict" class="text-xs">{{ store.subdistrict }}</div>
+              </div>
+              <!-- <button
               class="bg-[#184c36] hover:bg-[#b6e388] text-white rounded-full px-3 py-1 text-sm shadow transition flex items-center gap-1 mb-2"
               @click="selectPartner(store)"
             >
               เลือกร้านนี้
             </button> -->
-            <button
-              class="bg-emerald-900 hover:bg-green-500 text-white rounded-full px-3 py-1 text-sm shadow transition flex items-center gap-1"
-              @click="selectPartner(store)"
-            >
-              เพิ่มเติม
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
+              <button
+                class="bg-emerald-900 hover:bg-green-500 text-white rounded-full px-3 py-1 text-sm shadow transition flex items-center gap-1"
+                @click="selectPartner(store)">
+                เพิ่มเติม
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- แสดงข้อความเมื่อไม่พบร้านค้า -->
+          <div v-else class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">ไม่พบร้านค้า</h3>
+            <p class="text-gray-600 mb-4">ลองเปลี่ยนเงื่อนไขการค้นหาหรือเลือกพื้นที่อื่น</p>
+            <button @click="clearFilters"
+              class="bg-[#b6e388] hover:bg-[#184c36] text-[#184c36] hover:text-white rounded-full px-6 py-2 font-semibold transition">
+              ล้างการค้นหา
             </button>
           </div>
-        </div>
-        
-        <!-- แสดงข้อความเมื่อไม่พบร้านค้า -->
-        <div v-else class="text-center py-12">
-          <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-          </svg>
-          <h3 class="text-lg font-medium text-gray-900 mb-2">ไม่พบร้านค้า</h3>
-          <p class="text-gray-600 mb-4">ลองเปลี่ยนเงื่อนไขการค้นหาหรือเลือกพื้นที่อื่น</p>
-          <button @click="clearFilters" 
-            class="bg-[#b6e388] hover:bg-[#184c36] text-[#184c36] hover:text-white rounded-full px-6 py-2 font-semibold transition">
-            ล้างการค้นหา
-          </button>
-        </div>
-        <!-- Pagination -->
-        <div v-if="pagedStores.length > 0 && pageCount > 1" class="flex justify-end">
-          <nav class="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-            <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1"
-              class="px-3 py-1 rounded-l-md border border-[#e6e6e6] bg-white text-[#184c36] font-semibold hover:bg-[#b6e388] disabled:opacity-50 disabled:cursor-not-allowed">&lt;</button>
-            <button v-for="page in pageCount" :key="page" @click="goToPage(page)"
-              :class="['px-3 py-1 border-t border-b border-[#e6e6e6] bg-white text-[#184c36] font-semibold', currentPage === page ? 'bg-[#b6e388] text-[#184c36]' : '']">
-              {{ page }}
-            </button>
-            <button @click="goToPage(currentPage + 1)" :disabled="currentPage === pageCount"
-              class="px-3 py-1 rounded-r-md border border-[#e6e6e6] bg-white text-[#184c36] font-semibold hover:bg-[#b6e388] disabled:opacity-50 disabled:cursor-not-allowed">&gt;</button>
-          </nav>
+          <!-- Pagination -->
+          <div v-if="pagedStores.length > 0 && pageCount > 1" class="flex justify-end">
+            <nav class="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+              <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1"
+                class="px-3 py-1 rounded-l-md border border-[#e6e6e6] bg-white text-[#184c36] font-semibold hover:bg-[#b6e388] disabled:opacity-50 disabled:cursor-not-allowed">&lt;</button>
+              <button v-for="page in pageCount" :key="page" @click="goToPage(page)"
+                :class="['px-3 py-1 border-t border-b border-[#e6e6e6] bg-white text-[#184c36] font-semibold', currentPage === page ? 'bg-[#b6e388] text-[#184c36]' : '']">
+                {{ page }}
+              </button>
+              <button @click="goToPage(currentPage + 1)" :disabled="currentPage === pageCount"
+                class="px-3 py-1 rounded-r-md border border-[#e6e6e6] bg-white text-[#184c36] font-semibold hover:bg-[#b6e388] disabled:opacity-50 disabled:cursor-not-allowed">&gt;</button>
+            </nav>
+          </div>
         </div>
       </main>
       <Footer v-if="showBarFooter" />
@@ -185,6 +194,7 @@ const isAtStart = ref(true)
 const isAtEnd = ref(false)
 const currentPage = ref(1)
 const pageSize = 10
+const isLoading = ref(true);
 
 const displayedStores = computed(() => {
   let filtered = stores.value;
@@ -199,27 +209,27 @@ const displayedStores = computed(() => {
 
 const filteredStores = computed(() => {
   let filtered = stores.value;
-  
+
   // กรองตามจังหวัด
   if (selectedProvince.value) {
     filtered = filtered.filter(s => s.province === selectedProvince.value);
   }
-  
+
   // กรองตามอำเภอ
   if (selectedDistrict.value) {
     filtered = filtered.filter(s => s.district === selectedDistrict.value);
   }
-  
+
   // กรองตามตำบล
   if (selectedSubdistrict.value) {
     filtered = filtered.filter(s => s.subdistrict === selectedSubdistrict.value);
   }
-  
+
   // กรองตามชื่อร้าน
   if (search.value) {
     filtered = filtered.filter(s => s.name && s.name.toLowerCase().includes(search.value.toLowerCase()));
   }
-  
+
   return filtered;
 })
 const pageCount = computed(() => Math.ceil(filteredStores.value.length / pageSize))
@@ -281,14 +291,14 @@ const onProvinceChange = () => {
   selectedSubdistrict.value = '';
   districts.value = [];
   subdistricts.value = [];
-  
+
   if (selectedProvince.value) {
     // ดึงข้อมูลอำเภอจากร้านในจังหวัดที่เลือก
     const storesInProvince = stores.value.filter(s => s.province === selectedProvince.value);
     const districtSet = new Set(storesInProvince.map(s => s.district).filter(Boolean));
     districts.value = Array.from(districtSet).sort((a, b) => a.localeCompare(b, 'th'));
   }
-  
+
   currentPage.value = 1; // รีเซ็ตหน้า
 };
 
@@ -296,17 +306,17 @@ const onProvinceChange = () => {
 const onDistrictChange = () => {
   selectedSubdistrict.value = '';
   subdistricts.value = [];
-  
+
   if (selectedDistrict.value) {
     // ดึงข้อมูลตำบลจากร้านในอำเภอที่เลือก
-    const storesInDistrict = stores.value.filter(s => 
-      s.province === selectedProvince.value && 
+    const storesInDistrict = stores.value.filter(s =>
+      s.province === selectedProvince.value &&
       s.district === selectedDistrict.value
     );
     const subdistrictSet = new Set(storesInDistrict.map(s => s.subdistrict).filter(Boolean));
     subdistricts.value = Array.from(subdistrictSet).sort((a, b) => a.localeCompare(b, 'th'));
   }
-  
+
   currentPage.value = 1; // รีเซ็ตหน้า
 };
 
@@ -320,6 +330,8 @@ const clearFilters = async () => {
   subdistricts.value = [];
   currentPage.value = 1;
   router.replace({ path: '/partnerstores' });
+
+  isLoading.value = true;
 
   try {
     const res = await axios.get(`${import.meta.env.VITE_API_URL}/partners`);
@@ -337,6 +349,8 @@ const clearFilters = async () => {
   } catch (e) {
     stores.value = [];
     provinces.value = [];
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -370,6 +384,7 @@ onMounted(async () => {
     scrollRef.value.addEventListener('scroll', updateScrollState)
     updateScrollState()
   }
+  isLoading.value = true;
 
   try {
     const res = await axios.get(`${import.meta.env.VITE_API_URL}/partners`);
@@ -390,8 +405,8 @@ onMounted(async () => {
       console.log('prodRes', prodRes.data);
       // prodRes.data อาจเป็น array ของ product-partner ที่มี shopId
       const shopIds = Array.isArray(prodRes.data)
-  ? prodRes.data.map(p => (typeof p.shopId === 'object' ? p.shopId._id : p.shopId))
-  : (prodRes.data.products || []).map(p => (typeof p.shopId === 'object' ? p.shopId._id : p.shopId));
+        ? prodRes.data.map(p => (typeof p.shopId === 'object' ? p.shopId._id : p.shopId))
+        : (prodRes.data.products || []).map(p => (typeof p.shopId === 'object' ? p.shopId._id : p.shopId));
       // filter เฉพาะร้านที่รับซื้อสินค้านี้
       stores.value = stores.value.filter(s => shopIds.includes(s._id));
     }
@@ -408,6 +423,8 @@ onMounted(async () => {
   } catch (e) {
     stores.value = [];
     provinces.value = [];
+  } finally {
+    isLoading.value = false;
   }
   if (route.query.highlight) highlightStore(route.query.highlight);
 });
@@ -417,14 +434,39 @@ onMounted(async () => {
 .bg-partner-bg {
   background: #f7faf0;
 }
+
 @keyframes pulse {
-  0% { transform: scale(1); box-shadow: 0 0 0 0 #b6e388; }
-  20% { transform: scale(1.10); box-shadow: 0 0 0 8px #b6e38844; }
-  40% { transform: scale(1); box-shadow: 0 0 0 0 #b6e388; }
-  60% { transform: scale(1.10); box-shadow: 0 0 0 8px #b6e38844; }
-  80% { transform: scale(1); box-shadow: 0 0 0 0 #b6e388; }
-  100% { transform: scale(1); box-shadow: 0 0 0 0 #b6e388; }
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 #b6e388;
+  }
+
+  20% {
+    transform: scale(1.10);
+    box-shadow: 0 0 0 8px #b6e38844;
+  }
+
+  40% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 #b6e388;
+  }
+
+  60% {
+    transform: scale(1.10);
+    box-shadow: 0 0 0 8px #b6e38844;
+  }
+
+  80% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 #b6e388;
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 #b6e388;
+  }
 }
+
 .highlight-animate {
   animation: pulse 1.2s 2;
   z-index: 2;

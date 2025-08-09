@@ -1,11 +1,8 @@
 <template>
-    <BarNoMenu 
-        :showBackNavigation="true"
-        pageTitle="หมวดหมู่ย่อยสินค้ารีไซเคิล"
-        backRoute="/category"
-    />
+    <BarNoMenu :showBackNavigation="true" pageTitle="หมวดหมู่ย่อยสินค้ารีไซเคิล" backRoute="/category" />
     <div class="min-h-screen w-full flex flex-col bg-white pt-20">
-        <main class="flex-1 max-w-[1450px] mx-auto w-full px-8 py-10 relative flex flex-col justify-center mt-0 md:mt-5">
+        <main
+            class="flex-1 max-w-[1450px] mx-auto w-full px-8 py-10 relative flex flex-col justify-center mt-0 md:mt-5">
             <h1 class="text-2xl md:text-3xl font-bold mb-4 text-[#222]">หมวดหมู่ย่อยสินค้ารีไซเคิล</h1>
             <!-- ชื่อหมวดหมู่ -->
             <div class="mb-6 flex flex-wrap items-center gap-2">
@@ -29,41 +26,51 @@
                 <button type="submit"
                     class="bg-[#b6e388] hover:bg-[#d6f5a6] text-[#184c36] rounded-full px-6 py-2 text-base font-semibold shadow transition">ค้นหา</button>
             </form>
-            <!-- Grid -->
-            <div v-if="pagedSubCategories.length === 0" class="text-center text-[#888] text-lg mt-10">
-                ไม่พบประเภทย่อยในหมวดหมู่นี้</div>
-            <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-                <div v-for="sub in pagedSubCategories" :key="sub._id"
-                    class="bg-white rounded-2xl shadow-card flex flex-col overflow-hidden border border-[#e6e6e6]">
-                    <div class="h-48 w-full bg-[#eee] flex items-center justify-center overflow-hidden">
-                        <img :src="sub.image || '/src/assets/NoPicture.webp'" :alt="sub.name"
-                            class="w-full h-full object-cover" />
-                    </div>
-                    <div class="flex-1 flex flex-col justify-between p-5">
-                        <div class="text-lg font-bold text-[#184c36] mb-4">{{ sub.name }}</div>
-                        <button
-                            class="mt-auto bg-[#7bb661] hover:bg-[#b6e388] text-white rounded-full px-6 py-2 text-base font-semibold flex items-center gap-2 self-start transition"
-                            @click="goToProductCategory(sub)">
-                            เพิ่มเติม
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </button>
+            <div v-if="isLoading" class="flex flex-col items-center justify-center py-10 sm:py-16">
+                <svg class="animate-spin h-8 w-8 sm:h-10 sm:w-10 text-[#2BAC75]" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                </svg>
+                <span class="mt-2 sm:mt-4 text-[#2BAC75] text-sm sm:text-lg font-semibold">กำลังโหลดข้อมูล...</span>
+            </div>
+            <div v-else class="">
+                <!-- Grid -->
+                <div v-if="pagedSubCategories.length === 0" class="text-center text-[#888] text-lg mt-10">
+                    ไม่พบประเภทย่อยในหมวดหมู่นี้</div>
+                <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                    <div v-for="sub in pagedSubCategories" :key="sub._id"
+                        class="bg-white rounded-2xl shadow-card flex flex-col overflow-hidden border border-[#e6e6e6]">
+                        <div class="h-48 w-full bg-[#eee] flex items-center justify-center overflow-hidden">
+                            <img :src="sub.image || '/src/assets/NoPicture.webp'" :alt="sub.name"
+                                class="w-full h-full object-cover" />
+                        </div>
+                        <div class="flex-1 flex flex-col justify-between p-5">
+                            <div class="text-lg font-bold text-[#184c36] mb-4">{{ sub.name }}</div>
+                            <button
+                                class="mt-auto bg-[#7bb661] hover:bg-[#b6e388] text-white rounded-full px-6 py-2 text-base font-semibold flex items-center gap-2 self-start transition"
+                                @click="goToProductCategory(sub)">
+                                เพิ่มเติม
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <!-- Pagination -->
-            <div v-if="pageCount > 1" class="flex justify-end mt-8">
-                <nav class="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                    <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1"
-                        class="px-3 py-1 rounded-l-md border border-[#e6e6e6] bg-white text-[#184c36] font-semibold hover:bg-[#b6e388] disabled:opacity-50 disabled:cursor-not-allowed">&lt;</button>
-                    <button v-for="page in pageCount" :key="page" @click="goToPage(page)"
-                        :class="['px-3 py-1 border-t border-b border-[#e6e6e6] bg-white text-[#184c36] font-semibold', currentPage === page ? 'bg-[#b6e388] text-[#184c36]' : '']">
-                        {{ page }}
-                    </button>
-                    <button @click="goToPage(currentPage + 1)" :disabled="currentPage === pageCount"
-                        class="px-3 py-1 rounded-r-md border border-[#e6e6e6] bg-white text-[#184c36] font-semibold hover:bg-[#b6e388] disabled:opacity-50 disabled:cursor-not-allowed">&gt;</button>
-                </nav>
+                <!-- Pagination -->
+                <div v-if="pageCount > 1" class="flex justify-end mt-8">
+                    <nav class="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                        <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1"
+                            class="px-3 py-1 rounded-l-md border border-[#e6e6e6] bg-white text-[#184c36] font-semibold hover:bg-[#b6e388] disabled:opacity-50 disabled:cursor-not-allowed">&lt;</button>
+                        <button v-for="page in pageCount" :key="page" @click="goToPage(page)"
+                            :class="['px-3 py-1 border-t border-b border-[#e6e6e6] bg-white text-[#184c36] font-semibold', currentPage === page ? 'bg-[#b6e388] text-[#184c36]' : '']">
+                            {{ page }}
+                        </button>
+                        <button @click="goToPage(currentPage + 1)" :disabled="currentPage === pageCount"
+                            class="px-3 py-1 rounded-r-md border border-[#e6e6e6] bg-white text-[#184c36] font-semibold hover:bg-[#b6e388] disabled:opacity-50 disabled:cursor-not-allowed">&gt;</button>
+                    </nav>
+                </div>
             </div>
         </main>
         <Footer />
@@ -83,6 +90,7 @@ const allSubCategories = ref([])
 const currentPage = ref(1)
 const pageSize = 8
 const search = ref('')
+const isLoading = ref(true)
 
 const categoryId = ref(JSON.parse(localStorage.getItem('category') || '{}')._id || '')
 const categoryName = ref(JSON.parse(localStorage.getItem('category') || '{}').name || '')
@@ -121,29 +129,30 @@ const goToCategory = () => {
 
 // Animation highlight
 function highlightSubCategory(name) {
-  nextTick(() => {
-    const idx = pagedSubCategories.value.findIndex(sub => sub.name === name);
-    if (idx !== -1) {
-      const cards = document.querySelectorAll('.subcat-card');
-      const card = cards[idx];
-      if (card) {
-        card.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-        card.classList.add('highlight-animate');
-        setTimeout(() => card.classList.remove('highlight-animate'), 1200);
-      }
-    }
-  });
+    nextTick(() => {
+        const idx = pagedSubCategories.value.findIndex(sub => sub.name === name);
+        if (idx !== -1) {
+            const cards = document.querySelectorAll('.subcat-card');
+            const card = cards[idx];
+            if (card) {
+                card.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+                card.classList.add('highlight-animate');
+                setTimeout(() => card.classList.remove('highlight-animate'), 1200);
+            }
+        }
+    });
 }
 
 watch(() => route.query.highlight, (val) => {
-  if (val) highlightSubCategory(val);
+    if (val) highlightSubCategory(val);
 });
 
 onMounted(() => {
-  if (route.query.highlight) highlightSubCategory(route.query.highlight);
+    if (route.query.highlight) highlightSubCategory(route.query.highlight);
 });
 
 onMounted(async () => {
+    isLoading.value = true;
     try {
         const res = await axios.get(`${import.meta.env.VITE_API_URL}/categories/subcategories/${categoryId.value}`)
         if (Array.isArray(res.data)) {
@@ -153,6 +162,8 @@ onMounted(async () => {
         }
     } catch (e) {
         allSubCategories.value = []
+    } finally {
+        isLoading.value = false;
     }
 })
 </script>
@@ -161,16 +172,41 @@ onMounted(async () => {
 .shadow-card {
     box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.08);
 }
+
 @keyframes pulse {
-  0% { transform: scale(1); box-shadow: 0 0 0 0 #b6e388; }
-  20% { transform: scale(1.10); box-shadow: 0 0 0 8px #b6e38844; }
-  40% { transform: scale(1); box-shadow: 0 0 0 0 #b6e388; }
-  60% { transform: scale(1.10); box-shadow: 0 0 0 8px #b6e38844; }
-  80% { transform: scale(1); box-shadow: 0 0 0 0 #b6e388; }
-  100% { transform: scale(1); box-shadow: 0 0 0 0 #b6e388; }
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 #b6e388;
+    }
+
+    20% {
+        transform: scale(1.10);
+        box-shadow: 0 0 0 8px #b6e38844;
+    }
+
+    40% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 #b6e388;
+    }
+
+    60% {
+        transform: scale(1.10);
+        box-shadow: 0 0 0 8px #b6e38844;
+    }
+
+    80% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 #b6e388;
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 #b6e388;
+    }
 }
+
 .highlight-animate {
-  animation: pulse 1.2s 2;
-  z-index: 2;
+    animation: pulse 1.2s 2;
+    z-index: 2;
 }
 </style>

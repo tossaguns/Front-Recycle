@@ -1,14 +1,10 @@
 <template>
-  <BarNoMenu 
-    :showBackNavigation="true"
-    pageTitle="จองคิวขายสินค้ารีไซเคิล"
-    backRoute="/partnerstores"
-  />
+  <BarNoMenu :showBackNavigation="true" pageTitle="จองคิวขายสินค้ารีไซเคิล" backRoute="/partnerstores" />
   <div class="min-h-screen flex flex-col bg-white pt-20">
     <main class="flex-1 max-w-5xl mx-auto w-full px-4 py-10 flex flex-col gap-8 relative mt-0 md:mt-5">
       <h1 class="text-2xl md:text-3xl font-bold mb-6 text-[#222]">จองคิวขายสินค้ารีไซเคิล</h1>
       <!-- User Info -->
-      <div class="flex items-center gap-4 mb-6">
+      <div class="flex items-center gap-4">
         <img :src="memberData.profile_img" class="w-12 h-12 rounded-full object-cover border-2 border-[#b6e388]" />
         <div class="flex flex-col">
           <span class="font-semibold text-lg">{{ memberData.fullName }}</span>
@@ -16,7 +12,7 @@
       </div>
 
       <!-- Partner Info -->
-      <div v-if="partnerData.partnerCompanyName" class="bg-[#f7faf0] rounded-xl p-4 mb-6">
+      <div v-if="partnerData.partnerCompanyName" class="bg-[#f7faf0] rounded-xl p-4">
         <h3 class="font-semibold text-[#184c36] mb-2">ร้านที่เลือก</h3>
         <div class="flex items-center gap-3">
           <div class="w-8 h-8 bg-[#b6e388] rounded-full flex items-center justify-center">
@@ -34,7 +30,7 @@
         </div>
       </div>
       <!-- Form -->
-      <form @submit.prevent="confirmBooking" class="p-6 grid grid-cols-1 gap-6">
+      <form @submit.prevent="confirmBooking" class="p-2 sm:p-6 grid grid-cols-1 gap-6">
         <!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
           <div class="flex flex-col gap-4">
             <label class="font-medium text-[#184c36]">เลือกจังหวัด</label>
@@ -81,7 +77,8 @@
           </div>
         </div> -->
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mt-4 sm:mt-5">
+
           <!-- <div class="flex flex-col gap-4">
             <label class="font-medium text-[#184c36]">ชื่อ</label>
             <input type="text" v-model="bookingData.name"
@@ -93,111 +90,105 @@
               class="rounded-full border border-[#b6e388] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white"
               placeholder="0891234567" />
           </div> -->
-          <!-- เลือกประเภทสินค้า -->
-<div class="flex flex-col gap-4">
-  <label class="font-medium text-[#184c36]">เลือกประเภทสินค้า</label>
-  <div class="relative mb-2">
-    <input v-model="categorySearch" @focus="categoryDropdownOpen = true"
-      @input="categoryDropdownOpen = true" @blur="categoryDropdownOpen = false"
-      placeholder="ค้นหาหรือเลือกประเภทสินค้า"
-      class="border border-[#b6e388] rounded px-3 py-2 w-full pr-8 focus:ring-2 focus:ring-[#b6e388] focus:border-[#b6e388] transition" />
-    <button v-if="selectedCategory" @click="clearCategory" type="button"
-      class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 text-lg focus:outline-none">
-      ❌
-    </button>
-    <ul v-if="categoryDropdownOpen"
-      class="absolute z-10 bg-white border border-[#b6e388] rounded w-full max-h-40 overflow-auto mt-1 shadow">
-      <li v-for="cat in filteredCategoriesSearch" :key="cat._id"
-        class="px-3 py-2 hover:bg-green-100 cursor-pointer text-[#184c36]"
-        @mousedown.prevent="selectCategory(cat)">
-        {{ cat.name }}
-      </li>
-      <li v-if="filteredCategoriesSearch.length === 0" class="px-3 py-2 text-gray-400">ไม่พบข้อมูล</li>
-    </ul>
-  </div>
-</div>
 
-<!-- เลือกประเภทย่อย -->
-<div class="flex flex-col gap-4" v-if="selectedCategory">
-  <label class="font-medium text-[#184c36]">เลือกประเภทย่อย</label>
-  <div class="relative mb-2">
-    <input v-model="subCategorySearch" @focus="subCategoryDropdownOpen = true"
-      @input="subCategoryDropdownOpen = true" @blur="subCategoryDropdownOpen = false"
-      placeholder="ค้นหาหรือเลือกประเภทย่อย"
-      class="border border-[#b6e388] rounded px-3 py-2 w-full pr-8 focus:ring-2 focus:ring-[#b6e388] focus:border-[#b6e388] transition" />
-    <button v-if="selectedSubCategory" @click="clearSubCategory" type="button"
-      class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 text-lg focus:outline-none">
-      ❌
-    </button>
-    <ul v-if="subCategoryDropdownOpen"
-      class="absolute z-10 bg-white border border-[#b6e388] rounded w-full max-h-40 overflow-auto mt-1 shadow">
-      <li v-for="sub in filteredSubCategoriesSearch" :key="sub._id"
-        class="px-3 py-2 hover:bg-green-100 cursor-pointer text-[#184c36]"
-        @mousedown.prevent="selectSubCategory(sub)">
-        {{ sub.name }}
-      </li>
-      <li v-if="filteredSubCategoriesSearch.length === 0" class="px-3 py-2 text-gray-400">ไม่พบข้อมูล</li>
-    </ul>
-  </div>
-</div>
+          <div class="flex flex-col gap-2 sm:gap-4">
+            <label class="font-medium text-xs sm:text-sm text-[#184c36]">เลือกประเภทสินค้า</label>
+            <div class="relative mb-2">
+              <input v-model="categorySearch" @focus="categoryDropdownOpen = true" @input="categoryDropdownOpen = true"
+                @blur="categoryDropdownOpen = false" placeholder="ค้นหาหรือเลือกประเภทสินค้า"
+                class="border border-[#b6e388] rounded px-3 py-2 w-full pr-8 text-xs sm:text-sm focus:ring-2 focus:ring-[#b6e388] focus:border-[#b6e388] transition" />
+              <button v-if="selectedCategory" @click="clearCategory" type="button"
+                class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 text-xs sm:text-lg focus:outline-none">
+                ❌
+              </button>
+              <ul v-if="categoryDropdownOpen"
+                class="absolute z-10 bg-white border border-[#b6e388] rounded w-full max-h-40 overflow-auto mt-1 shadow text-xs sm:text-sm">
+                <li v-for="cat in filteredCategoriesSearch" :key="cat._id"
+                  class="px-3 py-2 hover:bg-green-100 cursor-pointer text-[#184c36]"
+                  @mousedown.prevent="selectCategory(cat)">
+                  {{ cat.name }}
+                </li>
+                <li v-if="filteredCategoriesSearch.length === 0" class="px-3 py-2 text-gray-400">ไม่พบข้อมูล</li>
+              </ul>
+            </div>
+          </div>
 
-<!-- เลือกสินค้า -->
-<div class="flex flex-col gap-4" v-if="selectedCategory && selectedSubCategory">
-  <label class="font-medium text-[#184c36]">เลือกสินค้า</label>
-  <div class="relative mb-2">
-    <input v-model="productSearch" @focus="productDropdownOpen = true"
-      @input="productDropdownOpen = true" @blur="productDropdownOpen = false"
-      placeholder="ค้นหาหรือเลือกสินค้า"
-      class="border border-[#b6e388] rounded px-3 py-2 w-full pr-8 focus:ring-2 focus:ring-[#b6e388] focus:border-[#b6e388] transition" />
-    <button v-if="selectedProduct" @click="clearProduct" type="button"
-      class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 text-lg focus:outline-none">
-      ❌
-    </button>
-    <ul v-if="productDropdownOpen"
-      class="absolute z-10 bg-white border border-[#b6e388] rounded w-full max-h-40 overflow-auto mt-1 shadow">
-      <li v-for="prod in filteredProductsSearch" :key="prod._id"
-        class="px-3 py-2 hover:bg-green-100 cursor-pointer text-[#184c36]"
-        @mousedown.prevent="selectProduct(prod)">
-        {{ prod.name }}
-      </li>
-      <li v-if="filteredProductsSearch.length === 0" class="px-3 py-2 text-gray-400">ไม่พบข้อมูล</li>
-    </ul>
-  </div>
-</div>
+          <div class="flex flex-col gap-2 sm:gap-4" v-if="selectedCategory">
+            <label class="font-medium text-xs sm:text-sm text-[#184c36]">เลือกประเภทย่อย</label>
+            <div class="relative mb-2">
+              <input v-model="subCategorySearch" @focus="subCategoryDropdownOpen = true"
+                @input="subCategoryDropdownOpen = true" @blur="subCategoryDropdownOpen = false"
+                placeholder="ค้นหาหรือเลือกประเภทย่อย"
+                class="border border-[#b6e388] rounded px-3 py-2 w-full pr-8 text-xs sm:text-sm focus:ring-2 focus:ring-[#b6e388] focus:border-[#b6e388] transition" />
+              <button v-if="selectedSubCategory" @click="clearSubCategory" type="button"
+                class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 text-xs sm:text-lg focus:outline-none">
+                ❌
+              </button>
+              <ul v-if="subCategoryDropdownOpen"
+                class="absolute z-10 bg-white border border-[#b6e388] rounded w-full max-h-40 overflow-auto mt-1 shadow text-xs sm:text-sm">
+                <li v-for="sub in filteredSubCategoriesSearch" :key="sub._id"
+                  class="px-3 py-2 hover:bg-green-100 cursor-pointer text-[#184c36]"
+                  @mousedown.prevent="selectSubCategory(sub)">
+                  {{ sub.name }}
+                </li>
+                <li v-if="filteredSubCategoriesSearch.length === 0" class="px-3 py-2 text-gray-400">ไม่พบข้อมูล</li>
+              </ul>
+            </div>
+          </div>
 
-          <!-- จำนวนกิโลกรัม: แสดงเลย -->
-          <div class="flex flex-col gap-4">
-            <label class="font-medium text-[#184c36]">จำนวน (กิโลกรัม)</label>
+          <div class="flex flex-col gap-2 sm:gap-4" v-if="selectedCategory && selectedSubCategory">
+            <label class="font-medium text-xs sm:text-sm text-[#184c36]">เลือกสินค้า</label>
+            <div class="relative mb-2">
+              <input v-model="productSearch" @focus="productDropdownOpen = true" @input="productDropdownOpen = true"
+                @blur="productDropdownOpen = false" placeholder="ค้นหาหรือเลือกสินค้า"
+                class="border border-[#b6e388] rounded px-3 py-2 w-full pr-8 text-xs sm:text-sm focus:ring-2 focus:ring-[#b6e388] focus:border-[#b6e388] transition" />
+              <button v-if="selectedProduct" @click="clearProduct" type="button"
+                class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 text-xs sm:text-lg focus:outline-none">
+                ❌
+              </button>
+              <ul v-if="productDropdownOpen"
+                class="absolute z-10 bg-white border border-[#b6e388] rounded w-full max-h-40 overflow-auto mt-1 shadow text-xs sm:text-sm">
+                <li v-for="prod in filteredProductsSearch" :key="prod._id"
+                  class="px-3 py-2 hover:bg-green-100 cursor-pointer text-[#184c36]"
+                  @mousedown.prevent="selectProduct(prod)">
+                  {{ prod.name }}
+                </li>
+                <li v-if="filteredProductsSearch.length === 0" class="px-3 py-2 text-gray-400">ไม่พบข้อมูล</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-2 sm:gap-4">
+            <label class="font-medium text-xs sm:text-sm text-[#184c36]">จำนวน (กิโลกรัม)</label>
             <input type="number" v-model.number="sellAmount" :min="1" :max="selectedProductObj?.maxAmount || 999"
-              class="rounded-full border border-[#b6e388] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white"
+              class="rounded-full border border-[#b6e388] px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white"
               placeholder="จำนวนกิโลกรัม" @input="handleAmountInput" />
             <div v-if="selectedProductObj && sellAmount > selectedProductObj.maxAmount"
               class="text-red-600 text-xs mt-1">
               จำนวนสูงสุดที่ขายได้คือ {{ selectedProductObj.maxAmount }} กิโลกรัม
             </div>
-            <!-- ปุ่มเพิ่มสินค้า -->
             <button type="button" @click="addItem" :disabled="!selectedProduct"
-              class="bg-[#b6e388] hover:bg-[#a4d376] text-[#184c36] font-semibold py-2 px-4 rounded-full transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed">
+              class="bg-[#b6e388] hover:bg-[#a4d376] text-[#184c36] font-semibold py-2 px-4 rounded-full transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed text-xs sm:text-sm">
               เพิ่มสินค้า
             </button>
           </div>
-          <div class="flex flex-col gap-4">
-            <label class="font-medium text-[#184c36]">เลือกวันที่จอง</label>
+          <div class="flex flex-col gap-2 sm:gap-4">
+            <label class="font-medium text-xs sm:text-sm text-[#184c36]">เลือกวันที่จอง</label>
             <input type="date" :min="today" v-model="bookingData.date"
-              class="rounded-full border border-[#b6e388] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white" />
+              class="rounded-full border border-[#b6e388] px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white" />
           </div>
-          <div class="flex flex-col gap-4">
-            <label class="font-semibold text-[#184c36] text-base">เลือกเวลา</label>
+          <div class="flex flex-col gap-2 sm:gap-4">
+            <label class="font-semibold text-xs sm:text-base text-[#184c36]">เลือกเวลา</label>
             <input type="time" v-model="bookingData.time"
-              class="rounded-full border border-[#b6e388] px-4 py-2 text-sm text-[#184c36] bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388]" />
+              class="rounded-full border border-[#b6e388] px-4 py-2 text-xs sm:text-sm text-[#184c36] bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388]" />
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="flex flex-col gap-4" v-if="deliveryType === 'ให้รถเข้ารับสินค้า'">
-            <label class="font-medium text-[#184c36]">เลือกที่อยู่สำหรับรับจุดรับสินค้า</label>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mt-4 sm:mt-6">
+          <div class="flex flex-col gap-2 sm:gap-4" v-if="deliveryType === 'ให้รถเข้ารับสินค้า'">
+            <label class="font-medium text-xs sm:text-sm text-[#184c36]">เลือกที่อยู่สำหรับรับจุดรับสินค้า</label>
             <select v-model="selectedMemberAddressId" @change="onSelectMemberAddress"
-              class="rounded-full border border-[#b6e388] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white">
+              class="rounded-full border border-[#b6e388] px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white">
               <option v-for="addr in memberAddresses" :key="addr._id" :value="addr._id">
                 {{ formatAddress(addr) }}
                 <span v-if="addr.is_default"> (ที่อยู่หลัก)</span>
@@ -205,20 +196,20 @@
             </select>
           </div>
           <div class="flex flex-col gap-2">
-            <label class="font-medium text-[#184c36]">เลือกการจัดส่ง</label>
+            <label class="font-medium text-xs sm:text-sm text-[#184c36]">เลือกการจัดส่ง</label>
             <select v-model="deliveryType"
-              class="rounded-full border border-[#b6e388] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white">
+              class="rounded-full border border-[#b6e388] px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white">
               <option>จัดส่งด้วยต้นเอง</option>
               <option>ให้รถเข้ารับสินค้า</option>
             </select>
-            <span class="text-xs text-gray-500 pl-5">
+            <span class="text-[10px] text-gray-500 pl-5">
               *ค่าจัดส่ง 15 บาท จะถูกหักจากยอดเงินที่ได้รับจากการขายสินค้า
             </span>
           </div>
-          <div class="flex flex-col gap-4">
-            <label class="font-medium text-[#184c36]">หมายเหตุเพิ่มเติม</label>
+          <div class="flex flex-col gap-2 sm:gap-4">
+            <label class="font-medium text-xs sm:text-sm text-[#184c36]">หมายเหตุเพิ่มเติม</label>
             <textarea v-model="bookingData.notes" rows="3"
-              class="rounded-xl border border-[#b6e388] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white resize-none"
+              class="rounded-xl border border-[#b6e388] px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white resize-none"
               placeholder="หมายเหตุเพิ่มเติม (ถ้ามี)"></textarea>
           </div>
         </div>
@@ -256,27 +247,26 @@
               <div class="relative">
                 <!-- Google Maps Container -->
                 <div id="google-map" class="w-full h-64 rounded-xl border-2 border-[#b6e388] overflow-hidden"></div>
-                
+
                 <!-- ปุ่มค้นหาตำแหน่งปัจจุบัน -->
-                <button 
-                  @click="getCurrentLocation" 
-                  type="button"
+                <button @click="getCurrentLocation" type="button"
                   class="absolute top-2 right-2 bg-white hover:bg-gray-50 text-[#184c36] p-2 rounded-lg shadow-md transition-colors"
                   title="ค้นหาตำแหน่งปัจจุบัน">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </button>
 
                 <!-- แสดงพิกัดที่เลือก -->
-                <div v-if="selectedLocation.lat && selectedLocation.lng" 
-                     class="absolute bottom-2 left-2 bg-white bg-opacity-90 px-3 py-2 rounded-lg text-xs text-[#184c36]">
+                <div v-if="selectedLocation.lat && selectedLocation.lng"
+                  class="absolute bottom-2 left-2 bg-white bg-opacity-90 px-3 py-2 rounded-lg text-xs text-[#184c36]">
                   <div>ละติจูด: {{ selectedLocation.lat.toFixed(6) }}</div>
                   <div>ลองจิจูด: {{ selectedLocation.lng.toFixed(6) }}</div>
                 </div>
               </div>
-              
+
               <!-- คำแนะนำ -->
               <div class="text-xs text-gray-500">
                 คลิกบนแผนที่เพื่อปักหมุดตำแหน่งหน้าบ้านของคุณ
@@ -286,22 +276,23 @@
         </div>
 
         <!-- รายการสินค้าที่เลือก -->
-        <div v-if="selectedItems.length > 0" class="bg-[#f7faf0] rounded-xl p-6 mt-6">
-          <h3 class="font-semibold text-[#184c36] mb-4 text-lg">รายการสินค้าที่เลือก</h3>
-          <div class="space-y-4">
-            <div v-for="(item, index) in selectedItems" :key="index" class="bg-white rounded-lg p-4 shadow-sm">
+        <div v-if="selectedItems.length > 0" class="bg-[#f7faf0] rounded-xl p-4 sm:p-6 mt-4 sm:mt-6">
+          <h3 class="font-semibold text-[#184c36] mb-3 sm:mb-4 text-base sm:text-lg">รายการสินค้าที่เลือก</h3>
+          <div class="space-y-3 sm:space-y-4">
+            <div v-for="(item, index) in selectedItems" :key="index" class="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
               <div class="flex justify-between items-start">
                 <div class="flex-1">
-                  <h4 class="font-medium text-[#184c36]">{{ item.product_name }}</h4>
-                  <p class="text-sm text-gray-600 mt-1">
+                  <h4 class="font-medium text-[#184c36] text-sm sm:text-base">{{ item.product_name }}</h4>
+                  <p class="text-xs text-gray-600 mt-0.5 sm:mt-1">
                     จำนวน: {{ item.amount }} กิโลกรัม | ราคา: ฿{{ item.unit_price }}/กก.
                   </p>
-                  <p class="text-sm font-medium text-[#184c36] mt-1">
+                  <p class="text-sm font-medium text-[#184c36] mt-0.5 sm:mt-1">
                     ยอดรวม: ฿{{ item.subtotal.toLocaleString() }}
                   </p>
                 </div>
                 <button type="button" @click="removeItem(index)" class="text-red-500 hover:text-red-700 p-1">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round"
                       d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
@@ -310,17 +301,16 @@
             </div>
           </div>
 
-          <!-- สรุปราคา -->
-          <div class="mt-6 pt-4 border-t border-gray-200">
-            <div class="flex justify-between items-center mb-2">
+          <div class="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-200">
+            <div class="flex justify-between items-center mb-1 sm:mb-2 text-sm">
               <span class="text-gray-600">ราคาสินค้ารวม:</span>
               <span class="font-medium">฿{{ totalPrice.toLocaleString() }}</span>
             </div>
-            <div class="flex justify-between items-center mb-2">
+            <div class="flex justify-between items-center mb-1 sm:mb-2 text-sm">
               <span class="text-gray-600">ค่าจัดส่ง:</span>
               <span class="font-medium text-red-600">-฿{{ pickupFee.toLocaleString() }}</span>
             </div>
-            <div class="flex justify-between items-center text-lg font-semibold text-[#184c36]">
+            <div class="flex justify-between items-center text-base sm:text-lg font-semibold text-[#184c36]">
               <span>เงินที่ได้รับจริง:</span>
               <span>฿{{ grandTotal.toLocaleString() }}</span>
             </div>
@@ -328,12 +318,11 @@
         </div>
 
         <!-- Summary -->
-        <div class="rounded-2xl shadow border-t-4 border-lime-400 p-6 mt-8 w-full bg-white">
-          <div class="flex flex-col gap-6">
-            <!-- ข้อมูล Member -->
+        <div class="rounded-2xl shadow border-t-4 border-lime-400 p-4 sm:p-6 mt-4 sm:mt-8 w-full bg-white">
+          <div class="flex flex-col gap-4 sm:gap-6">
             <div>
-              <h3 class="font-semibold text-[#184c36] mb-2 text-base">ข้อมูลลูกค้า</h3>
-              <div class="flex flex-col gap-1 mb-2">
+              <h3 class="font-semibold text-[#184c36] mb-1 sm:mb-2 text-sm sm:text-base">ข้อมูลลูกค้า</h3>
+              <div class="flex flex-col gap-1 mb-1 sm:mb-2 text-sm">
                 <div class="flex justify-between items-center">
                   <span class="text-gray-600">ชื่อลูกค้า:</span>
                   <span class="font-medium">{{ memberData.fullName }}</span>
@@ -345,28 +334,25 @@
               </div>
             </div>
             <hr />
-            <!-- ข้อมูล Partner -->
             <div>
-              <h3 class="font-semibold text-[#184c36] mb-2 text-base">ข้อมูลร้านค้า</h3>
-              <div class="flex flex-col gap-1 mb-2">
+              <h3 class="font-semibold text-[#184c36] mb-1 sm:mb-2 text-sm sm:text-base">ข้อมูลร้านค้า</h3>
+              <div class="flex flex-col gap-1 mb-1 sm:mb-2 text-sm">
                 <div class="flex justify-between items-center">
                   <span class="text-gray-600">ร้านค้า:</span>
                   <span class="font-medium">{{ partnerData.partnerCompanyName }}</span>
                 </div>
                 <div class="flex justify-between items-center">
                   <span class="text-gray-600">ที่อยู่:</span>
-                  <span class="font-medium">{{ partnerData.partnerCompanyAddress }} ต.{{
-                    partnerData.partnerCompanySubdistrict
-                  }} อ.{{ partnerData.partnerCompanyDistrict }} จ.{{ partnerData.partnerCompanyProvince }} {{
-                      partnerData.partnerCompanyPostalCode }}</span>
+                  <span class="font-medium text-right break-words">{{ partnerData.partnerCompanyAddress }} ต.{{
+                    partnerData.partnerCompanySubdistrict }} อ.{{ partnerData.partnerCompanyDistrict }} จ.{{
+                      partnerData.partnerCompanyProvince }} {{ partnerData.partnerCompanyPostalCode }}</span>
                 </div>
               </div>
             </div>
             <hr />
-            <!-- ข้อมูลสินค้า -->
             <div v-if="selectedItems.length > 0">
-              <h3 class="font-semibold text-[#184c36] mb-2 text-base">ข้อมูลสินค้า</h3>
-              <div class="flex flex-col gap-1 mb-2">
+              <h3 class="font-semibold text-[#184c36] mb-1 sm:mb-2 text-sm sm:text-base">ข้อมูลสินค้า</h3>
+              <div class="flex flex-col gap-1 mb-1 sm:mb-2 text-sm">
                 <div class="flex justify-between items-center">
                   <span class="text-gray-600">จำนวนรายการ:</span>
                   <span class="font-medium">{{ selectedItems.length }} รายการ</span>
@@ -386,10 +372,9 @@
               </div>
             </div>
             <hr />
-            <!-- ข้อมูลการจอง -->
             <div v-if="bookingData.date && bookingData.time">
-              <h3 class="font-semibold text-[#184c36] mb-2 text-base">ข้อมูลการจอง</h3>
-              <div class="flex flex-col gap-1 mb-2">
+              <h3 class="font-semibold text-[#184c36] mb-1 sm:mb-2 text-sm sm:text-base">ข้อมูลการจอง</h3>
+              <div class="flex flex-col gap-1 mb-1 sm:mb-2 text-sm">
                 <div class="flex justify-between items-center">
                   <span class="text-gray-600">วันที่จอง:</span>
                   <span class="font-medium">{{ new Date(bookingData.date).toLocaleDateString('th-TH') }}</span>
@@ -405,72 +390,68 @@
                 <div v-if="deliveryType === 'ให้รถเข้ารับสินค้า' && bookingData.address"
                   class="flex justify-between items-center">
                   <span class="text-gray-600">ที่อยู่รับสินค้า:</span>
-                  <span class="font-medium text-sm">{{ bookingData.address }}</span>
+                  <span class="font-medium text-right text-xs break-words">{{ bookingData.address }}</span>
                 </div>
                 <div v-if="bookingData.notes" class="flex justify-between items-center">
                   <span class="text-gray-600">หมายเหตุ:</span>
-                  <span class="font-medium text-sm">{{ bookingData.notes }}</span>
+                  <span class="font-medium text-right text-xs break-words">{{ bookingData.notes }}</span>
                 </div>
               </div>
             </div>
             <hr />
-            <!-- รูปภาพที่อัปโหลด -->
             <div>
-              <h3 class="font-semibold text-[#184c36] mb-2 text-base">รูปภาพที่อัปโหลด</h3>
-              <div v-if="Object.values(uploadedImages).some(img => img)" class="flex flex-col gap-2 mb-2">
+              <h3 class="font-semibold text-[#184c36] mb-1 sm:mb-2 text-sm sm:text-base">รูปภาพที่อัปโหลด</h3>
+              <div v-if="Object.values(uploadedImages).some(img => img)" class="flex flex-col gap-2 mb-1 sm:mb-2">
                 <div class="flex gap-2 flex-wrap">
-                  <div v-if="uploadedImages.product" class="text-sm text-blue-600">✓ รูปสินค้า</div>
-                  <div v-if="uploadedImages.front" class="text-sm text-blue-600">✓ รูปหน้าบ้าน</div>
+                  <div v-if="uploadedImages.product" class="text-xs text-blue-600">✓ รูปสินค้า</div>
+                  <div v-if="uploadedImages.front" class="text-xs text-blue-600">✓ รูปหน้าบ้าน</div>
                 </div>
               </div>
-              <div v-else class="flex flex-col gap-2 mb-2">
-                <div class="text-sm text-blue-600">ยังไม่มีรูปภาพที่อัปโหลด</div>
+              <div v-else class="flex flex-col gap-2 mb-1 sm:mb-2">
+                <div class="text-xs text-blue-600">ยังไม่มีรูปภาพที่อัปโหลด</div>
               </div>
             </div>
 
-            <!-- ข้อมูลตำแหน่ง (เฉพาะเมื่อเลือกให้รถเข้ารับสินค้า) -->
             <div v-if="deliveryType === 'ให้รถเข้ารับสินค้า' && selectedLocation.lat && selectedLocation.lng">
-              <h3 class="font-semibold text-[#184c36] mb-2 text-base">ข้อมูลตำแหน่ง</h3>
-              <div class="flex flex-col gap-1 mb-2">
+              <h3 class="font-semibold text-[#184c36] mb-1 sm:mb-2 text-sm sm:text-base">ข้อมูลตำแหน่ง</h3>
+              <div class="flex flex-col gap-1 mb-1 sm:mb-2 text-sm">
                 <div class="flex justify-between items-center">
                   <span class="text-gray-600">ละติจูด:</span>
-                  <span class="font-medium text-sm">{{ selectedLocation.lat.toFixed(6) }}</span>
+                  <span class="font-medium text-xs">{{ selectedLocation.lat.toFixed(6) }}</span>
                 </div>
                 <div class="flex justify-between items-center">
                   <span class="text-gray-600">ลองจิจูด:</span>
-                  <span class="font-medium text-sm">{{ selectedLocation.lng.toFixed(6) }}</span>
+                  <span class="font-medium text-xs">{{ selectedLocation.lng.toFixed(6) }}</span>
                 </div>
               </div>
             </div>
             <hr />
-            <!-- ยอดเงิน -->
             <div v-if="selectedItems.length > 0">
-              <h3 class="font-semibold text-[#184c36] mb-2 text-base">ยอดเงิน</h3>
-              <div class="flex flex-col gap-1 mb-2">
+              <h3 class="font-semibold text-[#184c36] mb-1 sm:mb-2 text-sm sm:text-base">ยอดเงิน</h3>
+              <div class="flex flex-col gap-1 mb-1 sm:mb-2 text-sm">
                 <div class="flex flex-col">
-                  <span class="text-[#184c36] font-semibold">ยอดเงินที่ได้รับจากการขายรีไซเคิล</span>
-                  <span class="text-lg font-bold text-[#184c36]">
+                  <span class="text-[#184c36] font-semibold text-sm">ยอดเงินที่ได้รับจากการขายรีไซเคิล</span>
+                  <span class="text-base sm:text-lg font-bold text-[#184c36]">
                     ฿ {{ totalPrice.toLocaleString() }} บาท
                   </span>
                 </div>
                 <div v-if="deliveryType === 'ให้รถเข้ารับสินค้า'" class="flex flex-col">
-                  <span class="text-gray-500 text-sm">หักค่าบริการการจัดส่ง</span>
-                  <span class="text-base font-semibold text-red-600">-฿ {{ pickupFee.toLocaleString() }} บาท</span>
+                  <span class="text-gray-500 text-xs">หักค่าบริการการจัดส่ง</span>
+                  <span class="text-sm font-semibold text-red-600">-฿ {{ pickupFee.toLocaleString() }} บาท</span>
                 </div>
                 <div class="flex flex-col">
-                  <span class="text-black text-md font-semibold">เงินที่ได้รับจริง</span>
-                  <span class="text-lg font-bold text-[#184c36]">
+                  <span class="text-black text-xs font-semibold">เงินที่ได้รับจริง</span>
+                  <span class="text-base sm:text-lg font-bold text-[#184c36]">
                     ฿ {{ grandTotal.toLocaleString() }} บาท
                   </span>
                 </div>
               </div>
             </div>
             <hr />
-            <!-- หมายเหตุ -->
             <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
               <div class="flex items-start gap-2">
-                <svg class="w-5 h-5 text-yellow-600 mt-0.5" fill="none" stroke="currentColor" stroke-width="2"
-                  viewBox="0 0 24 24">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600 mt-0.5 flex-shrink-0" fill="none"
+                  stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round"
                     d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
@@ -486,13 +467,13 @@
               </div>
             </div>
           </div>
-          <div class="flex justify-end mt-4 gap-3">
+          <div class="flex justify-end mt-4 gap-2 sm:gap-3">
             <button @click="cancelBooking" type="button"
-              class="bg-gray-400 text-white px-10 py-2 rounded-full text-sm hover:bg-[#145029] transition duration-200">
+              class="bg-gray-400 text-white px-6 py-2 sm:px-10 rounded-full text-xs sm:text-sm hover:bg-[#145029] transition duration-200">
               ยกเลิก
             </button>
             <button type="submit" :disabled="selectedItems.length === 0"
-              class="bg-[#184c36] text-white px-10 py-2 rounded-full text-sm hover:bg-[#145029] transition duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed">
+              class="bg-[#184c36] text-white px-6 py-2 sm:px-10 rounded-full text-xs sm:text-sm hover:bg-[#145029] transition duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed">
               {{ selectedItems.length === 0 ? 'กรุณาเลือกสินค้า' : 'จองคิว' }}
             </button>
           </div>
@@ -544,7 +525,7 @@ onMounted(async () => {
   // ... (โหลด member/partner data อื่นๆ ตามเดิม)
   loadMemberData();
   loadPartnerData();
-  
+
   // โหลด Google Maps เมื่อเลือก "ให้รถเข้ารับสินค้า"
   if (deliveryType.value === 'ให้รถเข้ารับสินค้า') {
     initGoogleMaps();
@@ -1097,7 +1078,7 @@ const initGoogleMaps = () => {
     loadGoogleMapsAPI();
     return;
   }
-  
+
   // สร้างแผนที่
   createMap();
 };
@@ -1140,7 +1121,7 @@ const createMap = () => {
 
   // ตำแหน่งเริ่มต้น (กรุงเทพฯ)
   const defaultLocation = { lat: 13.7563, lng: 100.5018 };
-  
+
   // สร้างแผนที่
   map = new google.maps.Map(mapContainer, {
     center: defaultLocation,
@@ -1263,7 +1244,7 @@ const getCurrentLocation = () => {
     (error) => {
       // ปิด loading
       Swal.close();
-      
+
       let errorMessage = 'เกิดข้อผิดพลาดในการค้นหาตำแหน่ง';
       switch (error.code) {
         case error.PERMISSION_DENIED:

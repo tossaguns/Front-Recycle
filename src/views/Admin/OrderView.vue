@@ -58,7 +58,7 @@
                                         ยอดรวม</th>
                                     <th
                                         class="px-6 py-4 text-left text-xs lg:text-sm font-semibold hidden lg:table-cell">
-                                        วันที่สั่งซื้อ</th>
+                                        วันที่จองคิว</th>
                                     <th class="px-6 py-4 text-center text-xs lg:text-sm font-semibold">การดำเนินการ</th>
                                 </tr>
                             </thead>
@@ -134,7 +134,7 @@
                                             }}</span>
                                     </td>
                                     <td class="px-6 py-4 hidden lg:table-cell text-xs lg:text-sm">
-                                        <p class="text-xs lg:text-sm text-[#666]">{{ formatDate(order.createdAt) }}</p>
+                                        <p class="text-xs lg:text-sm text-[#666]">{{ formatDate(order.booking_datetime) }}</p>
                                     </td>
                                     <td class="px-6 py-4 text-xs lg:text-sm">
                                         <button @click="viewOrderDetails(order)"
@@ -208,7 +208,7 @@
                                         <h2 class="text-2xl font-bold text-[#184c36] mb-1">
                                             Order ID: {{ selectedOrder.orderId || selectedOrder._id.slice(-8) }}
                                         </h2>
-                                        <p class="text-[#666]">วันที่สั่งซื้อ: {{ formatDate(selectedOrder.createdAt) }}
+                                        <p class="text-[#666]">วันที่จองคิว: {{ formatDate(selectedOrder.booking_datetime) }}
                                         </p>
                                     </div>
                                     <div class="flex items-center gap-3">
