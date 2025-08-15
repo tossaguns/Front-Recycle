@@ -88,8 +88,9 @@
                     </div>
                     <div class="flex flex-col md:flex-row items-start md:items-center gap-1 md:gap-2 mb-2">
                         <button class="bg-green-100 text-[#184c36] hover:bg-green-200 px-4 py-2 rounded shadow-sm"
-                        @click="showProductModal = true">สร้างใหม่</button>
-                        <span class="text-xs text-gray-500 mt-1 md:mt-0">💡 คำแนะนำ: ค้นหาก่อนเพื่อหลีกเลี่ยงการสร้างซ้ำ</span>
+                            @click="showProductModal = true">สร้างใหม่</button>
+                        <span class="text-xs text-gray-500 mt-1 md:mt-0">💡 คำแนะนำ:
+                            ค้นหาก่อนเพื่อหลีกเลี่ยงการสร้างซ้ำ</span>
                     </div>
                 </div>
                 <!-- ราคาต่อกิโลกรัม -->
@@ -102,9 +103,18 @@
                 <!-- จำนวนที่รับซื้อ -->
                 <div class="flex-1" v-if="selectedProductId || (!productNameExists && productSearch)">
                     <label class="block font-semibold mb-2 text-[#184c36]">จำนวนที่รับซื้อ (กิโลกรัม)</label>
-                    <input type="number" v-model="quantity"
+
+                    <input v-if="!unlimitedQuantity" type="number" v-model="quantity"
                         class="border border-[#e6e6e6] rounded px-3 py-2 w-full focus:ring-2 focus:ring-green-200 focus:border-green-400 transition"
                         min="0" />
+
+                    <div v-else class="border border-[#e6e6e6] rounded px-3 py-2 w-full bg-gray-100 text-gray-500">
+                        ไม่จำกัด
+                    </div>
+                    <div class="flex items-center my-2">
+                        <input type="checkbox" id="unlimitedCheckbox" v-model="unlimitedQuantity" class="mr-2 h-4 w-4">
+                        <label for="unlimitedCheckbox" class="text-sm text-gray-700">ไม่จำกัด</label>
+                    </div>
                 </div>
             </div>
 
@@ -315,7 +325,7 @@
                             <td class="px-4 py-3 border-b border-[#e6e6e6] min-w-[100px] text-center">{{ prod.pricePerKg
                                 || '-' }}</td>
                             <td class="px-4 py-3 border-b border-[#e6e6e6] min-w-[100px] text-center">{{ prod.quantity
-                                || '-' }}</td>
+                                || 'ไม่จำกัด' }}</td>
                             <td class="px-4 py-3 border-b border-[#e6e6e6] min-w-[140px]">
                                 <div class="flex justify-center items-center gap-3">
                                     <button class="text-blue-600 hover:underline" title="ข้อมูล"
@@ -383,13 +393,25 @@
                 </div>
                 <div class="mb-3">
                     <label class="block font-semibold mb-1 text-[#184c36]">จำนวนที่รับซื้อ (กิโลกรัม)</label>
-                    <input v-model="editForm.quantity" type="number" class="border rounded px-3 py-2 w-full" />
+
+                    <input v-if="!editForm.isUnlimited" v-model="editForm.quantity" type="number"
+                        class="border rounded px-3 py-2 w-full" :min="0" />
+
+                    <div v-else class="border rounded px-3 py-2 w-full bg-gray-100 text-gray-500">
+                        ไม่จำกัด
+                    </div>
+
+                    <div class="flex items-center mt-2">
+                        <input type="checkbox" id="unlimitedCheckbox" v-model="editForm.isUnlimited"
+                            class="mr-2 h-4 w-4">
+                        <label for="unlimitedCheckbox" class="text-sm text-gray-700">ไม่จำกัด</label>
+                    </div>
                 </div>
                 <div class="mb-3">
-                    <label class="block font-semibold mb-1 text-[#184c36]">รูปภาพสินค้าเดิม</label>
+                    <label class="block font-semibold mb-1 text-[#184c36]">รูปภาพสินค้า</label>
                     <img v-if="editingProduct && editingProduct.image" :src="editingProduct.image" alt="รูปสินค้าเดิม"
                         class="w-24 h-24 object-contain border rounded mb-2" />
-                    <label for="editProductImageInput" class="upload-button">
+                    <!-- <label for="editProductImageInput" class="upload-button">
                         <span class="upload-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor">
@@ -405,7 +427,7 @@
                     </label>
                     <div class="text-xs text-gray-500 mt-1">
                         ถ้าไม่เลือกรูปใหม่ ระบบจะใช้รูปเดิม
-                    </div>
+                    </div> -->
                     <div v-if="editProductImageFileName"
                         class="mt-2 p-2 bg-green-50 border border-green-200 rounded-lg">
                         <div class="flex items-center gap-2 text-sm text-green-700">
@@ -428,275 +450,387 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import axios from 'axios';
-import BarNoMenu from '../../components/BarNoMenu.vue';
-import { ChevronLeftIcon } from '../../icons';
 import Swal from 'sweetalert2';
+import BarNoMenu from '../../components/BarNoMenu.vue';
+
+const partner = JSON.parse(localStorage.getItem('partner') || '{}');
+const partnerId = ref(partner.id || partner._id);
 
 // State หลัก
 const categories = ref([]);
 const subcategories = ref([]);
-const productsAll = ref([]); // สินค้าทั้งหมด (สำหรับ dropdown)
-const products = ref([]);    // สินค้าของ partner (สำหรับตาราง)
+const productsAll = ref([]);
 const partnerProducts = ref([]);
+const loadingProduct = ref(false);
 
-onMounted(async () => {
-    // โหลด categories
-    const catRes = await axios.get(`${import.meta.env.VITE_API_URL}/categories`);
-    categories.value = (catRes.data || []).map(cat => ({
-        id: cat._id,
-        name: cat.name,
-        image: cat.image || null
-    }));
-
-    // โหลด subcategories
-    const subRes = await axios.get(`${import.meta.env.VITE_API_URL}/categories/subcategories/all`);
-    subcategories.value = (subRes.data || []).map(sub => ({
-        id: sub._id,
-        name: sub.name,
-        categoryId: sub.categoryId,
-        image: sub.image || null
-    }));
-
-    // โหลด products
-    const prodRes = await axios.get(`${import.meta.env.VITE_API_URL}/products`);
-    productsAll.value = (prodRes.data.products || []).map(prod => ({
-        id: prod._id,
-        name: prod.name,
-        categoryId: prod.category_id,
-        subCategoryId: prod.subCategoryId,
-        image: prod.image || '/src/assets/NoPicture.webp',
-    }));
-    await reloadPartnerProducts();
-});
-
-const reloadPartnerProducts = async () => {
-    // โหลดสินค้าของ partner จาก product-partners
-    const partner = JSON.parse(localStorage.getItem('partner') || '{}');
-    const partnerId = partner.id || partner._id || 'p1';
-    const res = await axios.get(`${import.meta.env.VITE_API_URL}/product-partners?shopId=${partnerId}`);
-    partnerProducts.value = (res.data || []).map(item => ({
-        id: item._id,
-        name: item.productId?.name,
-        pricePerKg: item.price_per_kg,
-        quantity: item.maxAmount,
-        categoryId: item.productId?.category_id,
-        subCategoryId: item.productId?.subCategoryId,
-        image: item.productId?.image || '/src/assets/NoPicture.webp',
-        productId: item.productId?._id
-    }));
-};
-
-const selectedCategoryId = ref('');
-const selectedSubCategoryId = ref('');
-const selectedProductId = ref('');
-
-// Searchable select states
+// ฟอร์มสำหรับเพิ่มสินค้าใหม่
+const selectedCategoryId = ref(null);
+const selectedSubCategoryId = ref(null);
+const selectedProductId = ref(null);
 const categorySearch = ref('');
-const categoryDropdownOpen = ref(false);
 const subCategorySearch = ref('');
-const subCategoryDropdownOpen = ref(false);
 const productSearch = ref('');
+const pricePerKg = ref(null);
+const quantity = ref(null);
+const unlimitedQuantity = ref(false);
+
+// สถานะ dropdown
+const categoryDropdownOpen = ref(false);
+const subCategoryDropdownOpen = ref(false);
 const productDropdownOpen = ref(false);
 
+// Modal สร้างประเภทหลัก
 const showCategoryModal = ref(false);
-const showSubCategoryModal = ref(false);
-const showProductModal = ref(false);
-
 const newCategory = ref({ name: '', image: null });
-const newSubCategory = ref({ name: '', image: null });
-const newProduct = ref({ name: '', image: null });
-
-const pricePerKg = ref('');
-const quantity = ref('');
-
-// ฟิลเตอร์สำหรับ searchable select
-const filteredCategories = computed(() => {
-    if (!categorySearch.value) return categories.value;
-    return categories.value.filter(cat => cat.name.toLowerCase().includes(categorySearch.value.toLowerCase()));
-});
-const filteredSubCategories = computed(() => {
-    if (!subCategorySearch.value) return subcategories.value.filter(sub => sub.categoryId === selectedCategoryId.value);
-    return subcategories.value.filter(sub => sub.categoryId === selectedCategoryId.value && sub.name.toLowerCase().includes(subCategorySearch.value.toLowerCase()));
-});
-// สำหรับ dropdown
-const filteredProducts = computed(() => {
-    return productsAll.value.filter(prod =>
-        prod.categoryId === selectedCategoryId.value &&
-        prod.subCategoryId === selectedSubCategoryId.value &&
-        (!productSearch.value || prod.name.toLowerCase().includes(productSearch.value.toLowerCase()))
-    );
-});
-// สำหรับตาราง
-const filteredProductsTable = computed(() => {
-    return partnerProducts.value.filter(prod => {
-        if (searchProductName.value && !prod.name.toLowerCase().includes(searchProductName.value.toLowerCase())) return false;
-        if (filterCategoryId.value && prod.categoryId !== filterCategoryId.value) return false;
-        if (filterSubCategoryId.value && prod.subCategoryId !== filterSubCategoryId.value) return false;
-        return true;
-    });
-});
-
-// ตรวจสอบชื่อซ้ำ (case-insensitive)
-const categoryNameExists = computed(() => {
-    return categories.value.some(cat => cat.name.trim().toLowerCase() === newCategory.value.name.trim().toLowerCase());
-});
-const subCategoryNameExists = computed(() => {
-    return subcategories.value.some(sub => sub.categoryId === selectedCategoryId.value && sub.name.trim().toLowerCase() === newSubCategory.value.name.trim().toLowerCase());
-});
-const productNameExists = computed(() => {
-    return productsAll.value.some(prod => prod.name.trim().toLowerCase() === newProduct.value.name.trim().toLowerCase());
-});
-
-// File name states
+const categoryNameExists = computed(() => categories.value.some(cat => cat.name === newCategory.value.name));
 const categoryImageFileName = ref('');
+
+// Modal สร้างประเภทย่อย
+const showSubCategoryModal = ref(false);
+const newSubCategory = ref({ name: '', image: null });
+const subCategoryNameExists = computed(() => subcategories.value.some(sub => sub.name === newSubCategory.value.name));
 const subCategoryImageFileName = ref('');
+
+// Modal สร้างสินค้า
+const showProductModal = ref(false);
+const newProduct = ref({ name: '', image: null });
+const productNameExists = computed(() => productsAll.value.some(prod => prod.name === productSearch.value));
 const productImageFileName = ref('');
 
-// Handler สำหรับอัปโหลดรูป (mock)
-function onCategoryImageChange(e) {
-    const file = e.target.files[0];
+// Modal ดู/แก้ไขสินค้า
+const viewingProduct = ref(null);
+const editingProduct = ref(null);
+const editForm = ref({ name: '', pricePerKg: null, quantity: null, isUnlimited: false, image: null, oldImage: null });
+const editProductImageFileName = ref('');
+
+// กรองและ pagination สำหรับตาราง
+const searchProductName = ref('');
+const filterCategoryId = ref('');
+const filterSubCategoryId = ref('');
+const itemsPerPage = 5;
+const currentPage = ref(1);
+
+// Computed Properties
+const filteredCategories = computed(() => {
+    return categories.value.filter(cat => cat.name.toLowerCase().includes(categorySearch.value.toLowerCase()));
+});
+
+const filteredSubCategories = computed(() => {
+    if (!selectedCategoryId.value) return [];
+    return subcategories.value
+        .filter(sub => sub.categoryId === selectedCategoryId.value)
+        .filter(sub => sub.name.toLowerCase().includes(subCategorySearch.value.toLowerCase()));
+});
+
+const filteredProducts = computed(() => {
+    if (!selectedSubCategoryId.value) return [];
+    return productsAll.value
+        .filter(prod => prod.subCategoryId === selectedSubCategoryId.value)
+        .filter(prod => prod.name.toLowerCase().includes(productSearch.value.toLowerCase()));
+});
+
+const canSave = computed(() => {
+    const hasProductAndPrice = selectedProductId.value && pricePerKg.value > 0;
+    const hasQuantity = quantity.value > 0 || unlimitedQuantity.value;
+    return hasProductAndPrice && hasQuantity;
+});
+
+const filteredPartnerProducts = computed(() => {
+    let filtered = partnerProducts.value;
+    if (searchProductName.value) {
+        filtered = filtered.filter(prod => prod.name.toLowerCase().includes(searchProductName.value.toLowerCase()));
+    }
+    if (filterCategoryId.value) {
+        filtered = filtered.filter(prod => prod.categoryId === filterCategoryId.value);
+    }
+    if (filterSubCategoryId.value) {
+        filtered = filtered.filter(prod => prod.subCategoryId === filterSubCategoryId.value);
+    }
+    return filtered;
+});
+
+const pageCount = computed(() => {
+    return Math.ceil(filteredPartnerProducts.value.length / itemsPerPage);
+});
+
+const paginatedProducts = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    return filteredPartnerProducts.value.slice(start, end);
+});
+
+watch(unlimitedQuantity, (newValue) => {
+    if (newValue) {
+        quantity.value = null; // Set to null when unlimited is checked
+    } else {
+        quantity.value = 0; // Reset to a valid number when unchecked
+    }
+});
+
+// Hooks
+onMounted(async () => {
+    await fetchAllData();
+});
+
+// Methods: Data Fetching
+async function fetchAllData() {
+    try {
+        const [catRes, subRes, prodRes] = await Promise.all([
+            axios.get(`${import.meta.env.VITE_API_URL}/categories`),
+            axios.get(`${import.meta.env.VITE_API_URL}/categories/subcategories/all`),
+            axios.get(`${import.meta.env.VITE_API_URL}/products`)
+        ]);
+
+        categories.value = (catRes.data || []).map(cat => ({ id: cat._id, name: cat.name, image: cat.image || null }));
+        subcategories.value = (subRes.data || []).map(sub => ({ id: sub._id, name: sub.name, categoryId: sub.categoryId, image: sub.image || null }));
+        productsAll.value = (prodRes.data.products || []).map(prod => ({
+            id: prod._id,
+            name: prod.name,
+            categoryId: prod.category_id,
+            subCategoryId: prod.subCategoryId,
+            image: prod.image || '/src/assets/NoPicture.webp',
+        }));
+
+        await reloadPartnerProducts();
+    } catch (error) {
+        console.error("Error fetching initial data:", error);
+        Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลเริ่มต้นได้', 'error');
+    }
+}
+
+async function reloadPartnerProducts() {
+    try {
+        const partnerRes = await axios.get(`${import.meta.env.VITE_API_URL}/product-partners`);
+        console.log("Reloading partner products:", partnerRes.data);
+        partnerProducts.value = partnerRes.data.map(item => ({
+            id: item._id,
+            productId: item.productId,
+            name: item.productId.name,
+            pricePerKg: item.price_per_kg,
+            quantity: item.maxAmount,
+            categoryId: item.productId.category_id,
+            subCategoryId: item.productId.subCategoryId,
+            image: item.productId.image || '/src/assets/NoPicture.webp'
+        }));
+        console.log(partnerProducts.value);
+    } catch (error) {
+        console.error("Error reloading partner products:", error);
+        Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดรายการสินค้าของคุณได้', 'error');
+    }
+}
+
+// Methods: Form & Dropdown
+function selectCategory(cat) {
+    selectedCategoryId.value = cat.id;
+    categorySearch.value = cat.name;
+    categoryDropdownOpen.value = false;
+    selectedSubCategoryId.value = null;
+    subCategorySearch.value = '';
+    selectedProductId.value = null;
+    productSearch.value = '';
+}
+
+function clearCategory() {
+    selectedCategoryId.value = null;
+    categorySearch.value = '';
+    selectedSubCategoryId.value = null;
+    subCategorySearch.value = '';
+    selectedProductId.value = null;
+    productSearch.value = '';
+}
+
+function selectSubCategory(sub) {
+    selectedSubCategoryId.value = sub.id;
+    subCategorySearch.value = sub.name;
+    subCategoryDropdownOpen.value = false;
+    selectedProductId.value = null;
+    productSearch.value = '';
+}
+
+function clearSubCategory() {
+    selectedSubCategoryId.value = null;
+    subCategorySearch.value = '';
+    selectedProductId.value = null;
+    productSearch.value = '';
+}
+
+function selectProduct(prod) {
+    selectedProductId.value = prod.id;
+    productSearch.value = prod.name;
+    productDropdownOpen.value = false;
+}
+
+function clearProduct() {
+    selectedProductId.value = null;
+    productSearch.value = '';
+}
+
+// Methods: Modals
+function onCategoryImageChange(event) {
+    const file = event.target.files[0];
     if (file) {
         newCategory.value.image = file;
         categoryImageFileName.value = file.name;
     }
 }
-function onSubCategoryImageChange(e) {
-    const file = e.target.files[0];
+
+function onSubCategoryImageChange(event) {
+    const file = event.target.files[0];
     if (file) {
         newSubCategory.value.image = file;
         subCategoryImageFileName.value = file.name;
     }
 }
-function onProductImageChange(e) {
-    const file = e.target.files[0];
+
+function onProductImageChange(event) {
+    const file = event.target.files[0];
     if (file) {
         newProduct.value.image = file;
         productImageFileName.value = file.name;
     }
 }
 
-// Handler สำหรับ searchable select
-function selectCategory(cat) {
-    selectedCategoryId.value = cat.id;
-    categorySearch.value = cat.name;
-    categoryDropdownOpen.value = false;
-    selectedSubCategoryId.value = '';
-    subCategorySearch.value = '';
-    selectedProductId.value = '';
-    productSearch.value = '';
-}
-function selectSubCategory(sub) {
-    selectedSubCategoryId.value = sub.id;
-    subCategorySearch.value = sub.name;
-    subCategoryDropdownOpen.value = false;
-    selectedProductId.value = '';
-    productSearch.value = '';
-}
-// ปรับ selectProduct ให้ใช้ productsAll
-function selectProduct(prod) {
-    selectedProductId.value = prod.id;
-    productSearch.value = prod.name;
-    productDropdownOpen.value = false;
-    pricePerKg.value = '';
-    quantity.value = '';
-    newProduct.value.image = null;
-    productImageFileName.value = '';
+function onEditProductImageChange(event) {
+    const file = event.target.files[0];
+    if (file) {
+        editForm.value.image = file;
+        editProductImageFileName.value = file.name;
+    }
 }
 
-// เงื่อนไขปุ่มบันทึก
-const canSave = computed(() => {
-    return (
-        selectedCategoryId.value &&
-        selectedSubCategoryId.value &&
-        (
-            selectedProductId.value ||
-            (!productNameExists.value && productSearch.value)
-        ) &&
-        pricePerKg.value &&
-        quantity.value
-    );
-});
+function closeViewProduct() {
+    viewingProduct.value = null;
+}
 
-// Loading states สำหรับการสร้างข้อมูล
-const loadingCategory = ref(false);
-const loadingSubCategory = ref(false);
-const loadingProduct = ref(false);
+function closeEditProduct() {
+    editingProduct.value = null;
+    editForm.value = { name: '', pricePerKg: null, quantity: null, image: null, oldImage: null };
+    editProductImageFileName.value = '';
+}
 
-// Handler สำหรับสร้างใหม่ (mock)
+// Methods: CRUD
 async function handleCreateCategory() {
-    if (categoryNameExists.value || !newCategory.value.name) return;
-    loadingCategory.value = true;
-    const formData = new FormData();
-    formData.append('name', newCategory.value.name);
-    if (newCategory.value.image) formData.append('image', newCategory.value.image);
+    if (categoryNameExists.value) {
+        Swal.fire('สร้างไม่สำเร็จ', 'ชื่อประเภทหลักนี้มีอยู่แล้ว', 'warning');
+        return;
+    }
+    if (!newCategory.value.name) {
+        Swal.fire('สร้างไม่สำเร็จ', 'กรุณากรอกชื่อประเภทหลัก', 'warning');
+        return;
+    }
+    loadingProduct.value = true;
     try {
-        await axios.post(`${import.meta.env.VITE_API_URL}/categories`, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
+        const formData = new FormData();
+        formData.append('name', newCategory.value.name);
+        if (newCategory.value.image) {
+            formData.append('image', newCategory.value.image);
+        }
+
+        const res = await axios.post(`${import.meta.env.VITE_API_URL}/categories`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        categories.value.push({
+            id: res.data._id,
+            name: res.data.name,
+            image: res.data.image
         });
         showCategoryModal.value = false;
         newCategory.value = { name: '', image: null };
         categoryImageFileName.value = '';
-        // reload categories
-        const catRes = await axios.get(`${import.meta.env.VITE_API_URL}/categories`);
-        categories.value = (catRes.data || []).map(cat => ({
-            id: cat._id, name: cat.name, image: cat.image || null
-        }));
+        Swal.fire('สำเร็จ', 'สร้างประเภทหลักเรียบร้อย', 'success');
+    } catch (error) {
+        console.error("Error creating category:", error);
+        Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถสร้างประเภทหลักได้', 'error');
     } finally {
-        loadingCategory.value = false;
+        loadingProduct.value = false;
     }
 }
 
 async function handleCreateSubCategory() {
-    if (subCategoryNameExists.value || !newSubCategory.value.name) return;
-    loadingSubCategory.value = true;
-    const formData = new FormData();
-    formData.append('name', newSubCategory.value.name);
-    formData.append('categoryId', selectedCategoryId.value);
-    if (newSubCategory.value.image) formData.append('image', newSubCategory.value.image);
+    if (subCategoryNameExists.value) {
+        Swal.fire('สร้างไม่สำเร็จ', 'ชื่อประเภทย่อยนี้มีอยู่แล้ว', 'warning');
+        return;
+    }
+    if (!newSubCategory.value.name) {
+        Swal.fire('สร้างไม่สำเร็จ', 'กรุณากรอกชื่อประเภทย่อย', 'warning');
+        return;
+    }
+    loadingProduct.value = true;
     try {
-        await axios.post(`${import.meta.env.VITE_API_URL}/categories/subcategories`, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
+        const formData = new FormData();
+        formData.append('name', newSubCategory.value.name);
+        formData.append('categoryId', selectedCategoryId.value);
+        if (newSubCategory.value.image) {
+            formData.append('image', newSubCategory.value.image);
+        }
+
+        const res = await axios.post(`${import.meta.env.VITE_API_URL}/categories/subcategories`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        subcategories.value.push({
+            id: res.data._id,
+            name: res.data.name,
+            categoryId: res.data.categoryId,
+            image: res.data.image
         });
         showSubCategoryModal.value = false;
         newSubCategory.value = { name: '', image: null };
         subCategoryImageFileName.value = '';
-        // reload subcategories
-        const subRes = await axios.get(`${import.meta.env.VITE_API_URL}/categories/subcategories/all`);
-        subcategories.value = (subRes.data || []).map(sub => ({
-            id: sub._id, name: sub.name, categoryId: sub.categoryId, image: sub.image || null
-        }));
+        Swal.fire('สำเร็จ', 'สร้างประเภทย่อยเรียบร้อย', 'success');
+    } catch (error) {
+        console.error("Error creating subcategory:", error);
+        Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถสร้างประเภทย่อยได้', 'error');
     } finally {
-        loadingSubCategory.value = false;
+        loadingProduct.value = false;
     }
 }
 
 async function handleCreateProductFromModal() {
+    if (productNameExists.value) {
+        Swal.fire('สร้างไม่สำเร็จ', 'ชื่อสินค้านี้มีอยู่แล้ว', 'warning');
+        return;
+    }
+    if (!newProduct.value.name) {
+        Swal.fire('สร้างไม่สำเร็จ', 'กรุณากรอกชื่อสินค้า', 'warning');
+        return;
+    }
     loadingProduct.value = true;
     try {
-        if (productNameExists.value || !newProduct.value.name) return;
         const formData = new FormData();
         formData.append('name', newProduct.value.name);
         formData.append('category_id', selectedCategoryId.value);
         formData.append('subCategoryId', selectedSubCategoryId.value);
-        if (newProduct.value.image) formData.append('image', newProduct.value.image);
-        await axios.post(`${import.meta.env.VITE_API_URL}/products`, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
+        if (newProduct.value.image) {
+            formData.append('image', newProduct.value.image);
+        }
+
+        const res = await axios.post(`${import.meta.env.VITE_API_URL}/products`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
         });
+        productsAll.value.push({
+            id: res.data._id,
+            name: res.data.name,
+            categoryId: res.data.category_id,
+            subCategoryId: res.data.subCategoryId,
+            image: res.data.image
+        });
+        selectedProductId.value = res.data._id;
+        productSearch.value = res.data.name;
         showProductModal.value = false;
         newProduct.value = { name: '', image: null };
         productImageFileName.value = '';
-        // reload products
-        const prodRes = await axios.get(`${import.meta.env.VITE_API_URL}/products`);
-        productsAll.value = (prodRes.data.products || []).map(prod => ({
-            id: prod._id,
-            name: prod.name,
-            categoryId: prod.category_id,
-            subCategoryId: prod.subCategoryId,
-            image: prod.image || '/src/assets/NoPicture.webp'
-        }));
-        await Swal.fire('สำเร็จ', 'สร้างสินค้าใหม่สำเร็จ', 'success');
+        Swal.fire('สำเร็จ', 'สร้างสินค้าเรียบร้อย', 'success');
+    } catch (error) {
+        console.error("Error creating product:", error);
+        Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถสร้างสินค้าได้', 'error');
     } finally {
         loadingProduct.value = false;
     }
@@ -705,237 +839,151 @@ async function handleCreateProductFromModal() {
 async function handleCreateProductPartner() {
     loadingProduct.value = true;
     try {
-        let productId = selectedProductId.value;
-        // ถ้าไม่มี productId ห้ามส่ง
-        if (!productId) {
-            await Swal.fire('เกิดข้อผิดพลาด', 'กรุณาเลือกสินค้าก่อน', 'error');
-            return;
-        }
-        const partner = JSON.parse(localStorage.getItem('partner') || '{}');
-        const partnerId = partner.id || partner._id || 'p1';
-        await axios.post(`${import.meta.env.VITE_API_URL}/product-partners`, {
-            shopId: partnerId,
-            productId,
-            maxAmount: quantity.value,
-            price_per_kg: pricePerKg.value
-        });
+        const payload = {
+            productId: selectedProductId.value,
+            price_per_kg: pricePerKg.value,
+            maxAmount: unlimitedQuantity.value ? null : quantity.value,
+            shopId: partnerId.value
+        };
+        const res = await axios.post(`${import.meta.env.VITE_API_URL}/product-partners`, payload);
+        Swal.fire('สำเร็จ', 'เพิ่มสินค้าเรียบร้อย', 'success');
         await reloadPartnerProducts();
-        // reset
-        selectedProductId.value = '';
-        productSearch.value = '';
-        pricePerKg.value = '';
-        quantity.value = '';
-        await Swal.fire('สำเร็จ', 'บันทึกสินค้าสำเร็จ', 'success');
+
+        // Clear form
+        clearCategory();
+        pricePerKg.value = null;
+        quantity.value = null;
     } catch (error) {
-        await Swal.fire('เกิดข้อผิดพลาด', error?.response?.data?.error || error.message, 'error');
+        console.error("Error creating partner product:", error);
+        Swal.fire('เกิดข้อผิดพลาด', error.response?.data?.message || 'ไม่สามารถเพิ่มสินค้าได้', 'error');
     } finally {
         loadingProduct.value = false;
     }
 }
 
-// async function handleCreateProduct() {
-//     loadingProduct.value = true;
+function handleViewProduct(prod) {
+    viewingProduct.value = prod;
+}
+
+function handleEditProduct(prod) {
+    editingProduct.value = prod;
+    editForm.value.name = prod.name;
+    editForm.value.pricePerKg = prod.pricePerKg;
+    editForm.value.isUnlimited = prod.quantity === null; // แก้ไขที่นี่
+    editForm.value.quantity = prod.quantity !== null ? prod.quantity : 0;
+    editForm.value.oldImage = prod.image;
+    editForm.value.image = null;
+    editProductImageFileName.value = '';
+}
+
+// async function handleUpdateProduct() {
+//     if (!editingProduct.value.id) return;
 //     try {
-//         let productId = selectedProductId.value;
-//         // ถ้าพิมพ์ชื่อใหม่ (ไม่มีในระบบ) ให้สร้างสินค้าใหม่ก่อน
-//         if (!productNameExists.value && productSearch.value) {
-//             const formData = new FormData();
-//             formData.append('name', productSearch.value);
-//             formData.append('category_id', selectedCategoryId.value);
-//             formData.append('subCategoryId', selectedSubCategoryId.value);
-//             if (newProduct.value.image) formData.append('image', newProduct.value.image);
-//             const res = await axios.post(`${import.meta.env.VITE_API_URL}/products`, formData, {
-//                 headers: { 'Content-Type': 'multipart/form-data' }
-//             });
-//             productId = res.data._id;
-//             // โหลด productsAll ใหม่
-//             const prodRes = await axios.get(`${import.meta.env.VITE_API_URL}/products`);
-//             productsAll.value = (prodRes.data.products || []).map(prod => ({
-//                 id: prod._id,
-//                 name: prod.name,
-//                 categoryId: prod.category_id,
-//                 subCategoryId: prod.subCategoryId,
-//                 image: prod.image || '/src/assets/NoPicture.webp'
-//             }));
+//         const formData = new FormData();
+//         formData.append('shopId', partnerId.value);
+//         formData.append('productId', editingProduct.value.productId);
+//         formData.append('price_per_kg', editForm.value.pricePerKg);
+//         if (editForm.value.isUnlimited) {
+//             formData.append('maxAmount', 8888888);
+//         } else {
+//             // ถ้าไม่ได้เลือก 'ไม่จำกัด' ให้ส่งค่า quantity
+//             // ตรวจสอบให้แน่ใจว่า quantity มีค่ามากกว่า 0
+//             formData.append('maxAmount', editForm.value.quantity > 0 ? editForm.value.quantity : 0);
 //         }
-//         // สร้าง product-partner
-//         const partner = JSON.parse(localStorage.getItem('partner') || '{}');
-//         const partnerId = partner.id || partner._id || 'p1';
-//         await axios.post(`${import.meta.env.VITE_API_URL}/product-partners`, {
-//             shopId: partnerId,
-//             productId,
-//             maxAmount: quantity.value,
-//             price_per_kg: pricePerKg.value
+
+//         const res = await axios.put(`${import.meta.env.VITE_API_URL}/product-partners/${editingProduct.value.id}`, formData, {
+//             headers: {
+//                 'Content-Type': 'multipart/form-data'
+//             }
 //         });
+
+//         Swal.fire('สำเร็จ', 'แก้ไขสินค้าเรียบร้อย', 'success');
+//         closeEditProduct();
 //         await reloadPartnerProducts();
-//         // reset
-//         selectedProductId.value = '';
-//         productSearch.value = '';
-//         pricePerKg.value = '';
-//         quantity.value = '';
-//         newProduct.value.image = null;
-//         productImageFileName.value = '';
-//         await Swal.fire('สำเร็จ', 'บันทึกสินค้าสำเร็จ', 'success');
 //     } catch (error) {
-//         await Swal.fire('เกิดข้อผิดพลาด', error?.response?.data?.error || error.message, 'error');
-//     } finally {
-//         loadingProduct.value = false;
+//         console.error("Error updating partner product:", error);
+//         Swal.fire('เกิดข้อผิดพลาด', error.response?.data?.message || 'ไม่สามารถแก้ไขสินค้าได้', 'error');
 //     }
 // }
 
-// ฟังก์ชันล้างค่าแต่ละช่อง
-function clearCategory() {
-    selectedCategoryId.value = '';
-    categorySearch.value = '';
-    selectedSubCategoryId.value = '';
-    subCategorySearch.value = '';
-    selectedProductId.value = '';
-    productSearch.value = '';
-}
-function clearSubCategory() {
-    selectedSubCategoryId.value = '';
-    subCategorySearch.value = '';
-    selectedProductId.value = '';
-    productSearch.value = '';
-}
-function clearProduct() {
-    selectedProductId.value = '';
-    productSearch.value = '';
-}
+// ในส่วนของ <script setup> ในไฟล์ Vue.js ของคุณ
 
-// โหลด partnerId จาก localStorage
-let partner = {};
-if (typeof window !== 'undefined') {
-    partner = JSON.parse(localStorage.getItem('partner') || '{}');
-}
-const partnerId = ref(partner.id || partner._id || 'p1'); // mock fallback
+async function handleUpdateProduct() {
+    if (!editingProduct.value.id) return;
+    try {
+        const payload = {
+            shopId: partnerId.value,
+            productId: editingProduct.value.productId,
+            price_per_kg: editForm.value.pricePerKg
+        };
+        
+        // กำหนดค่า maxAmount ตามเงื่อนไข
+        if (editForm.value.isUnlimited) {
+            payload.maxAmount = null;
+        } else {
+            payload.maxAmount = editForm.value.quantity > 0 ? editForm.value.quantity : 0;
+        }
+        
+        // ✅ เปลี่ยน axios.put ให้ส่ง payload ในรูปแบบ JSON
+        const res = await axios.put(`${import.meta.env.VITE_API_URL}/product-partners/${editingProduct.value.id}`, payload);
 
-// filter state
-const searchProductName = ref('');
-const filterCategoryId = ref('');
-const filterSubCategoryId = ref('');
-
-// filter subcategory ตาม category ที่เลือก
-const subcategoriesFilteredByCategory = computed(() => {
-    if (!filterCategoryId.value) return subcategories.value;
-    return subcategories.value.filter(sub => sub.categoryId === filterCategoryId.value);
-});
-
-// ใน handleCreateProduct, handleDeleteProduct ให้เรียก await reloadProducts() แทนการดึง products.value ตรง ๆ
-async function reloadProducts() {
-    const prodRes = await axios.get(`${import.meta.env.VITE_API_URL}/products`);
-    productsAll.value = (prodRes.data.products || []).map(prod => ({
-        id: prod._id,
-        name: prod.name,
-        pricePerKg: prod.price_per_kg,
-        quantity: prod.maxAmount,
-        categoryId: prod.category_id,
-        subCategoryId: prod.subCategoryId,
-        image: prod.image || '/src/assets/NoPicture.webp',
-        shopId: prod.shopId
-    }));
-    products.value = productsAll.value.filter(
-        prod => (prod.shopId?._id || prod.shopId) === partnerId.value
-    );
+        Swal.fire('สำเร็จ', 'แก้ไขสินค้าเรียบร้อย', 'success');
+        closeEditProduct();
+        await reloadPartnerProducts();
+    } catch (error) {
+        console.error("Error updating partner product:", error);
+        Swal.fire('เกิดข้อผิดพลาด', error.response?.data?.message || 'ไม่สามารถแก้ไขสินค้าได้', 'error');
+    }
 }
 
-const currentPage = ref(1);
-const pageSize = 10;
-const pageCount = computed(() => Math.ceil(filteredProductsTable.value.length / pageSize));
-const paginatedProducts = computed(() =>
-    filteredProductsTable.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize)
-);
+async function handleDeleteProduct(id) {
+    const result = await Swal.fire({
+        title: 'คุณแน่ใจหรือไม่?',
+        text: 'คุณต้องการลบสินค้าชิ้นนี้ใช่ไหม?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#184c36',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'ใช่, ลบเลย!',
+        cancelButtonText: 'ยกเลิก'
+    });
+
+    if (result.isConfirmed) {
+        try {
+            await axios.delete(`${import.meta.env.VITE_API_URL}/product-partners/${id}`);
+            Swal.fire('ลบแล้ว!', 'สินค้าถูกลบเรียบร้อย', 'success');
+            await reloadPartnerProducts();
+        } catch (error) {
+            console.error("Error deleting partner product:", error);
+            Swal.fire('เกิดข้อผิดพลาด', error.response?.data?.message || 'ไม่สามารถลบสินค้าได้', 'error');
+        }
+    }
+}
+
+// Methods: Pagination
 function goToPage(page) {
     if (page >= 1 && page <= pageCount.value) {
         currentPage.value = page;
-        setTimeout(() => {
-            const table = document.querySelector('table');
-            if (table) table.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 0);
     }
 }
 
-const viewingProduct = ref(null); // สำหรับ modal ดูข้อมูล
-const editingProduct = ref(null); // สำหรับ modal แก้ไข
-const editForm = ref({ name: '', pricePerKg: '', quantity: '', image: null });
-const editProductImageFileName = ref('');
-function onEditProductImageChange(e) {
-    const file = e.target.files[0];
-    if (file) {
-        editForm.value.image = file;
-        editProductImageFileName.value = file.name;
-    }
-}
-
-function handleViewProduct(prod) {
-    // ค้นหาสินค้าจาก productsAll ด้วย id เพื่อให้ได้ object ที่ map image แล้ว
-    const found = productsAll.value.find(p => p.id === prod.id);
-    viewingProduct.value = found || prod;
-    console.log(viewingProduct.value);
-}
-function closeViewProduct() {
-    viewingProduct.value = null;
-}
-function handleEditProduct(prod) {
-    editingProduct.value = prod;
-    editForm.value = {
-        name: prod.name,
-        pricePerKg: prod.pricePerKg,
-        quantity: prod.quantity,
-        image: null // ไม่โชว์รูปเดิม ให้เลือกใหม่เท่านั้น
-    };
-}
-function closeEditProduct() {
-    editingProduct.value = null;
-}
-async function handleUpdateProduct() {
-    if (!editingProduct.value) return;
-    const formData = new FormData();
-    formData.append('name', editForm.value.name);
-    formData.append('price_per_kg', editForm.value.pricePerKg);
-    formData.append('maxAmount', editForm.value.quantity);
-    if (editForm.value.image) formData.append('image', editForm.value.image);
-    // ส่ง category_id, subCategoryId, shopId เดิมกลับไปด้วย
-    formData.append('category_id', editingProduct.value.categoryId);
-    formData.append('subCategoryId', editingProduct.value.subCategoryId);
-    formData.append('shopId', editingProduct.value.shopId);
-    try {
-        await axios.put(`${import.meta.env.VITE_API_URL}/products/${editingProduct.value.id}`, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        });
-        await reloadProducts();
-        currentPage.value = 1;
-        editingProduct.value = null;
-        Swal.fire('สำเร็จ', 'แก้ไขสินค้าเรียบร้อยแล้ว', 'success');
-    } catch (error) {
-        Swal.fire('เกิดข้อผิดพลาด', error?.response?.data?.error || error.message, 'error');
-    }
-}
-async function handleDeleteProduct(prodId) {
-    const result = await Swal.fire({
-        title: 'ยืนยันการลบสินค้า?',
-        text: 'คุณต้องการลบสินค้านี้หรือไม่',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'ลบ',
-        cancelButtonText: 'ยกเลิก'
-    });
-    if (result.isConfirmed) {
-        await axios.delete(`${import.meta.env.VITE_API_URL}/products/${prodId}`);
-        await reloadProducts();
-        currentPage.value = 1;
-        Swal.fire('ลบสำเร็จ', 'ลบสินค้าเรียบร้อยแล้ว', 'success');
-    }
-}
-
+// Helper methods
 function getCategoryName(id) {
     const cat = categories.value.find(c => c.id === id);
-    return cat ? cat.name : '-';
+    return cat ? cat.name : 'ไม่ระบุ';
 }
+
 function getSubCategoryName(id) {
     const sub = subcategories.value.find(s => s.id === id);
-    return sub ? sub.name : '-';
+    return sub ? sub.name : 'ไม่ระบุ';
 }
+
+const subcategoriesFilteredByCategory = computed(() => {
+    if (!filterCategoryId.value) {
+        return subcategories.value;
+    }
+    return subcategories.value.filter(sub => sub.categoryId === filterCategoryId.value);
+});
 </script>
 
 <style scoped>

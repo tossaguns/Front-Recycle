@@ -7,6 +7,14 @@
           <h1 class="text-3xl font-bold text-[#184c36] mb-2">จัดการประเภทสินค้า</h1>
           <p class="text-[#666] text-lg">ประเภทหลัก ประเภทย่อย และสินค้า</p>
         </div>
+        <div class="flex gap-2">
+        <button @click="openAddModal"
+          class="bg-[#50b3e8] hover:bg-[#7fc8f0] text-white px-6 py-2 rounded shadow flex items-center gap-2">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 4v16m8-8H4" />
+          </svg>
+          เพิ่มใหม่
+        </button>
         <button @click="fetchAll"
           class="bg-green-500 hover:bg-green-700 text-white px-6 py-2 rounded shadow flex items-center gap-2">
           <svg :class="loading ? 'animate-spin' : ''" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -17,6 +25,7 @@
           </svg>
           รีเฟรชข้อมูล
         </button>
+      </div>
       </div>
       <div v-if="loading" class="flex justify-center items-center py-16">
         <svg class="animate-spin h-10 w-10 text-[#184c36]" fill="none" viewBox="0 0 24 24">
@@ -186,6 +195,80 @@
           </div>
         </div>
       </div>
+      <div v-if="showAddModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+  <div class="bg-white rounded-xl shadow p-8 max-w-md w-full mx-3">
+    <h3 class="text-xl font-bold text-[#184c36] mb-4">เพิ่ม {{ addFormTypeText }}</h3>
+
+    <!-- เลือกประเภทสิ่งที่จะเพิ่ม -->
+    <label class="block mb-2 font-semibold text-[#184c36]">เลือกประเภท</label>
+    <select v-model="addForm.type" class="border rounded px-3 py-2 w-full mb-4">
+      <option value="category">ประเภทหลัก</option>
+      <option value="subcategory">ประเภทย่อย</option>
+      <option value="product">สินค้า</option>
+    </select>
+
+    <!-- ถ้าเป็น subcategory หรือ product ต้องเลือก category -->
+    <div v-if="addForm.type === 'subcategory' || addForm.type === 'product'">
+      <label class="block mb-2 font-semibold text-[#184c36]">ประเภทหลัก</label>
+      <select v-model="addForm.categoryId" class="border rounded px-3 py-2 w-full mb-4">
+        <option v-for="cat in categories" :key="cat._id" :value="cat._id">{{ cat.name }}</option>
+      </select>
+    </div>
+
+    <!-- ถ้าเป็น product ต้องเลือก subcategory -->
+    <div v-if="addForm.type === 'product'">
+      <label class="block mb-2 font-semibold text-[#184c36]">ประเภทย่อย</label>
+      <select v-model="addForm.subCategoryId" class="border rounded px-3 py-2 w-full mb-4">
+        <option v-for="sub in subcategories.filter(s => s.categoryId === addForm.categoryId)" :key="sub._id"
+          :value="sub._id">{{ sub.name }}</option>
+      </select>
+    </div>
+
+    <!-- ชื่อ -->
+    <label class="block mb-2 font-semibold text-[#184c36]">ชื่อ</label>
+    <input v-model="addForm.name" class="border rounded px-3 py-2 w-full mb-4" />
+
+    <!-- รูป -->
+    <!-- <label class="block mb-2 font-semibold text-[#184c36]">เลือกรูปภาพ</label>
+    <input type="file" @change="handleFileUpload" class="mb-4" /> -->
+    <!-- ปุ่มอัปโหลดรูป -->
+<div class="relative mb-4">
+  <label for="addImageInput" class="upload-button block cursor-pointer bg-green-50 border border-green-200 rounded-lg p-4 text-center hover:bg-green-100 transition">
+    <span class="upload-icon flex justify-center mb-1 text-green-600">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+      </svg>
+    </span>
+    <span class="upload-text block font-semibold text-green-700">เลือกรูปภาพ</span>
+    <span class="upload-hint text-xs text-gray-500">JPG, PNG, GIF (สูงสุด 2MB)</span>
+    <input id="addImageInput" type="file" accept="image/*"
+      class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+      @change="onAddImageChange" />
+  </label>
+
+  <!-- แสดงชื่อไฟล์ -->
+  <div v-if="addImageFileName"
+    class="mt-2 p-2 bg-green-50 border border-green-200 rounded-lg">
+    <div class="flex items-center gap-2 text-sm text-green-700">
+      <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor"
+        viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <span class="truncate">{{ addImageFileName }}</span>
+    </div>
+  </div>
+</div>
+
+    <div class="flex justify-end gap-2">
+      <button class="px-4 py-2 text-[#184c36]" @click="showAddModal = false">ยกเลิก</button>
+      <button class="bg-[#184c36] hover:bg-green-700 text-white px-4 py-2 rounded shadow-sm"
+        @click="handleAddSave">บันทึก</button>
+    </div>
+  </div>
+</div>
     </main>
   </div>
 </template>
@@ -229,6 +312,8 @@ const showEditModal = ref(false);
 const editTarget = ref(null);
 const editTargetType = ref('');
 const editForm = reactive({});
+const showAddModal = ref(false);
+const addImageFileName = ref('');
 
 const deleteTargetTypeText = computed(() => {
   if (deleteTargetType.value === 'category') return 'ประเภทหลัก';
@@ -324,6 +409,7 @@ async function handleEditSave() {
         });
       }
     } else if (editTargetType.value === 'product') {
+      console.log(editForm);
       await axios.put(`${import.meta.env.VITE_API_URL}/products/${editTarget.value._id}`, { category_id: editForm.categoryId, subCategoryId: editForm.subCategoryId });
     }
     showEditModal.value = false;
@@ -331,6 +417,84 @@ async function handleEditSave() {
     Swal.fire('สำเร็จ', 'บันทึกข้อมูลเรียบร้อย', 'success');
   } catch (e) {
     Swal.fire('เกิดข้อผิดพลาด', e.message, 'error');
+  }
+}
+
+const addForm = reactive({
+  type: 'category',
+  categoryId: '',
+  subCategoryId: '',
+  name: '',
+  imageFile: null
+});
+
+const addFormTypeText = computed(() => {
+  if (addForm.type === 'category') return 'ประเภทหลัก';
+  if (addForm.type === 'subcategory') return 'ประเภทย่อย';
+  if (addForm.type === 'product') return 'สินค้า';
+  return '';
+});
+
+function openAddModal() {
+  addForm.type = 'category';
+  addForm.categoryId = '';
+  addForm.subCategoryId = '';
+  addForm.name = '';
+  addForm.imageFile = null;
+  showAddModal.value = true;
+}
+
+async function handleAddSave() {
+  try {
+    Swal.fire({
+      title: 'กำลังบันทึก...',
+      text: 'กรุณารอสักครู่',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+    const formData = new FormData();
+
+    // ใส่ไฟล์ให้ตรงกับ field name ที่ backend ใช้
+    if (addForm.imageFile) {
+      formData.append('image', addForm.imageFile);
+    }
+
+    // ใส่ข้อมูลอื่น ๆ
+    formData.append('name', addForm.name);
+
+    let url = '';
+    if (addForm.type === 'category') {
+      url = `${import.meta.env.VITE_API_URL}/categories`;
+    }
+    if (addForm.type === 'subcategory') {
+      formData.append('categoryId', addForm.categoryId);
+      url = `${import.meta.env.VITE_API_URL}/categories/subcategories`;
+    }
+    if (addForm.type === 'product') {
+      formData.append('category_id', addForm.categoryId);
+      formData.append('subCategoryId', addForm.subCategoryId);
+      url = `${import.meta.env.VITE_API_URL}/products`;
+    }
+
+    await axios.post(url, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+
+    showAddModal.value = false;
+    
+    Swal.fire('สำเร็จ', 'เพิ่มข้อมูลเรียบร้อย', 'success');
+  } catch (e) {
+    Swal.fire('เกิดข้อผิดพลาด', e.message, 'error');
+  }
+}
+
+function onAddImageChange(e) {
+  const file = e.target.files[0];
+  if (file) {
+    addForm.imageFile = file;
+    addImageFileName.value = file.name;
   }
 }
 </script>

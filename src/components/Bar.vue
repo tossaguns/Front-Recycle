@@ -1,5 +1,6 @@
 <template>
-    <header class="fixed top-0 left-0 w-full z-50 bg-white shadow-md border-b border-[#e6e6e6] flex flex-col items-center">
+    <header
+        class="fixed top-0 left-0 w-full z-50 bg-white shadow-md border-b border-[#e6e6e6] flex flex-col items-center">
         <div class="w-full flex items-center justify-between px-6 py-3 gap-4">
             <!-- Logo -->
             <div class="flex items-center cursor-pointer" @click="goToHome">
@@ -64,6 +65,34 @@
                         @click="$router.push('/category')">หมวดหมู่สินค้า</li>
                     <li :class="['menu-underline', $route.path === '/partnerstores' ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : '', 'cursor-pointer']"
                         @click="$router.push('/partnerstores')">ร้านค้า</li>
+                    <li v-if="authStore.isAuthenticated" class="relative group cursor-pointer">
+                        <!-- ปุ่มหลัก -->
+                        <div :class="[
+                            'menu-underline',
+                            ($route.path === '/pos/buyorder' || $route.path === '/pos/sellorder' || $route.path === '/pos/storeproduct')
+                                ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]'
+                                : ''
+                        ]">
+                            Pos
+                        </div>
+
+                        <!-- เมนูย่อย (โผล่มาเมื่อ hover หรือคลิก) -->
+                        <ul
+                            class="absolute left-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 translate-y-2 pointer-events-none group-hover:pointer-events-auto transition-all duration-200 z-50">
+                            <li @click="$router.push('/pos/buyorder')"
+                                class="px-4 py-2 hover:bg-[#e6f7e6] cursor-pointer">
+                                รับซื้อสินค้า
+                            </li>
+                            <li @click="$router.push('/pos/sellorder')"
+                                class="px-4 py-2 hover:bg-[#e6f7e6] cursor-pointer">
+                                ขายสินค้า
+                            </li>
+                            <li @click="$router.push('/pos/storeproduct')"
+                                class="px-4 py-2 hover:bg-[#e6f7e6] cursor-pointer">
+                                จัดการสินค้าในสต็อก
+                            </li>
+                        </ul>
+                    </li>
                     <li v-if="authStore.isAuthenticated"
                         :class="['menu-underline', $route.path === '/profilemember' || $route.path === '/profilepartner' ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : '', 'cursor-pointer']"
                         @click="goToAccountSettings">การตั้งค่าบัญชี</li>
@@ -88,6 +117,33 @@
                     @click="$router.push('/category')">หมวดหมู่สินค้า</li>
                 <li :class="['menu-underline', $route.path === '/partnerstores' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
                     @click="$router.push('/partnerstores')">ร้านค้า</li>
+                <li v-if="authStore.isAuthenticated" class="relative group">
+                    <span class="menu-underline cursor-pointer block"
+                        :class="$route.path.startsWith('/pos') ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : ''">
+                        POS
+                    </span>
+
+                    <!-- เมนูย่อย -->
+                    <ul
+                        class="absolute left-0 mt-1 w-48 bg-white shadow-lg rounded-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200 z-50">
+                        <li>
+                            <router-link to="/pos/buyorder" class="block px-4 py-2 text-[#184c36] hover:bg-slate-100">
+                                รับซื้อสินค้า
+                            </router-link>
+                        </li>
+                        <li>
+                            <router-link to="/pos/sellorder" class="block px-4 py-2 text-[#184c36] hover:bg-slate-100">
+                                ขายสินค้า
+                            </router-link>
+                        </li>
+                        <li>
+                            <router-link to="/pos/storeproduct"
+                                class="block px-4 py-2 text-[#184c36] hover:bg-slate-100">
+                                จัดการสินค้าในสต็อก
+                            </router-link>
+                        </li>
+                    </ul>
+                </li>
                 <li v-if="authStore.isAuthenticated"
                     :class="['menu-underline', $route.path === '/profilemember' || $route.path === '/profilepartner' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
                     @click="goToAccountSettings">การตั้งค่าบัญชี</li>
@@ -149,7 +205,7 @@ function decodeJWT(token) {
     try {
         const base64Url = token.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
             return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
         }).join(''));
         return JSON.parse(jsonPayload);
@@ -163,10 +219,10 @@ function decodeJWT(token) {
 function getUserRole() {
     const token = localStorage.getItem('token');
     if (!token) return null;
-    
+
     const decoded = decodeJWT(token);
     if (!decoded) return null;
-    
+
     // ตรวจสอบ role จาก token (ปรับตามโครงสร้าง token ของคุณ)
     return decoded.role || decoded.userRole || null;
 }
@@ -174,7 +230,7 @@ function getUserRole() {
 function goToHome() {
     // ตรวจสอบ role ของผู้ใช้จาก JWT token
     const userRole = getUserRole();
-    
+
     if (userRole === 'partner') {
         // ถ้าเป็น partner ให้ไปหน้า HomePartner
         router.push('/homepartner');
@@ -190,13 +246,29 @@ function goToHome() {
 function goToAccountSettings() {
     // ตรวจสอบ role ของผู้ใช้จาก JWT token
     const userRole = getUserRole();
-    
+
     if (userRole === 'partner') {
         // ถ้าเป็น partner ให้ไปหน้า ProfilePartner
         router.push('/profilepartner');
     } else if (userRole === 'member') {
         // ถ้าเป็น member ให้ไปหน้า ProfileMember
         router.push('/profilemember');
+    }
+}
+
+function goToPos() {
+    const userRole = getUserRole();
+    // ตรวจสอบ role ของผู้ใช้จาก authStore
+    if (userRole === 'partner' || userRole === 'employee') {
+        // ถ้าเป็น partner หรือ employee ให้ไปหน้า Pos
+        router.push('/pos/buyorder');
+    } else {
+        // ถ้าไม่ใช่ role ที่กำหนด ให้แสดงข้อความแจ้งเตือน
+        Swal.fire({
+            icon: 'warning',
+            title: 'ไม่สามารถเข้าถึงได้',
+            text: 'คุณไม่มีสิทธิ์เข้าถึงหน้าดังกล่าว'
+        });
     }
 }
 

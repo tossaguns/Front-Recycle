@@ -42,6 +42,11 @@ import ManageMember from "../views/Admin/ManageMember.vue";
 import OrderView from "../views/Admin/OrderView.vue";
 import ManageCategory from "../views/Admin/ManageCategory.vue";
 
+// Pos
+import BuyOrder from "../views/pos/BuyOrderForm.vue";
+import SellOrder from "../views/pos/SellOrderForm.vue";
+import StoreProduct from "../views/pos/StoreProductPage.vue";
+
 const routes = [
   // Login and Register
   { path: "/register", component: Register },
@@ -134,6 +139,11 @@ const routes = [
     component: ManageCategory,
     meta: { requiresAuth: true, roles: ['admin'] }
   },
+
+  // Pos
+  { path: "/pos/buyorder", component: BuyOrder, meta: { requiresAuth: true, roles: ['partner', 'employee'] } },
+  { path: "/pos/sellorder", component: SellOrder, meta: { requiresAuth: true, roles: ['partner', 'employee'] } },
+  { path: "/pos/storeproduct", component: StoreProduct, meta: { requiresAuth: true, roles: ['partner', 'employee'] } }
 ];
 
 const router = createRouter({

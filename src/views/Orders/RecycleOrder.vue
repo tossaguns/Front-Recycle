@@ -160,10 +160,12 @@
 
           <div class="flex flex-col gap-2 sm:gap-4">
             <label class="font-medium text-xs sm:text-sm text-[#184c36]">จำนวน (กิโลกรัม)</label>
-            <input type="number" v-model.number="sellAmount" :min="1" :max="selectedProductObj?.maxAmount || 999"
+            <input type="number" v-model.number="sellAmount" :min="1"
+              :max="selectedProductObj?.maxAmount !== null ? selectedProductObj?.maxAmount : Infinity"
               class="rounded-full border border-[#b6e388] px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white"
               placeholder="จำนวนกิโลกรัม" @input="handleAmountInput" />
-            <div v-if="selectedProductObj && sellAmount > selectedProductObj.maxAmount"
+            <div
+              v-if="selectedProductObj && selectedProductObj.maxAmount !== null && sellAmount > selectedProductObj.maxAmount"
               class="text-red-600 text-xs mt-1">
               จำนวนสูงสุดที่ขายได้คือ {{ selectedProductObj.maxAmount }} กิโลกรัม
             </div>
@@ -554,7 +556,7 @@ const partnerSubCategories = computed(() =>
 // State สำหรับ dropdown
 const selectedCategory = ref('');
 const selectedSubCategory = ref('');
-const selectedProduct = ref('');
+const selectedProduct = ref(null);
 
 // กรอง subcategories ตาม category ที่เลือก
 const filteredSubCategories = computed(() =>
@@ -962,11 +964,9 @@ const selectedProductPrice = computed(() => {
 
 const sellAmount = ref(1);
 function handleAmountInput() {
-  if (sellAmount.value > (selectedProductObj.value?.maxAmount || 0)) {
-    sellAmount.value = selectedProductObj.value.maxAmount;
-  }
-  if (sellAmount.value < 1) {
-    sellAmount.value = 1;
+  const max = selectedProductObj.value?.maxAmount
+  if (max !== null && max !== undefined && sellAmount.value > max) {
+    sellAmount.value = max
   }
 }
 

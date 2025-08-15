@@ -116,12 +116,6 @@
                 <div v-if="store.district" class="text-xs">{{ store.district }}</div>
                 <div v-if="store.subdistrict" class="text-xs">{{ store.subdistrict }}</div>
               </div>
-              <!-- <button
-              class="bg-[#184c36] hover:bg-[#b6e388] text-white rounded-full px-3 py-1 text-sm shadow transition flex items-center gap-1 mb-2"
-              @click="selectPartner(store)"
-            >
-              เลือกร้านนี้
-            </button> -->
               <button
                 class="bg-emerald-900 hover:bg-green-500 text-white rounded-full px-3 py-1 text-sm shadow transition flex items-center gap-1"
                 @click="selectPartner(store)">
@@ -209,6 +203,8 @@ const displayedStores = computed(() => {
 
 const filteredStores = computed(() => {
   let filtered = stores.value;
+
+  filtered = filtered.filter(s => s.status === 'ยืนยันแล้ว');
 
   // กรองตามจังหวัด
   if (selectedProvince.value) {
