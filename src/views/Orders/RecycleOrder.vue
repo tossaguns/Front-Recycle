@@ -188,14 +188,15 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mt-4 sm:mt-6">
           <div class="flex flex-col gap-2 sm:gap-4" v-if="deliveryType === 'ให้รถเข้ารับสินค้า'">
-            <label class="font-medium text-xs sm:text-sm text-[#184c36]">เลือกที่อยู่สำหรับรับจุดรับสินค้า</label>
-            <select v-model="selectedMemberAddressId" @change="onSelectMemberAddress"
-              class="rounded-full border border-[#b6e388] px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#b6e388] bg-white">
-              <option v-for="addr in memberAddresses" :key="addr._id" :value="addr._id">
-                {{ formatAddress(addr) }}
-                <span v-if="addr.is_default"> (ที่อยู่หลัก)</span>
-              </option>
-            </select>
+            <label class="font-medium text-xs sm:text-sm text-[#184c36]">ที่อยู่สำหรับรับสินค้า (ที่อยู่หลัก)</label>
+            <div v-if="defaultAddress"
+              class="rounded-full border border-[#b6e388] px-4 py-2 text-xs sm:text-sm bg-[#f7faf0] text-[#184c36]">
+              {{ formatAddress(defaultAddress) }}
+            </div>
+            <div v-else
+              class="rounded-full border border-gray-300 px-4 py-2 text-xs sm:text-sm bg-gray-100 text-gray-500">
+              ไม่พบที่อยู่หลัก
+            </div>
           </div>
           <div class="flex flex-col gap-2">
             <label class="font-medium text-xs sm:text-sm text-[#184c36]">เลือกการจัดส่ง</label>
@@ -641,6 +642,7 @@ const selectedItems = ref([]);
 // --- เพิ่มสำหรับที่อยู่สมาชิก ---
 const memberAddresses = ref([]);
 const selectedMemberAddressId = ref('');
+const defaultAddress = ref(null);
 
 const user = JSON.parse(localStorage.getItem('user') || '{}');
 const userId = ref(user.id || user._id);
@@ -902,15 +904,93 @@ const goBack = () => {
 };
 
 // โหลดที่อยู่เมื่อเลือก "ให้รถเข้ารับสินค้า"
-watch(deliveryType, (val) => {
-  if (val === 'ให้รถเข้ารับสินค้า') {
-    loadMemberAddresses();
-    // เริ่มต้น Google Maps เมื่อเลือกให้รถเข้ารับสินค้า
+// watch(deliveryType, (val) => {
+//   if (val === 'ให้รถเข้ารับสินค้า') {
+//     loadMemberAddresses();
+//     // เริ่มต้น Google Maps เมื่อเลือกให้รถเข้ารับสินค้า
+//     nextTick(() => {
+//       initGoogleMaps();
+//     });
+//   }
+// });
+
+watch(deliveryType, (newVal) => {
+  if (newVal === 'ให้รถเข้ารับสินค้า') {
     nextTick(() => {
       initGoogleMaps();
     });
+  } else {
+    // Optional: Clear map data if delivery type changes back
+    selectedLocation.value = { lat: null, lng: null };
   }
 });
+
+const initGoogleMaps = async () => {
+    // Check if the Google Maps API is loaded
+    if (typeof window.google === 'undefined' || typeof window.google.maps === 'undefined') {
+      console.error('Google Maps API not loaded.');
+      return;
+    }
+
+    const mapElement = document.getElementById('google-map');
+    if (!mapElement) {
+        console.error('Map container element not found.');
+        return;
+    }
+
+    // Set a default center for the map
+    const defaultCenter = { lat: 13.736717, lng: 100.523186 }; // Default to Bangkok, Thailand
+
+    map = new window.google.maps.Map(mapElement, {
+        center: defaultCenter,
+        zoom: 12,
+        fullscreenControl: false,
+        mapTypeControl: false,
+        streetViewControl: false,
+        zoomControl: true
+    });
+
+    // Add a marker for the selected location
+    marker = new window.google.maps.Marker({
+      position: defaultCenter,
+      map: map,
+      draggable: true,
+      animation: google.maps.Animation.DROP
+    });
+
+    // Update location when marker is dragged
+    marker.addListener('dragend', () => {
+      const position = marker.getPosition();
+      selectedLocation.value = {
+        lat: position.lat(),
+        lng: position.lng()
+      };
+    });
+
+    // Update marker when the map is clicked
+    map.addListener('click', (event) => {
+        const clickedLatLng = event.latLng;
+        marker.setPosition(clickedLatLng);
+        selectedLocation.value = {
+            lat: clickedLatLng.lat(),
+            lng: clickedLatLng.lng()
+        };
+    });
+
+    // Set initial position to the default address if it exists
+    if (defaultAddress.value && defaultAddress.value.location) {
+        const savedLocation = {
+            lat: defaultAddress.value.location.coordinates[1],
+            lng: defaultAddress.value.location.coordinates[0]
+        };
+        map.setCenter(savedLocation);
+        marker.setPosition(savedLocation);
+        selectedLocation.value = savedLocation;
+    } else {
+        // Otherwise, try to get current location
+        getCurrentLocation();
+    }
+};
 
 // เพิ่มฟังก์ชัน onSelectMemberAddress
 function onSelectMemberAddress() {
@@ -923,20 +1003,42 @@ function onSelectMemberAddress() {
 const loadMemberAddresses = async () => {
   try {
     const response = await axios.get(`${import.meta.env.VITE_API_URL}/member-addresses/${userId.value}`);
-    if (response.data.success) {
+
+    if (response.data.success && response.data.addresses && response.data.addresses.length > 0) {
       memberAddresses.value = response.data.addresses;
-      // ตั้ง default address
+
+      // ค้นหาที่อยู่หลัก
       const defaultAddr = memberAddresses.value.find(addr => addr.is_default);
+
       if (defaultAddr) {
+        // ถ้ามีที่อยู่หลัก
         selectedMemberAddressId.value = defaultAddr._id;
+        defaultAddress.value = defaultAddr; // ตั้งค่า defaultAddress
         bookingData.value.address = formatAddress(defaultAddr);
-      } else if (memberAddresses.value.length > 0) {
-        selectedMemberAddressId.value = memberAddresses.value[0]._id;
-        bookingData.value.address = formatAddress(memberAddresses.value[0]);
+      } else {
+        // ถ้าไม่มีที่อยู่หลัก ให้เลือกที่อยู่แรกในรายการ
+        const firstAddress = memberAddresses.value[0];
+        selectedMemberAddressId.value = firstAddress._id;
+        defaultAddress.value = firstAddress;
+        bookingData.value.address = formatAddress(firstAddress);
       }
+
+      // เรียกฟังก์ชันเพื่ออัปเดตข้อมูลอื่นๆ
+      onSelectMemberAddress();
+
+    } else {
+      // กรณีไม่พบที่อยู่
+      memberAddresses.value = [];
+      defaultAddress.value = null;
+      selectedMemberAddressId.value = null;
+      bookingData.value.address = '';
     }
   } catch (error) {
     console.error('Error loading member addresses:', error);
+    memberAddresses.value = [];
+    defaultAddress.value = null;
+    selectedMemberAddressId.value = null;
+    bookingData.value.address = '';
   }
 };
 
@@ -1071,17 +1173,17 @@ const grandTotal = computed(() => {
 // ========== Google Maps Functions ==========
 
 // เริ่มต้น Google Maps
-const initGoogleMaps = () => {
-  // ตรวจสอบว่า Google Maps API โหลดแล้วหรือยัง
-  if (typeof google === 'undefined') {
-    // ถ้ายังไม่โหลด ให้โหลด Google Maps API
-    loadGoogleMapsAPI();
-    return;
-  }
+// const initGoogleMaps = () => {
+//   // ตรวจสอบว่า Google Maps API โหลดแล้วหรือยัง
+//   if (typeof google === 'undefined') {
+//     // ถ้ายังไม่โหลด ให้โหลด Google Maps API
+//     loadGoogleMapsAPI();
+//     return;
+//   }
 
-  // สร้างแผนที่
-  createMap();
-};
+//   // สร้างแผนที่
+//   createMap();
+// };
 
 // โหลด Google Maps API
 const loadGoogleMapsAPI = () => {
@@ -1202,75 +1304,106 @@ const placeMarker = (latLng) => {
 };
 
 // หาตำแหน่งปัจจุบัน
+// const getCurrentLocation = () => {
+//   if (!navigator.geolocation) {
+//     Swal.fire({
+//       icon: 'warning',
+//       title: 'ไม่รองรับการระบุตำแหน่ง',
+//       text: 'เบราว์เซอร์ของคุณไม่รองรับการระบุตำแหน่งปัจจุบัน',
+//       confirmButtonText: 'ตกลง'
+//     });
+//     return;
+//   }
+
+//   // แสดง loading
+//   Swal.fire({
+//     title: 'กำลังค้นหาตำแหน่ง',
+//     text: 'กรุณารอสักครู่...',
+//     allowOutsideClick: false,
+//     allowEscapeKey: false,
+//     showConfirmButton: false,
+//     didOpen: () => {
+//       Swal.showLoading();
+//     }
+//   });
+
+//   navigator.geolocation.getCurrentPosition(
+//     (position) => {
+//       const pos = {
+//         lat: position.coords.latitude,
+//         lng: position.coords.longitude
+//       };
+
+//       // ปิด loading
+//       Swal.close();
+
+//       // ย้ายแผนที่ไปตำแหน่งปัจจุบัน
+//       if (map) {
+//         map.setCenter(pos);
+//         placeMarker(new google.maps.LatLng(pos.lat, pos.lng));
+//       }
+//     },
+//     (error) => {
+//       // ปิด loading
+//       Swal.close();
+
+//       let errorMessage = 'เกิดข้อผิดพลาดในการค้นหาตำแหน่ง';
+//       switch (error.code) {
+//         case error.PERMISSION_DENIED:
+//           errorMessage = 'กรุณาอนุญาตให้เข้าถึงตำแหน่งของคุณ';
+//           break;
+//         case error.POSITION_UNAVAILABLE:
+//           errorMessage = 'ไม่สามารถระบุตำแหน่งได้';
+//           break;
+//         case error.TIMEOUT:
+//           errorMessage = 'หมดเวลาการค้นหาตำแหน่ง';
+//           break;
+//       }
+
+//       Swal.fire({
+//         icon: 'error',
+//         title: 'ไม่สามารถค้นหาตำแหน่งได้',
+//         text: errorMessage,
+//         confirmButtonText: 'ตกลง'
+//       });
+//     },
+//     {
+//       enableHighAccuracy: true,
+//       timeout: 10000,
+//       maximumAge: 60000
+//     }
+//   );
+// };
 const getCurrentLocation = () => {
-  if (!navigator.geolocation) {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const pos = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        map.setCenter(pos);
+        marker.setPosition(pos);
+        selectedLocation.value = pos;
+      },
+      (error) => {
+        console.error("Geolocation failed: ", error);
+        Swal.fire({
+          icon: 'warning',
+          title: 'ไม่สามารถระบุตำแหน่งได้',
+          text: 'กรุณาเปิด Location Service เพื่อให้สามารถระบุตำแหน่งปัจจุบันได้',
+          confirmButtonText: 'ตกลง'
+        });
+      }
+    );
+  } else {
     Swal.fire({
       icon: 'warning',
-      title: 'ไม่รองรับการระบุตำแหน่ง',
-      text: 'เบราว์เซอร์ของคุณไม่รองรับการระบุตำแหน่งปัจจุบัน',
+      title: 'ไม่รองรับ',
+      text: 'เบราว์เซอร์ของคุณไม่รองรับ Geolocation',
       confirmButtonText: 'ตกลง'
     });
-    return;
   }
-
-  // แสดง loading
-  Swal.fire({
-    title: 'กำลังค้นหาตำแหน่ง',
-    text: 'กรุณารอสักครู่...',
-    allowOutsideClick: false,
-    allowEscapeKey: false,
-    showConfirmButton: false,
-    didOpen: () => {
-      Swal.showLoading();
-    }
-  });
-
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      const pos = {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude
-      };
-
-      // ปิด loading
-      Swal.close();
-
-      // ย้ายแผนที่ไปตำแหน่งปัจจุบัน
-      if (map) {
-        map.setCenter(pos);
-        placeMarker(new google.maps.LatLng(pos.lat, pos.lng));
-      }
-    },
-    (error) => {
-      // ปิด loading
-      Swal.close();
-
-      let errorMessage = 'เกิดข้อผิดพลาดในการค้นหาตำแหน่ง';
-      switch (error.code) {
-        case error.PERMISSION_DENIED:
-          errorMessage = 'กรุณาอนุญาตให้เข้าถึงตำแหน่งของคุณ';
-          break;
-        case error.POSITION_UNAVAILABLE:
-          errorMessage = 'ไม่สามารถระบุตำแหน่งได้';
-          break;
-        case error.TIMEOUT:
-          errorMessage = 'หมดเวลาการค้นหาตำแหน่ง';
-          break;
-      }
-
-      Swal.fire({
-        icon: 'error',
-        title: 'ไม่สามารถค้นหาตำแหน่งได้',
-        text: errorMessage,
-        confirmButtonText: 'ตกลง'
-      });
-    },
-    {
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 60000
-    }
-  );
 };
 </script>
 

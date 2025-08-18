@@ -1,6 +1,6 @@
 <template>
     <BarNoMenu :showBackNavigation="true" pageTitle="จัดการสินค้า" backRoute="/homepartner" />
-    <div class="min-h-screen bg-gray-50 pb-5 pt-24">
+    <div class="min-h-screen bg-gradient-to-br from-[#e6f7e6] via-white to-[#b6e388] pb-5 pt-24">
 
         <div class="max-w-full mx-5 md:mx-10 bg-white rounded-xl shadow border border-[#e6e6e6] p-3 md:p-8 mt-10">
             <h2 class="text-2xl font-bold text-[#184c36] mb-8">เพิ่มสินค้าใหม่</h2>

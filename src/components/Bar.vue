@@ -65,7 +65,7 @@
                         @click="$router.push('/category')">หมวดหมู่สินค้า</li>
                     <li :class="['menu-underline', $route.path === '/partnerstores' ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : '', 'cursor-pointer']"
                         @click="$router.push('/partnerstores')">ร้านค้า</li>
-                    <li v-if="authStore.isAuthenticated" class="relative group cursor-pointer">
+                    <li v-if="authStore.isPartner" class="relative group cursor-pointer">
                         <!-- ปุ่มหลัก -->
                         <div :class="[
                             'menu-underline',
@@ -117,7 +117,7 @@
                     @click="$router.push('/category')">หมวดหมู่สินค้า</li>
                 <li :class="['menu-underline', $route.path === '/partnerstores' ? 'active text-[#184c36] font-semibold border-b-2 border-[#b6e388] pb-[2px]' : 'hover:text-[#184c36]', 'cursor-pointer']"
                     @click="$router.push('/partnerstores')">ร้านค้า</li>
-                <li v-if="authStore.isAuthenticated" class="relative group">
+                <li v-if="authStore.isPartner" class="relative group">
                     <span class="menu-underline cursor-pointer block"
                         :class="$route.path.startsWith('/pos') ? 'active font-semibold border-b-2 border-[#b6e388] pb-[2px]' : ''">
                         POS
@@ -253,22 +253,6 @@ function goToAccountSettings() {
     } else if (userRole === 'member') {
         // ถ้าเป็น member ให้ไปหน้า ProfileMember
         router.push('/profilemember');
-    }
-}
-
-function goToPos() {
-    const userRole = getUserRole();
-    // ตรวจสอบ role ของผู้ใช้จาก authStore
-    if (userRole === 'partner' || userRole === 'employee') {
-        // ถ้าเป็น partner หรือ employee ให้ไปหน้า Pos
-        router.push('/pos/buyorder');
-    } else {
-        // ถ้าไม่ใช่ role ที่กำหนด ให้แสดงข้อความแจ้งเตือน
-        Swal.fire({
-            icon: 'warning',
-            title: 'ไม่สามารถเข้าถึงได้',
-            text: 'คุณไม่มีสิทธิ์เข้าถึงหน้าดังกล่าว'
-        });
     }
 }
 

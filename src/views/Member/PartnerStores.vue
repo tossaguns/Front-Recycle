@@ -89,9 +89,9 @@
         <div class="text-center mb-6">
           <p class="text-lg text-gray-600">
             พบร้านค้า <span class="font-bold text-[#184c36]">{{ filteredStores.length }}</span> ร้าน
-            <span v-if="selectedProvince || selectedDistrict || selectedSubdistrict || search">
+            <!-- <span v-if="selectedProvince || selectedDistrict || selectedSubdistrict || search">
               จากทั้งหมด <span class="font-bold text-[#184c36]">{{ stores.length }}</span> ร้าน
-            </span>
+            </span> -->
           </p>
         </div>
 
@@ -190,6 +190,14 @@ const currentPage = ref(1)
 const pageSize = 10
 const isLoading = ref(true);
 
+const user = JSON.parse(localStorage.getItem('user') || '{}');
+const userId = ref(user.id || user._id || '');
+const userAddress = ref({
+  province: '',
+  district: '',
+  subdistrict: ''
+});
+
 const displayedStores = computed(() => {
   let filtered = stores.value;
   if (selectedProvince.value) {
@@ -200,6 +208,18 @@ const displayedStores = computed(() => {
   }
   return showAll.value ? filtered : filtered.slice(0, 5);
 })
+
+const getMatchScore = (store, userAddr) => {
+  let score = 0;
+  if (store.subdistrict === userAddr.subdistrict && store.district === userAddr.district && store.province === userAddr.province) {
+    score = 3; // ตรงตำบล
+  } else if (store.district === userAddr.district && store.province === userAddr.province) {
+    score = 2; // ตรงอำเภอ
+  } else if (store.province === userAddr.province) {
+    score = 1; // ตรงจังหวัด
+  }
+  return score;
+};
 
 const filteredStores = computed(() => {
   let filtered = stores.value;
@@ -224,6 +244,14 @@ const filteredStores = computed(() => {
   // กรองตามชื่อร้าน
   if (search.value) {
     filtered = filtered.filter(s => s.name && s.name.toLowerCase().includes(search.value.toLowerCase()));
+  }
+
+   if (userAddress.value.subdistrict || userAddress.value.district || userAddress.value.province) {
+      filtered.sort((a, b) => {
+          const scoreA = getMatchScore(a, userAddress.value);
+          const scoreB = getMatchScore(b, userAddress.value);
+          return scoreB - scoreA; // เรียงจากคะแนนมากไปน้อย
+      });
   }
 
   return filtered;
@@ -381,6 +409,20 @@ onMounted(async () => {
     updateScrollState()
   }
   isLoading.value = true;
+
+  try {
+    if (userId.value) {
+      const userRes = await axios.get(`${import.meta.env.VITE_API_URL}/member-addresses/${userId.value}`);
+      console.log('userRes', userRes.data);
+      if (userRes.data && userRes.data.addresses && userRes.data.addresses.length > 0) {
+        // สมมติว่าข้อมูลที่อยู่มาในรูปแบบ userRes.data.data.subdistrict เป็นต้น
+        userAddress.value = userRes.data.addresses[0] || {};
+        console.log('User address:', userAddress.value);
+      }
+    }
+  } catch (e) {
+    console.error("Failed to fetch user address:", e);
+  }
 
   try {
     const res = await axios.get(`${import.meta.env.VITE_API_URL}/partners`);

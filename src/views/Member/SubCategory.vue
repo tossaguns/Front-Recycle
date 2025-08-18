@@ -41,7 +41,7 @@
                     <div v-for="sub in pagedSubCategories" :key="sub._id"
                         class="bg-white rounded-2xl shadow-card flex flex-col overflow-hidden border border-[#e6e6e6]">
                         <div class="h-48 w-full bg-[#eee] flex items-center justify-center overflow-hidden">
-                            <img :src="sub.image || '/src/assets/NoPicture.webp'" :alt="sub.name"
+                            <img :src="sub.image || '/src/assets/NoPicture.webp'"
                                 class="w-full h-full object-cover" />
                         </div>
                         <div class="flex-1 flex flex-col justify-between p-5">
@@ -155,6 +155,7 @@ onMounted(async () => {
     isLoading.value = true;
     try {
         const res = await axios.get(`${import.meta.env.VITE_API_URL}/categories/subcategories/${categoryId.value}`)
+        console.log('Subcategories:', res.data);
         if (Array.isArray(res.data)) {
             allSubCategories.value = res.data
         } else if (res.data && Array.isArray(res.data.subcategories)) {

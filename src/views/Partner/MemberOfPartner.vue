@@ -4,7 +4,7 @@
         pageTitle="สมาชิก"
         backRoute="/homepartner"
   />
-  <div class="min-h-screen bg-gray-50 pt-20 px-3">
+  <div class="min-h-screen bg-gradient-to-br from-[#e6f7e6] via-white to-[#b6e388] pt-20 px-3">
     
     <div class="max-w-7xl mx-auto py-8 mt-5">
       <!-- ปุ่มเพิ่มสมาชิกใหม่ -->

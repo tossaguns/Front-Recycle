@@ -4,7 +4,7 @@
         pageTitle="แดชบอร์ดพาร์ทเนอร์"
         backRoute="/homepartner"
     />
-    <div class="min-h-screen bg-gray-50 pt-20">
+    <div class="min-h-screen bg-gradient-to-br from-[#e6f7e6] via-white to-[#b6e388] pt-20">
         <!-- Header Section -->
         <div class="bg-white shadow-sm border-b border-[#e6e6e6] mt-10">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">

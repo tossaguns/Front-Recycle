@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import Swal from "sweetalert2";
 import router from "../routes";
 
@@ -71,14 +71,14 @@ export const useAuthStore = defineStore("auth", () => {
     function login(userData) {
         try {
             console.log('Auth store login called with:', userData);
-            
+
             if (!userData) {
                 console.error("Invalid login data:", userData);
                 throw new Error("Invalid login response");
             }
 
             // เช็ค status ก็ต่อเมื่อ role === 'partner'
-            if (userData.status === "รอยืนยัน" || userData.status === "ไม่ยืนยัน" ) {
+            if (userData.status === "รอยืนยัน" || userData.status === "ไม่ยืนยัน") {
                 Swal.fire({
                     title: "การเข้าถึงถูกปฏิเสธ",
                     text: 'สถานะของคุณคือ "รอยืนยัน" กรุณารอการยืนยันจากเจ้าหน้าที่',
@@ -127,7 +127,7 @@ export const useAuthStore = defineStore("auth", () => {
                     break;
                 case "partner":
                 case "shop":
-                    router.push("/dashboardpartner");
+                    router.push("/homepartner");
                     break;
                 case "employee":
                     router.push("/");
@@ -171,10 +171,9 @@ export const useAuthStore = defineStore("auth", () => {
         return user.value.role === requiredRole;
     }
 
-    // ฟังก์ชันตรวจสอบว่าเป็น partner, admin, หรือ shop
-    function isPartnerOrAdmin() {
-        return user.value.role === "partner" || user.value.role === "admin" || user.value.role === "shop";
-    }
+    const isPartner = computed(() => {
+        return user.value.role === "partner" || user.value.role === "shop";
+    });
 
     // ฟังก์ชันตรวจสอบว่าเป็น admin
     function isAdmin() {
@@ -199,7 +198,7 @@ export const useAuthStore = defineStore("auth", () => {
         logout,
         initializeAuth,
         hasRole,
-        isPartnerOrAdmin,
+        isPartner,
         isAdmin,
         isMember,
         isEmployee,

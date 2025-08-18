@@ -1,6 +1,6 @@
 <template>
     <Bar />
-    <div class="min-h-screen flex flex-col bg-white relative overflow-x-hidden pt-20">
+    <div class="min-h-screen flex flex-col bg-gradient-to-br from-[#e6f7e6] via-white to-[#b6e388] relative overflow-x-hidden pt-20">
         <main class="flex-1 flex flex-col items-center justify-center z-10 relative py-4 sm:py-6 md:py-8 lg:py-10">
             <h1
                 class="font-bold text-xl sm:text-2xl md:text-3xl lg:text-4xl text-[#222] mb-4 sm:mb-5 md:mb-6 lg:mb-8 mt-2">

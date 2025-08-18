@@ -573,6 +573,8 @@ export default {
                 this.prevPriceMap = prevMap;
                 // ย้าย "ของแกะ/คอมแอร์มอเตอร์T" ไปยังกลุ่มเบ็ดเตล็ด
                 this.moveMotorToMisc();
+                // ย้ายรายการกระดาษที่ต้องการ
+                this.movePaperItems();
             } catch (err) {
                 console.error('Error fetching prices:', err);
                 this.tableData = [];
@@ -626,6 +628,37 @@ export default {
                     this.tableData[2].push(motorItem);
                     // ลบออกจาก index 4
                     this.tableData[4].splice(motorIndex, 1);
+                }
+            }
+        },
+        movePaperItems() {
+            const paperList = [
+                'กระดาษขาวดํา', 
+                'หนังสือพิมพ์', 
+                'หนังสือเล่ม/ย่อย', 
+                'กระดาษขาวดำทำลาย', 
+                'กระดาษลังน้ำตาล (ลูกฟูก)'
+            ];
+
+            const sourceCategories = [0, 2, 3, 4, 5]; // หมวดหมู่ที่อาจมีรายการกระดาษอยู่
+            const targetCategoryIndex = 1; // หมวดหมู่กระดาษ
+
+            if (!this.tableData[targetCategoryIndex]) return;
+
+            for (const categoryIndex of sourceCategories) {
+                if (this.tableData[categoryIndex]) {
+                    const itemsToMove = [];
+                    // กรองรายการที่จะย้าย
+                    this.tableData[categoryIndex] = this.tableData[categoryIndex].filter(item => {
+                        const isPaper = item[0] && paperList.some(paper => item[0].includes(paper));
+                        if (isPaper) {
+                            itemsToMove.push(item);
+                            return false; // กรองออก
+                        }
+                        return true; // เก็บไว้
+                    });
+                    // เพิ่มรายการที่ถูกกรองลงในหมวดหมู่กระดาษ
+                    this.tableData[targetCategoryIndex].push(...itemsToMove);
                 }
             }
         },
